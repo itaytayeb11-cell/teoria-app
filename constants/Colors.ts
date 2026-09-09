@@ -19,6 +19,7 @@ export const palette = {
   explain: '#6B4EE6',
   white: '#FFFFFF',
   black: '#0B1220',
+  muted: '#6B7280', // טקסט משני ניטרלי (זמין גם בלי hook צבעים)
 };
 
 const tintColorLight = palette.primary;

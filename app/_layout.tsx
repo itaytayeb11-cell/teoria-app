@@ -72,7 +72,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       {/* StatusBar: translucent={false} מונע מהתוכן להיכנס מתחת לבר הסטטוס באנדרואיד */}
       {/* זה עובד ב-Expo Go, בניגוד להגדרות ב-app.json */}
-      <StatusBar style="light" translucent={false} backgroundColor="#0a0a0a" />
+      <StatusBar style="light" translucent={false} backgroundColor="#1D4ED8" />
 
       {/* ספק האימות של Convex עוטף את כל האפליקציה ומנהל את מצב ההתחברות */}
       <ConvexAuthProvider client={convex} storage={secureStorage}>
