@@ -45,9 +45,11 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 
 ## משימה נוכחית
 
-שלבים 6-9 הושלמו — Frontend MVP בנוי (auth, בית, license, תרגול, מבחן, תוצאות, סטטיסטיקות, היסטוריה, הגדרות). typecheck+lint נקי.
-הבא: המשתמש מריץ `bun dev` + Expo Go בטלפון לבדיקה ראשונה. אחר כך: שלב 10 (RevenueCat), 11 (אבטחה/פרטיות).
-קומפוננטות ב-components/ui.tsx, hook ב-hooks/useQuiz.ts. ניווט Stack ב-(authenticated).
+Frontend MVP + עיצוב מלא לפי Stitch mockup של דף הבית. ניווט טאבים (בית/תרגול/תמרורים/מחסן טעויות).
+פיצ'רים: ציון מוכנות (RingProgress), רצף ימים, שינוי שבועי, שאלות שמורות (bookmark), מחסן טעויות, מילון תמרורים.
+נותר: (א) התחברות Google — ממתין ל-OAuth client מהמשתמש (Google Cloud). (ב) Push notifications — נדחה ל-dev build. (ג) שלב 10 RevenueCat, שלב 11 אבטחה/פרטיות, שלב 12+ חנויות.
+המשתמש בודק ב-Expo Go (`bun dev`). לחיצה על `r` = reload.
+קומפוננטות: components/ui.tsx. hook: hooks/useQuiz.ts.
 
 ## עיצוב
 
