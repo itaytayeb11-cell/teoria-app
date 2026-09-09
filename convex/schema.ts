@@ -16,6 +16,7 @@ export default defineSchema({
     fullName: v.optional(v.string()), // שם מלא
     role: v.union(v.literal('admin'), v.literal('user')), // תפקיד המשתמש (מנהל או משתמש רגיל)
     userType: v.optional(v.union(v.literal('free'), v.literal('paid'))), // סוג משתמש (חינמי או בתשלום) - אופציונלי לתאימות לאחור
+    licenseType: v.optional(v.string()), // סוג הרישיון שנבחר: "B" (פרטי), "A" (אופנוע), "C1", "C", "D", "1" (טרקטור)
     isActive: v.boolean(), // האם המשתמש פעיל
     createdAt: v.number(), // זמן יצירה (Timestamp)
     updatedAt: v.number(), // זמן עדכון אחרון (Timestamp)

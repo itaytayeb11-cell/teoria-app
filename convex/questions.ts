@@ -1,6 +1,17 @@
 import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
-import { internalMutation, query } from './_generated/server';
+import { internalMutation, type QueryCtx, query } from './_generated/server';
+import { filterByLicense, getUserIdOrNull } from './model';
+
+// שולף את סוג הרישיון של המשתמש המחובר (או undefined)
+async function currentLicenseType(ctx: QueryCtx): Promise<string | undefined> {
+  const userId = await getUserIdOrNull(ctx);
+  if (!userId) {
+    return undefined;
+  }
+  const user = await ctx.db.get(userId);
+  return user?.licenseType ?? undefined;
+}
 
 // ==========================================================================
 // שליפת שאלות מהמאגר
@@ -10,10 +21,12 @@ import { internalMutation, query } from './_generated/server';
 export const listCategories = query({
   args: {},
   handler: async (ctx) => {
-    const questions = await ctx.db
+    const licenseType = await currentLicenseType(ctx);
+    const all = await ctx.db
       .query('questions')
       .withIndex('by_active', (q) => q.eq('isActive', true))
       .collect();
+    const questions = filterByLicense(all, licenseType);
 
     const counts = new Map<string, number>();
     for (const q of questions) {
@@ -57,6 +70,7 @@ export const getQuestions = query({
     if (category !== undefined && difficulty !== undefined) {
       filtered = filtered.filter((q) => q.difficulty === difficulty);
     }
+    filtered = filterByLicense(filtered, await currentLicenseType(ctx));
 
     return limit ? filtered.slice(0, limit) : filtered;
   },

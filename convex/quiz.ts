@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { type MutationCtx, mutation, query } from './_generated/server';
-import { requireUserId, shuffle } from './model';
+import { filterByLicense, requireUserId, shuffle } from './model';
 
 const SIMULATION_SIZE = 30; // מספר שאלות במבחן מדמה
 
@@ -53,8 +53,10 @@ export const startQuiz = mutation({
   },
   handler: async (ctx, { mode, filterValue, count }) => {
     const userId = await requireUserId(ctx);
+    const user = await ctx.db.get(userId);
 
-    const pool = await pickPool(ctx, mode, filterValue);
+    const rawPool = await pickPool(ctx, mode, filterValue);
+    const pool = filterByLicense(rawPool, user?.licenseType);
     if (pool.length === 0) {
       throw new Error('אין שאלות זמינות למבחן הזה');
     }

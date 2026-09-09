@@ -36,6 +36,23 @@ export async function userHasPremium(
   return purchase !== null;
 }
 
+// מסנן שאלות לפי סוג רישיון.
+// שאלה נכללת אם היא מסומנת לסוג הרישיון, או אם אין לה סימון רישיון כלל (שאלה כללית).
+export function filterByLicense<T extends { licenseTypes?: string[] }>(
+  questions: T[],
+  licenseType: string | undefined
+): T[] {
+  if (!licenseType) {
+    return questions;
+  }
+  return questions.filter(
+    (q) =>
+      !q.licenseTypes ||
+      q.licenseTypes.length === 0 ||
+      q.licenseTypes.includes(licenseType)
+  );
+}
+
 // ערבוב מערך (Fisher-Yates) — מחזיר מערך חדש
 export function shuffle<T>(input: readonly T[]): T[] {
   const arr = [...input];

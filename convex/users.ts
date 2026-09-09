@@ -134,6 +134,16 @@ export const updateUserType = mutation({
   },
 });
 
+// עדכון סוג הרישיון שהמשתמש מתרגל אליו (B / A / C1 / C / D / 1)
+export const setLicenseType = mutation({
+  args: { licenseType: v.string() },
+  handler: async (ctx, { licenseType }) => {
+    const userId = await requireUserId(ctx);
+    await ctx.db.patch(userId, { licenseType, updatedAt: Date.now() });
+    return userId;
+  },
+});
+
 // מחיקת משתמש (פעולה למנהלים או למשתמש עצמו - כאן מיושם כמחיקה פיזית)
 export const remove = mutation({
   args: { userId: v.id('users') },
