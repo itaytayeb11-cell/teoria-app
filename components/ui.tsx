@@ -146,14 +146,7 @@ export function Card(props: {
     </View>
   );
   if (props.onPress) {
-    return (
-      <Pressable
-        onPress={props.onPress}
-        style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
-      >
-        {body}
-      </Pressable>
-    );
+    return <Pressable onPress={props.onPress}>{body}</Pressable>;
   }
   return body;
 }
@@ -185,16 +178,20 @@ export function Button(props: {
     <Pressable
       onPress={props.onPress}
       disabled={disabled}
-      style={({ pressed }) => [
+      android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
+      style={[
         {
+          width: '100%',
+          alignSelf: 'stretch',
           backgroundColor: bg,
           borderWidth: variant === 'outline' ? 1.5 : 0,
           borderColor: border,
           borderRadius: 14,
-          height: 52,
+          minHeight: 52,
+          paddingHorizontal: 16,
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: disabled ? 0.5 : pressed ? 0.9 : 1,
+          opacity: disabled ? 0.5 : 1,
         },
         props.style,
       ]}
@@ -202,7 +199,14 @@ export function Button(props: {
       {props.loading ? (
         <ActivityIndicator color={fg} />
       ) : (
-        <Text style={{ color: fg, fontSize: 17, fontWeight: '700' }}>
+        <Text
+          style={{
+            color: fg,
+            fontSize: 17,
+            fontWeight: '700',
+            textAlign: 'center',
+          }}
+        >
           {props.label}
         </Text>
       )}
@@ -241,7 +245,9 @@ export function AnswerOption(props: {
     <Pressable
       onPress={props.onPress}
       disabled={props.disabled}
-      style={({ pressed }) => ({
+      style={{
+        width: '100%',
+        alignSelf: 'stretch',
         backgroundColor: bg,
         borderWidth: 1.5,
         borderColor,
@@ -251,8 +257,7 @@ export function AnswerOption(props: {
         flexDirection: rtl.flexDirection,
         alignItems: 'center',
         gap: 12,
-        opacity: pressed && !props.disabled ? 0.9 : 1,
-      })}
+      }}
     >
       <View
         style={{
