@@ -19,7 +19,7 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 | 2. חיבור Convex | ✅ | `bun run setup` הורץ 2026-09-09, deployment cloud פעיל |
 | 3. Auth Keys | ✅ | Password provider, מפתחות נוצרו |
 | 4. Backend (schema + functions) | ✅ | schema: questions, quizSessions, answerLog, purchases. functions: questions/quiz/stats/purchases + model.ts helpers. deployed, typecheck+lint נקי |
-| 5. הורדת + טביעת שאלות | ⬜ | הורדה מ-data.gov.il (משתמש) → המרה + seed (Claude). internalMutation `questions:importQuestions` מוכן |
+| 5. הורדת + טביעת שאלות | ✅ | 1,802 שאלות מ-data.gov.il API (CKAN datastore) → scripts/convert-questions.mjs → questions.jsonl → convex import. נושאים: חוקי התנועה 901, בטיחות 400, תמרורים 391, הכרת הרכב 110. 598 עם תמונה (imageUrl מ-gov.il) |
 | 6. הרצה ראשונה | ⬜ | |
 | 7. Auth Frontend | 🟡 | קיים בתבנית (sign-in/sign-up/paywall) — צריך התאמה |
 | 8. Quiz Screen | ⬜ | קיימים placeholders page1/page2 |
@@ -45,7 +45,7 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 
 ## משימה נוכחית
 
-שלב 5 — המשתמש מוריד את מאגר השאלות הרשמי מ-data.gov.il ושולח ל-Claude. אז Claude בונה סקריפט המרה + seed.
+שלב 6-8 — Frontend. בניית מסך המבחן (הליבה), חיבור לפונקציות Convex שכבר קיימות. הערה חשובה: הרשת במחשב חוסמת את aws-e.data.gov.il ומפנה ל-Google Family Link signin — אבל data.gov.il API הרגיל עובד, וכך גם convex (עם sandbox off).
 
 ## git
 

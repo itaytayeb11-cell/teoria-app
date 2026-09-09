@@ -88,7 +88,7 @@ export const startQuiz = mutation({
         explanation: q.explanation,
         category: q.category,
         difficulty: q.difficulty,
-        imageStorageId: q.imageStorageId,
+        imageUrl: q.imageUrl,
       })),
     };
   },

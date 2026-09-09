@@ -34,7 +34,8 @@ export default defineSchema({
     explanation: v.optional(v.string()), // הסבר לתשובה הנכונה (מוצג אחרי מענה)
     category: v.string(), // נושא ראשי: "תמרורים", "חוקי תנועה", "בטיחות", "הכרת הרכב", "עזרה ראשונה"
     difficulty: v.number(), // דרגת קושי 1-5
-    imageStorageId: v.optional(v.id('_storage')), // תמונת תמרור/מצב תנועה (אם יש)
+    imageUrl: v.optional(v.string()), // כתובת תמונה חיצונית (תמרור/מצב תנועה) ממאגר משרד התחבורה
+    imageStorageId: v.optional(v.id('_storage')), // תמונה מאוחסנת ב-Convex (עתידי, במקום imageUrl)
     licenseTypes: v.optional(v.array(v.string())), // סוגי רישיון רלוונטיים: "B", "A", "C", "D" וכו'
     officialId: v.optional(v.string()), // מזהה מקורי ממאגר משרד התחבורה (למניעת כפילויות)
     isActive: v.boolean(), // האם השאלה פעילה (מוצגת למשתמשים)
