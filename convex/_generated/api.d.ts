@@ -9,9 +9,11 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as mistakes from "../mistakes.js";
 import type * as model from "../model.js";
+import type * as notifications from "../notifications.js";
 import type * as purchases from "../purchases.js";
 import type * as questions from "../questions.js";
 import type * as quiz from "../quiz.js";
@@ -27,9 +29,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  crons: typeof crons;
   http: typeof http;
   mistakes: typeof mistakes;
   model: typeof model;
+  notifications: typeof notifications;
   purchases: typeof purchases;
   questions: typeof questions;
   quiz: typeof quiz;

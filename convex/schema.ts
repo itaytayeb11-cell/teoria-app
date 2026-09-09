@@ -108,6 +108,18 @@ export default defineSchema({
     .index('by_user_question', ['userId', 'questionId']),
 
   // ==========================================================================
+  // טוקנים להתראות Push (Expo)
+  // ==========================================================================
+  pushTokens: defineTable({
+    userId: v.id('users'),
+    token: v.string(), // ExponentPushToken[...]
+    platform: v.optional(v.string()),
+    updatedAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_token', ['token']),
+
+  // ==========================================================================
   // רכישות — מעקב אחרי גישה בתשלום (רכישה חד-פעמית)
   // ==========================================================================
   purchases: defineTable({

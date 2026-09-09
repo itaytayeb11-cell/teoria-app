@@ -10,6 +10,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
+import { usePushRegistration } from '@/hooks/usePushRegistration';
 
 // טאבים גלויים בסרגל התחתון (בסדר RTL: הראשון מימין)
 const TABS = [
@@ -34,6 +35,8 @@ export default function AuthenticatedLayout() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { isPremium, isLoading: isRevenueCatLoading } = useRevenueCat();
   const navigationState = useRootNavigationState();
+
+  usePushRegistration(isAuthenticated);
 
   const loadingView = (
     <View
