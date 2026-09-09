@@ -17,9 +17,74 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
 import { palette } from '@/constants/Colors';
 import { useAppColors } from '@/constants/theme';
 import { rtl } from '@/lib/rtl';
+
+// ----------------------------------------------------------------------------
+// RingProgress — טבעת התקדמות עגולה עם אחוז במרכז
+// ----------------------------------------------------------------------------
+export function RingProgress(props: {
+  value: number; // 0-100
+  size?: number;
+  strokeWidth?: number;
+  label?: string;
+  color?: string;
+}) {
+  const size = props.size ?? 140;
+  const stroke = props.strokeWidth ?? 12;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, props.value));
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Svg width={size} height={size} style={{ position: 'absolute' }}>
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke={palette.primaryTint}
+          strokeWidth={stroke}
+          fill="none"
+        />
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke={props.color ?? palette.primary}
+          strokeWidth={stroke}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={`${circ} ${circ}`}
+          strokeDashoffset={circ * (1 - pct / 100)}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </Svg>
+      <Text
+        style={{
+          fontSize: size * 0.24,
+          fontWeight: '800',
+          color: palette.primary,
+        }}
+      >
+        {Math.round(pct)}%
+      </Text>
+      {props.label ? (
+        <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
+          {props.label}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
 
 // ----------------------------------------------------------------------------
 // טקסט מיושר-ימין כברירת מחדל (RTL)
@@ -82,6 +147,7 @@ export function ScreenHeader(props: {
   highlight?: string; // מילה מודגשת בסוף הכותרת
   onBack?: () => void;
   backLabel?: string;
+  hideBack?: boolean; // למסכי טאב שאין להם חזרה
   right?: ReactNode;
   compact?: boolean;
   children?: ReactNode; // תוכן נוסף בתוך הפאנל (פרוגרס וכו')
@@ -95,16 +161,20 @@ export function ScreenHeader(props: {
     >
       <View style={styles.headerRow}>
         {props.right ?? <View style={{ width: 28 }} />}
-        <Pressable
-          onPress={back}
-          hitSlop={12}
-          style={{ flexDirection: rtl.flexDirection, alignItems: 'center' }}
-        >
-          {props.backLabel ? (
-            <Text style={styles.backLabel}>{props.backLabel}</Text>
-          ) : null}
-          <ChevronRight color="#fff" size={26} />
-        </Pressable>
+        {props.hideBack ? (
+          <View style={{ width: 28 }} />
+        ) : (
+          <Pressable
+            onPress={back}
+            hitSlop={12}
+            style={{ flexDirection: rtl.flexDirection, alignItems: 'center' }}
+          >
+            {props.backLabel ? (
+              <Text style={styles.backLabel}>{props.backLabel}</Text>
+            ) : null}
+            <ChevronRight color="#fff" size={26} />
+          </Pressable>
+        )}
       </View>
       <Text style={styles.headerTitle}>
         {props.title}

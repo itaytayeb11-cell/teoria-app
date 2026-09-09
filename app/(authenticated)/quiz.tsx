@@ -1,5 +1,6 @@
+import { useMutation, useQuery } from 'convex/react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronRight } from 'lucide-react-native';
+import { Bookmark, ChevronRight } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -18,6 +19,7 @@ import {
   T,
 } from '@/components/ui';
 import { palette } from '@/constants/Colors';
+import { api } from '@/convex/_generated/api';
 import { useQuiz } from '@/hooks/useQuiz';
 import { rtl } from '@/lib/rtl';
 
@@ -26,8 +28,12 @@ const SIMULATION_SECONDS = 40 * 60;
 export default function QuizScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ mode?: string; filter?: string }>();
-  const isPractice = params.mode === 'practice';
+  const mode = params.mode ?? 'simulation';
+  // כל המצבים חוץ ממבחן מדמה = תרגול עם משוב מיידי
+  const isPractice = mode !== 'simulation';
   const quiz = useQuiz();
+  const toggleSave = useMutation(api.saved.toggle);
+  const savedIds = useQuery(api.saved.listIds);
   const [showExplain, setShowExplain] = useState(false);
   const [confirmExit, setConfirmExit] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(SIMULATION_SECONDS);
@@ -35,11 +41,14 @@ export default function QuizScreen() {
   const startQuiz = quiz.start;
   useEffect(() => {
     // useQuiz מגן פנימית מפני קריאה כפולה (startedRef)
-    startQuiz({
-      mode: isPractice ? 'category' : 'simulation',
-      filterValue: params.filter,
-    });
-  }, [startQuiz, isPractice, params.filter]);
+    const startMode =
+      mode === 'practice'
+        ? 'category'
+        : mode === 'mistakes' || mode === 'saved'
+          ? mode
+          : 'simulation';
+    startQuiz({ mode: startMode, filterValue: params.filter });
+  }, [startQuiz, mode, params.filter]);
 
   const { finish, sessionId } = quiz;
   const correctCount = quiz.stats.correct;
@@ -110,6 +119,7 @@ export default function QuizScreen() {
   const q = quiz.current;
   const picked = quiz.currentAnswer;
   const isLast = quiz.index === quiz.questions.length - 1;
+  const isSaved = q ? (savedIds ?? []).includes(q._id as never) : false;
 
   const optionState = (
     i: number
@@ -165,20 +175,40 @@ export default function QuizScreen() {
           borderBottomRightRadius: 24,
         }}
       >
-        <Pressable
-          onPress={() => setConfirmExit(true)}
-          hitSlop={10}
+        <View
           style={{
             flexDirection: rtl.flexDirection,
             alignItems: 'center',
-            gap: 4,
+            justifyContent: 'space-between',
           }}
         >
-          <T color="#fff" weight="medium">
-            {isPractice ? 'סיום תרגול' : 'סיום מבחן'}
-          </T>
-          <ChevronRight color="#fff" size={22} />
-        </Pressable>
+          <Pressable
+            onPress={() => setConfirmExit(true)}
+            hitSlop={10}
+            style={{
+              flexDirection: rtl.flexDirection,
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <T color="#fff" weight="medium">
+              {isPractice ? 'סיום תרגול' : 'סיום מבחן'}
+            </T>
+            <ChevronRight color="#fff" size={22} />
+          </Pressable>
+          {q ? (
+            <Pressable
+              hitSlop={10}
+              onPress={() => toggleSave({ questionId: q._id as never })}
+            >
+              <Bookmark
+                color="#fff"
+                size={22}
+                fill={isSaved ? '#fff' : 'transparent'}
+              />
+            </Pressable>
+          ) : null}
+        </View>
         <View style={{ marginTop: 12, marginBottom: 8 }}>
           <ProgressBar value={(quiz.index + 1) / quiz.questions.length} />
         </View>

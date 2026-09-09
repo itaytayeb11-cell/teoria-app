@@ -17,6 +17,8 @@ export default defineSchema({
     role: v.union(v.literal('admin'), v.literal('user')), // תפקיד המשתמש (מנהל או משתמש רגיל)
     userType: v.optional(v.union(v.literal('free'), v.literal('paid'))), // סוג משתמש (חינמי או בתשלום) - אופציונלי לתאימות לאחור
     licenseType: v.optional(v.string()), // סוג הרישיון שנבחר: "B" (פרטי), "A" (אופנוע), "C1", "C", "D", "1" (טרקטור)
+    streakDays: v.optional(v.number()), // רצף ימי תרגול
+    lastActiveDay: v.optional(v.string()), // יום פעילות אחרון (YYYY-MM-DD, שעון ישראל)
     isActive: v.boolean(), // האם המשתמש פעיל
     createdAt: v.number(), // זמן יצירה (Timestamp)
     updatedAt: v.number(), // זמן עדכון אחרון (Timestamp)
@@ -56,7 +58,9 @@ export default defineSchema({
       v.literal('category'), // מבחן לפי נושא
       v.literal('difficulty'), // מבחן לפי דרגת קושי
       v.literal('simulation'), // מבחן מדמה (30 שאלות אקראיות)
-      v.literal('all') // מכל המאגר
+      v.literal('all'), // מכל המאגר
+      v.literal('mistakes'), // תרגול מחסן הטעויות
+      v.literal('saved') // תרגול שאלות שמורות
     ),
     filterValue: v.optional(v.string()), // הערך שסונן לפיו (שם נושא / דרגת קושי כמחרוזת)
     questionIds: v.array(v.id('questions')), // רשימת השאלות במבחן, לפי הסדר
@@ -91,6 +95,17 @@ export default defineSchema({
   })
     .index('by_user', ['userId'])
     .index('by_user_category', ['userId', 'category']),
+
+  // ==========================================================================
+  // שאלות שמורות — סימון שאלות לשינון חוזר (bookmark)
+  // ==========================================================================
+  savedQuestions: defineTable({
+    userId: v.id('users'),
+    questionId: v.id('questions'),
+    createdAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_user_question', ['userId', 'questionId']),
 
   // ==========================================================================
   // רכישות — מעקב אחרי גישה בתשלום (רכישה חד-פעמית)

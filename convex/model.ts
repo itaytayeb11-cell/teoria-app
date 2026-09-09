@@ -62,3 +62,62 @@ export function shuffle<T>(input: readonly T[]): T[] {
   }
   return arr;
 }
+
+// תאריך היום לפי שעון ישראל בפורמט YYYY-MM-DD
+export function israelDay(ts = Date.now()): string {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jerusalem',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date(ts));
+  } catch {
+    return new Date(ts).toISOString().slice(0, 10);
+  }
+}
+
+function dayBefore(day: string): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+// מעדכן את רצף ימי התרגול של המשתמש (נקרא בכל פעילות)
+export async function touchStreak(
+  ctx: MutationCtx,
+  userId: Id<'users'>
+): Promise<void> {
+  const user = await ctx.db.get(userId);
+  if (!user) {
+    return;
+  }
+  const today = israelDay();
+  if (user.lastActiveDay === today) {
+    return;
+  }
+  const continues = user.lastActiveDay === dayBefore(today);
+  await ctx.db.patch(userId, {
+    lastActiveDay: today,
+    streakDays: continues ? (user.streakDays ?? 0) + 1 : 1,
+    updatedAt: Date.now(),
+  });
+}
+
+// מפה של questionId -> התשובה האחרונה (isCorrect) של המשתמש
+export function latestAnswerByQuestion(
+  logs: {
+    questionId: Id<'questions'>;
+    isCorrect: boolean;
+    answeredAt: number;
+  }[]
+): Map<Id<'questions'>, boolean> {
+  const latest = new Map<Id<'questions'>, { at: number; correct: boolean }>();
+  for (const l of logs) {
+    const prev = latest.get(l.questionId);
+    if (!prev || l.answeredAt > prev.at) {
+      latest.set(l.questionId, { at: l.answeredAt, correct: l.isCorrect });
+    }
+  }
+  return new Map([...latest].map(([k, v]) => [k, v.correct]));
+}

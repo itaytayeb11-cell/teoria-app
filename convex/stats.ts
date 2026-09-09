@@ -1,7 +1,117 @@
 import { query } from './_generated/server';
-import { requireUserId } from './model';
+import {
+  filterByLicense,
+  israelDay,
+  latestAnswerByQuestion,
+  requireUserId,
+} from './model';
 
 const RECENT_WINDOW = 5; // כמה מבחנים אחרונים לחישוב ממוצע
+const READINESS_TARGET = 400; // כמה שאלות "מספיק" לכיסוי מלא
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// ==========================================================================
+// נתוני מסך הבית — ציון מוכנות, רצף, שינוי שבועי, ספירות
+// ==========================================================================
+export const getHome = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    const user = await ctx.db.get(userId);
+
+    const answers = await ctx.db
+      .query('answerLog')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+
+    const completed = await ctx.db
+      .query('quizSessions')
+      .withIndex('by_user_status', (q) =>
+        q.eq('userId', userId).eq('status', 'completed')
+      )
+      .collect();
+
+    // גודל המאגר הרלוונטי לסוג הרישיון
+    const activeQuestions = await ctx.db
+      .query('questions')
+      .withIndex('by_active', (q) => q.eq('isActive', true))
+      .collect();
+    const bankSize = filterByLicense(
+      activeQuestions,
+      user?.licenseType ?? undefined
+    ).length;
+
+    // כיסוי: כמה שאלות שונות נענו מתוך היעד
+    const latest = latestAnswerByQuestion(answers);
+    const seen = latest.size;
+    const target = Math.max(1, Math.min(bankSize, READINESS_TARGET));
+    const coverage = Math.min(1, seen / target);
+
+    // דיוק ב-200 התשובות האחרונות
+    const recent = [...answers]
+      .sort((a, b) => b.answeredAt - a.answeredAt)
+      .slice(0, 200);
+    const recentAccuracy =
+      recent.length > 0
+        ? recent.filter((a) => a.isCorrect).length / recent.length
+        : 0;
+
+    const readiness = Math.round(
+      100 * (0.45 * coverage + 0.55 * recentAccuracy)
+    );
+    const readinessLabel =
+      readiness >= 80
+        ? 'סיכוי מעבר גבוה'
+        : readiness >= 60
+          ? 'סיכוי מעבר בינוני'
+          : 'עוד דרך לעבור';
+
+    // שינוי שבועי בדיוק
+    const now = Date.now();
+    const thisWeek = answers.filter((a) => a.answeredAt >= now - 7 * DAY_MS);
+    const lastWeek = answers.filter(
+      (a) =>
+        a.answeredAt >= now - 14 * DAY_MS && a.answeredAt < now - 7 * DAY_MS
+    );
+    const acc = (arr: typeof answers) =>
+      arr.length > 0
+        ? arr.filter((a) => a.isCorrect).length / arr.length
+        : null;
+    const thisAcc = acc(thisWeek);
+    const lastAcc = acc(lastWeek);
+    const weeklyDelta =
+      thisAcc !== null && lastAcc !== null
+        ? Math.round((thisAcc - lastAcc) * 100)
+        : null;
+
+    // רצף — מתאפס אם היום ואתמול לא היו פעילים
+    const today = israelDay();
+    const yesterday = israelDay(now - DAY_MS);
+    const streakDays =
+      user?.lastActiveDay === today || user?.lastActiveDay === yesterday
+        ? (user?.streakDays ?? 0)
+        : 0;
+
+    const mistakeCount = [...latest.values()].filter((ok) => !ok).length;
+    const savedRows = await ctx.db
+      .query('savedQuestions')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+
+    return {
+      name: user?.fullName || user?.email?.split('@')[0] || 'תלמיד',
+      readiness,
+      readinessLabel,
+      streakDays,
+      weeklyDelta,
+      questionsToBoost: Math.max(0, target - seen) > 0 ? 12 : 0,
+      mistakeCount,
+      savedCount: savedRows.length,
+      totalQuizzes: completed.length,
+      correctAnswered: answers.filter((a) => a.isCorrect).length,
+    };
+  },
+});
 
 // ==========================================================================
 // לוח מחוונים אישי

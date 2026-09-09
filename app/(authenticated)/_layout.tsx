@@ -1,9 +1,34 @@
 import { useConvexAuth } from 'convex/react';
-import { Redirect, Stack, useRootNavigationState } from 'expo-router';
+import { Redirect, Tabs, useRootNavigationState } from 'expo-router';
+import {
+  AlertCircle,
+  Home,
+  ListChecks,
+  TrafficCone,
+} from 'lucide-react-native';
 import { ActivityIndicator, View } from 'react-native';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
+
+// טאבים גלויים בסרגל התחתון (בסדר RTL: הראשון מימין)
+const TABS = [
+  { name: 'index', title: 'בית', icon: Home },
+  { name: 'practice', title: 'תרגול', icon: ListChecks },
+  { name: 'signs', title: 'תמרורים', icon: TrafficCone },
+  { name: 'mistakes', title: 'מחסן טעויות', icon: AlertCircle },
+];
+
+// מסכים נגישים דרך ניווט אך מוסתרים מסרגל הטאבים
+const HIDDEN = [
+  'quiz',
+  'results',
+  'stats',
+  'history',
+  'license',
+  'settings',
+  'saved',
+];
 
 export default function AuthenticatedLayout() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -37,20 +62,36 @@ export default function AuthenticatedLayout() {
   }
 
   return (
-    <Stack
+    <Tabs
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#F4F5F7' },
+        tabBarActiveTintColor: palette.primary,
+        tabBarInactiveTintColor: '#9AA3B2',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopColor: '#E5E7EB',
+          height: 60,
+          paddingBottom: 6,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: { fontSize: 11 },
       }}
     >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="license" />
-      <Stack.Screen name="practice" />
-      <Stack.Screen name="quiz" options={{ gestureEnabled: false }} />
-      <Stack.Screen name="results" options={{ gestureEnabled: false }} />
-      <Stack.Screen name="stats" />
-      <Stack.Screen name="history" />
-      <Stack.Screen name="settings" />
-    </Stack>
+      {TABS.map((t) => (
+        <Tabs.Screen
+          key={t.name}
+          name={t.name}
+          options={{
+            title: t.title,
+            tabBarIcon: ({ color, size }) => (
+              <t.icon color={color} size={size} />
+            ),
+          }}
+        />
+      ))}
+      {HIDDEN.map((name) => (
+        <Tabs.Screen key={name} name={name} options={{ href: null }} />
+      ))}
+    </Tabs>
   );
 }

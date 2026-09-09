@@ -76,6 +76,38 @@ export const getQuestions = query({
   },
 });
 
+// מילון תמרורים — שאלות עם תמונה, מקובצות לפי תת-נושא, בלי כפילות תמונה
+export const signDictionary = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db
+      .query('questions')
+      .withIndex('by_active', (q) => q.eq('isActive', true))
+      .collect();
+
+    const seen = new Set<string>();
+    const groups = new Map<
+      string,
+      { url: string; text: string; officialId?: string }[]
+    >();
+
+    for (const q of all) {
+      if (!q.imageUrl || seen.has(q.imageUrl)) {
+        continue;
+      }
+      seen.add(q.imageUrl);
+      const group = q.subCategory ?? q.category;
+      const list = groups.get(group) ?? [];
+      list.push({ url: q.imageUrl, text: q.text, officialId: q.officialId });
+      groups.set(group, list);
+    }
+
+    return [...groups.entries()]
+      .map(([group, items]) => ({ group, items }))
+      .sort((a, b) => b.items.length - a.items.length);
+  },
+});
+
 // שליפת שאלה בודדת לפי מזהה
 export const getById = query({
   args: { questionId: v.id('questions') },

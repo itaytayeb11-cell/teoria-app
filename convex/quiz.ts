@@ -1,7 +1,13 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { type MutationCtx, mutation, query } from './_generated/server';
-import { filterByLicense, requireUserId, shuffle } from './model';
+import {
+  filterByLicense,
+  latestAnswerByQuestion,
+  requireUserId,
+  shuffle,
+  touchStreak,
+} from './model';
 
 const SIMULATION_SIZE = 30; // מספר שאלות במבחן מדמה
 
@@ -9,15 +15,42 @@ const modeValidator = v.union(
   v.literal('category'),
   v.literal('difficulty'),
   v.literal('simulation'),
-  v.literal('all')
+  v.literal('all'),
+  v.literal('mistakes'),
+  v.literal('saved')
 );
 
 // אוסף את מאגר השאלות המתאים למצב המבחן שנבחר
 async function pickPool(
   ctx: MutationCtx,
-  mode: 'category' | 'difficulty' | 'simulation' | 'all',
+  mode: 'category' | 'difficulty' | 'simulation' | 'all' | 'mistakes' | 'saved',
+  userId: Id<'users'>,
   filterValue?: string
 ): Promise<Doc<'questions'>[]> {
+  if (mode === 'mistakes') {
+    const logs = await ctx.db
+      .query('answerLog')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    const latest = latestAnswerByQuestion(logs);
+    const ids = [...latest.entries()].filter(([, ok]) => !ok).map(([id]) => id);
+    const docs = await Promise.all(ids.map((id) => ctx.db.get(id)));
+    return docs
+      .filter((d): d is Doc<'questions'> => d !== null)
+      .filter((d) => d.isActive);
+  }
+
+  if (mode === 'saved') {
+    const rows = await ctx.db
+      .query('savedQuestions')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    const docs = await Promise.all(rows.map((r) => ctx.db.get(r.questionId)));
+    return docs
+      .filter((d): d is Doc<'questions'> => d !== null)
+      .filter((d) => d.isActive);
+  }
+
   if (mode === 'category' && filterValue) {
     const pool = await ctx.db
       .query('questions')
@@ -55,8 +88,12 @@ export const startQuiz = mutation({
     const userId = await requireUserId(ctx);
     const user = await ctx.db.get(userId);
 
-    const rawPool = await pickPool(ctx, mode, filterValue);
-    const pool = filterByLicense(rawPool, user?.licenseType);
+    const rawPool = await pickPool(ctx, mode, userId, filterValue);
+    // מחסן טעויות ושמורות — לא מסננים לפי רישיון (המשתמש כבר נענה עליהן)
+    const pool =
+      mode === 'mistakes' || mode === 'saved'
+        ? rawPool
+        : filterByLicense(rawPool, user?.licenseType);
     if (pool.length === 0) {
       throw new Error('אין שאלות זמינות למבחן הזה');
     }
@@ -144,6 +181,7 @@ export const submitAnswer = mutation({
         isCorrect,
         answeredAt: Date.now(),
       });
+      await touchStreak(ctx, userId);
     }
 
     return { isCorrect, correctAnswer: question.correctAnswer };

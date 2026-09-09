@@ -10,10 +10,12 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as mistakes from "../mistakes.js";
 import type * as model from "../model.js";
 import type * as purchases from "../purchases.js";
 import type * as questions from "../questions.js";
 import type * as quiz from "../quiz.js";
+import type * as saved from "../saved.js";
 import type * as stats from "../stats.js";
 import type * as users from "../users.js";
 
@@ -26,10 +28,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  mistakes: typeof mistakes;
   model: typeof model;
   purchases: typeof purchases;
   questions: typeof questions;
   quiz: typeof quiz;
+  saved: typeof saved;
   stats: typeof stats;
   users: typeof users;
 }>;

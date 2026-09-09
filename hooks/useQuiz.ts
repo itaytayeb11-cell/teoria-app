@@ -33,7 +33,13 @@ export function useQuiz() {
 
   const start = useCallback(
     async (params: {
-      mode: 'category' | 'difficulty' | 'simulation' | 'all';
+      mode:
+        | 'category'
+        | 'difficulty'
+        | 'simulation'
+        | 'all'
+        | 'mistakes'
+        | 'saved';
       filterValue?: string;
       count?: number;
     }) => {

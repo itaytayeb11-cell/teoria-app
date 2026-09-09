@@ -19,7 +19,7 @@ export default function PracticeScreen() {
 
   return (
     <Screen edges={['top']}>
-      <ScreenHeader title="תרגול" highlight="שאלות" />
+      <ScreenHeader title="תרגול" highlight="שאלות" hideBack />
       {categories === undefined ? (
         <View
           style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
