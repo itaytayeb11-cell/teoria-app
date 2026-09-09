@@ -66,14 +66,22 @@ export function useQuiz() {
     [startQuizMut]
   );
 
+  // תרגול: מסמן, נועל, ושולח מיד (למשוב מיידי).
+  // מבחן מדמה: רק מסמן מקומית — אפשר לשנות עד הסיום (immediate=false).
   const answer = useCallback(
-    async (selected: number) => {
+    async (selected: number, immediate = true) => {
       const q = questions[index];
-      if (!q || !sessionId || answers[index]) {
+      if (!q || !sessionId) {
         return;
+      }
+      if (immediate && answers[index]) {
+        return; // בתרגול לא משנים תשובה שכבר נענתה
       }
       const isCorrect = selected === q.correctAnswer;
       setAnswers((prev) => ({ ...prev, [index]: { selected, isCorrect } }));
+      if (!immediate) {
+        return;
+      }
       try {
         await submitAnswerMut({
           sessionId: sessionId as never,
@@ -86,6 +94,28 @@ export function useQuiz() {
     },
     [questions, index, sessionId, answers, submitAnswerMut]
   );
+
+  // שולח את כל התשובות המקומיות לשרת (מבחן מדמה, לפני סיום)
+  const submitAll = useCallback(async () => {
+    if (!sessionId) {
+      return;
+    }
+    for (const [i, rec] of Object.entries(answers)) {
+      const q = questions[Number(i)];
+      if (!q) {
+        continue;
+      }
+      try {
+        await submitAnswerMut({
+          sessionId: sessionId as never,
+          questionId: q._id as never,
+          selected: rec.selected,
+        });
+      } catch {
+        // ממשיכים גם אם תשובה אחת נכשלה
+      }
+    }
+  }, [sessionId, answers, questions, submitAnswerMut]);
 
   const next = useCallback(() => {
     setIndex((i) => Math.min(i + 1, questions.length - 1));
@@ -124,6 +154,7 @@ export function useQuiz() {
     stats,
     start,
     answer,
+    submitAll,
     next,
     prev,
     goTo: setIndex,

@@ -40,7 +40,9 @@ export default function HistoryScreen() {
           </T>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 12 }}
+        >
           {history.map((h) => (
             <Card
               key={h._id}

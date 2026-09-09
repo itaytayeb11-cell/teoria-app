@@ -33,7 +33,9 @@ export default function SavedScreen() {
           </T>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 12 }}
+        >
           <Card>
             <T weight="bold" size={16}>
               {list.length} שאלות שמורות

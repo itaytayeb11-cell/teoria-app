@@ -27,7 +27,9 @@ export default function PracticeScreen() {
           <ActivityIndicator size="large" color={palette.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 12 }}
+        >
           <T color={palette.muted} size={13}>
             בחר נושא לתרגול. תקבל משוב מיידי והסבר לכל שאלה.
           </T>

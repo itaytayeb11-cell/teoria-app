@@ -1,4 +1,5 @@
 import { useConvexAuth, useQuery } from 'convex/react';
+import { BlurView } from 'expo-blur';
 import {
   Redirect,
   Tabs,
@@ -11,7 +12,8 @@ import {
   ListChecks,
   TrafficCone,
 } from 'lucide-react-native';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
@@ -26,15 +28,16 @@ const TABS = [
   { name: 'mistakes', title: 'מחסן טעויות', icon: AlertCircle },
 ];
 
-// מסכים נגישים דרך ניווט אך מוסתרים מסרגל הטאבים
-const HIDDEN = [
-  'quiz',
-  'results',
-  'stats',
-  'history',
-  'license',
-  'settings',
-  'saved',
+// מסכים נגישים דרך ניווט אך מוסתרים מסרגל הטאבים.
+// focus=true — גם מסתירים את סרגל הטאבים עצמו (מסכי מיקוד / כפתורים תחתונים)
+const HIDDEN: { name: string; focus?: boolean }[] = [
+  { name: 'quiz', focus: true },
+  { name: 'results', focus: true },
+  { name: 'license', focus: true },
+  { name: 'stats' },
+  { name: 'history' },
+  { name: 'settings' },
+  { name: 'saved' },
 ];
 
 export default function AuthenticatedLayout() {
@@ -42,6 +45,7 @@ export default function AuthenticatedLayout() {
   const { isPremium, isLoading: isRevenueCatLoading } = useRevenueCat();
   const navigationState = useRootNavigationState();
   const segments = useSegments();
+  const insets = useSafeAreaInsets();
   const currentUser = useQuery(
     api.users.getCurrentUser,
     isAuthenticated ? {} : 'skip'
@@ -80,20 +84,42 @@ export default function AuthenticatedLayout() {
     return <Redirect href="/(authenticated)/license" />;
   }
 
+  const barHeight = 56 + insets.bottom;
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.primary,
         tabBarInactiveTintColor: '#9AA3B2',
+        tabBarLabelStyle: { fontSize: 11, marginBottom: 2 },
+        // Liquid Glass — סרגל שקוף עם טשטוש, מרחף מעל התוכן
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopColor: '#E5E7EB',
-          height: 60,
-          paddingBottom: 6,
-          paddingTop: 6,
+          position: 'absolute',
+          height: barHeight,
+          paddingBottom: insets.bottom,
+          paddingTop: 8,
+          borderTopWidth: 0,
+          backgroundColor:
+            Platform.OS === 'android'
+              ? 'rgba(255,255,255,0.94)'
+              : 'transparent',
+          elevation: 0,
         },
-        tabBarLabelStyle: { fontSize: 11 },
+        tabBarBackground: () => (
+          <BlurView
+            intensity={40}
+            tint="light"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: 'rgba(255,255,255,0.55)',
+                borderTopWidth: StyleSheet.hairlineWidth,
+                borderTopColor: 'rgba(0,0,0,0.06)',
+              },
+            ]}
+          />
+        ),
       }}
     >
       {TABS.map((t) => (
@@ -108,8 +134,15 @@ export default function AuthenticatedLayout() {
           }}
         />
       ))}
-      {HIDDEN.map((name) => (
-        <Tabs.Screen key={name} name={name} options={{ href: null }} />
+      {HIDDEN.map((s) => (
+        <Tabs.Screen
+          key={s.name}
+          name={s.name}
+          options={{
+            href: null,
+            ...(s.focus ? { tabBarStyle: { display: 'none' } } : {}),
+          }}
+        />
       ))}
     </Tabs>
   );

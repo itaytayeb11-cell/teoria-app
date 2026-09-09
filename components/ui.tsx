@@ -539,21 +539,22 @@ export function NavArrows(props: {
     alignItems: 'center',
     justifyContent: 'center',
   };
+  // RTL: "הבא" בצד שמאל (חץ ←), "הקודם" בצד ימין (חץ →)
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <Pressable
-        onPress={props.onPrev}
-        disabled={props.prevDisabled}
-        style={[box, { opacity: props.prevDisabled ? 0.4 : 1 }]}
-      >
-        <ChevronRight color={palette.primary} size={24} />
-      </Pressable>
       <Pressable
         onPress={props.onNext}
         disabled={props.nextDisabled}
         style={[box, { opacity: props.nextDisabled ? 0.4 : 1 }]}
       >
         <ChevronLeft color={palette.primary} size={24} />
+      </Pressable>
+      <Pressable
+        onPress={props.onPrev}
+        disabled={props.prevDisabled}
+        style={[box, { opacity: props.prevDisabled ? 0.4 : 1 }]}
+      >
+        <ChevronRight color={palette.primary} size={24} />
       </Pressable>
     </View>
   );

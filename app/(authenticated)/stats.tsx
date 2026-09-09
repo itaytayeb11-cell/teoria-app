@@ -24,7 +24,9 @@ export default function StatsScreen() {
           <ActivityIndicator size="large" color={palette.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}
+        >
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <Stat label="ציון ממוצע" value={`${stats.averageScore}%`} />
             <Stat label="מבחנים" value={String(stats.totalQuizzes)} />

@@ -62,7 +62,9 @@ export default function SettingsScreen() {
   return (
     <Screen edges={['top']}>
       <ScreenHeader title="שלום" highlight={name} backLabel="בית" />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 10 }}
+      >
         <Row
           label={`סוג רישיון: ${licenseLabel(user?.licenseType ?? undefined)}`}
           onPress={() => router.push('/(authenticated)/license')}

@@ -64,7 +64,7 @@ export default function HomeScreen() {
 
       <ScrollView
         style={{ backgroundColor: '#F4F5F7' }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 28, gap: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}
       >
         {/* ברכה + רצף */}
         <View

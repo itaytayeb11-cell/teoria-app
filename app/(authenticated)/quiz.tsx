@@ -9,6 +9,7 @@ import {
   ScrollView,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AnswerOption,
   Button,
@@ -34,6 +35,7 @@ function fmt(sec: number) {
 
 export default function QuizScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ mode?: string; filter?: string }>();
   const mode = params.mode ?? 'simulation';
   const isPractice = mode !== 'simulation';
@@ -56,14 +58,17 @@ export default function QuizScreen() {
     startQuiz({ mode: startMode, filterValue: params.filter });
   }, [startQuiz, mode, params.filter]);
 
-  const { finish, sessionId } = quiz;
+  const { finish, sessionId, submitAll } = quiz;
   const correctCount = quiz.stats.correct;
   const goToResults = useCallback(async () => {
+    if (!isPractice) {
+      await submitAll(); // מבחן מדמה — שולח את כל התשובות לפני הסיום
+    }
     const res = await finish();
     router.replace(
       `/(authenticated)/results?sessionId=${sessionId}&score=${res?.scorePercent ?? correctCount}`
     );
-  }, [finish, sessionId, correctCount, router]);
+  }, [isPractice, submitAll, finish, sessionId, correctCount, router]);
 
   const hasQuestions = quiz.questions.length > 0;
 
@@ -148,12 +153,14 @@ export default function QuizScreen() {
   };
 
   const onPick = (i: number) => {
-    if (picked) {
-      return;
-    }
-    quiz.answer(i);
     if (isPractice) {
+      if (picked) {
+        return;
+      }
+      quiz.answer(i, true);
       setShowExplain(true);
+    } else {
+      quiz.answer(i, false); // מבחן מדמה — אפשר לשנות
     }
   };
 
@@ -330,9 +337,6 @@ export default function QuizScreen() {
             {q.text}
           </T>
         </View>
-        <T color={palette.muted} size={13} style={{ marginTop: -6 }}>
-          בחר את התשובה הנכונה לפי תקנות התעבורה.
-        </T>
 
         {/* תשובות */}
         <View style={{ gap: 10 }}>
@@ -341,7 +345,7 @@ export default function QuizScreen() {
               key={`${q._id}-${i}`}
               text={ans}
               state={optionState(i)}
-              disabled={!!picked}
+              disabled={isPractice && !!picked}
               onPress={() => onPick(i)}
             />
           ))}
@@ -381,7 +385,17 @@ export default function QuizScreen() {
       </ScrollView>
 
       {/* ניווט תחתון */}
-      <View style={{ backgroundColor: '#F4F5F7', padding: 16, gap: 12 }}>
+      <View
+        style={{
+          backgroundColor: '#F4F5F7',
+          paddingHorizontal: 16,
+          paddingTop: 12,
+          paddingBottom: Math.max(insets.bottom, 12),
+          gap: 12,
+          borderTopWidth: 1,
+          borderTopColor: '#E9EBF0',
+        }}
+      >
         {isPractice ? (
           <Button
             label={isLast ? 'סיום' : picked ? 'הבא' : 'דלג'}

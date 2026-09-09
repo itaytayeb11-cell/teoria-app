@@ -64,7 +64,9 @@ export default function SignsScreen() {
             ))}
           </ScrollView>
 
-          <ScrollView contentContainerStyle={{ padding: 12 }}>
+          <ScrollView
+            contentContainerStyle={{ padding: 12, paddingBottom: 110 }}
+          >
             <View
               style={{
                 flexDirection: 'row',
