@@ -302,7 +302,7 @@ export function AnswerOption(props: {
         ? palette.dangerBg
         : state === 'selected'
           ? palette.primaryTint
-          : c.pill;
+          : c.card;
   const borderColor =
     state === 'correct'
       ? palette.success
@@ -310,7 +310,7 @@ export function AnswerOption(props: {
         ? palette.danger
         : state === 'selected'
           ? palette.primary
-          : 'transparent';
+          : c.border;
   return (
     <Pressable
       onPress={props.onPress}
@@ -321,12 +321,17 @@ export function AnswerOption(props: {
         backgroundColor: bg,
         borderWidth: 1.5,
         borderColor,
-        borderRadius: 12,
+        borderRadius: 14,
         paddingVertical: 16,
         paddingHorizontal: 16,
         flexDirection: rtl.flexDirection,
         alignItems: 'center',
         gap: 12,
+        shadowColor: '#1B2B4B',
+        shadowOpacity: state === 'default' ? 0.05 : 0,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: state === 'default' ? 1 : 0,
       }}
     >
       <View

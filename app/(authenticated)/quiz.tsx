@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Bookmark, ChevronRight } from 'lucide-react-native';
+import { Bookmark, ChevronRight, Eye, Timer } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,6 +12,7 @@ import {
 import {
   AnswerOption,
   Button,
+  Card,
   ConfirmModal,
   NavArrows,
   ProgressBar,
@@ -25,11 +26,16 @@ import { rtl } from '@/lib/rtl';
 
 const SIMULATION_SECONDS = 40 * 60;
 
+function fmt(sec: number) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
 export default function QuizScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ mode?: string; filter?: string }>();
   const mode = params.mode ?? 'simulation';
-  // כל המצבים חוץ ממבחן מדמה = תרגול עם משוב מיידי
   const isPractice = mode !== 'simulation';
   const quiz = useQuiz();
   const toggleSave = useMutation(api.saved.toggle);
@@ -37,10 +43,10 @@ export default function QuizScreen() {
   const [showExplain, setShowExplain] = useState(false);
   const [confirmExit, setConfirmExit] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(SIMULATION_SECONDS);
+  const [elapsed, setElapsed] = useState(0);
 
   const startQuiz = quiz.start;
   useEffect(() => {
-    // useQuiz מגן פנימית מפני קריאה כפולה (startedRef)
     const startMode =
       mode === 'practice'
         ? 'category'
@@ -59,34 +65,34 @@ export default function QuizScreen() {
     );
   }, [finish, sessionId, correctCount, router]);
 
-  // טיימר למבחן מדמה
   const hasQuestions = quiz.questions.length > 0;
+
+  // מבחן מדמה — ספירה לאחור; תרגול — ספירה עולה
   useEffect(() => {
-    if (isPractice || !hasQuestions) {
+    if (!hasQuestions) {
       return;
     }
     const t = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(t);
-          goToResults();
-          return 0;
-        }
-        return s - 1;
-      });
+      if (isPractice) {
+        setElapsed((e) => e + 1);
+      } else {
+        setSecondsLeft((s) => {
+          if (s <= 1) {
+            clearInterval(t);
+            goToResults();
+            return 0;
+          }
+          return s - 1;
+        });
+      }
     }, 1000);
     return () => clearInterval(t);
   }, [isPractice, hasQuestions, goToResults]);
 
-  useEffect(() => {
-    setShowExplain(false);
-  }, []);
-
-  const timeStr = useMemo(() => {
-    const m = Math.floor(secondsLeft / 60);
-    const s = secondsLeft % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  }, [secondsLeft]);
+  const timeStr = useMemo(
+    () => (isPractice ? fmt(elapsed) : fmt(secondsLeft)),
+    [isPractice, elapsed, secondsLeft]
+  );
 
   if (quiz.loading || quiz.questions.length === 0) {
     return (
@@ -97,6 +103,7 @@ export default function QuizScreen() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 16,
+            padding: 24,
           }}
         >
           {quiz.error ? (
@@ -120,6 +127,7 @@ export default function QuizScreen() {
   const picked = quiz.currentAnswer;
   const isLast = quiz.index === quiz.questions.length - 1;
   const isSaved = q ? (savedIds ?? []).includes(q._id as never) : false;
+  const topic = q.subCategory ?? q.category;
 
   const optionState = (
     i: number
@@ -162,93 +170,172 @@ export default function QuizScreen() {
     quiz.next();
   };
 
+  const exit = () => {
+    if (isPractice) {
+      router.canGoBack() ? router.back() : router.replace('/(authenticated)');
+    } else {
+      setConfirmExit(true);
+    }
+  };
+
   return (
-    <Screen edges={['top']}>
-      {/* כותרת מבחן */}
+    <Screen edges={['top']} style={{ backgroundColor: palette.primary }}>
+      {/* כותרת */}
       <View
         style={{
-          backgroundColor: palette.primary,
-          paddingHorizontal: 20,
-          paddingTop: 8,
-          paddingBottom: 18,
-          borderBottomLeftRadius: 24,
-          borderBottomRightRadius: 24,
+          flexDirection: rtl.flexDirection,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingBottom: 14,
         }}
       >
-        <View
-          style={{
-            flexDirection: rtl.flexDirection,
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
+        <Pressable onPress={exit} hitSlop={10}>
+          <ChevronRight color="#fff" size={26} />
+        </Pressable>
+        <T color="#fff" weight="bold" size={17}>
+          {isPractice ? 'תרגול — תיאוריה' : 'מבחן — תיאוריה'}
+        </T>
+        <Pressable
+          hitSlop={10}
+          onPress={() => toggleSave({ questionId: q._id as never })}
         >
-          <Pressable
-            onPress={() => setConfirmExit(true)}
-            hitSlop={10}
+          <Bookmark
+            color="#fff"
+            size={22}
+            fill={isSaved ? '#fff' : 'transparent'}
+          />
+        </Pressable>
+      </View>
+
+      <ScrollView
+        style={{ backgroundColor: '#F4F5F7' }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 14 }}
+      >
+        {/* כרטיס התקדמות */}
+        <Card style={{ gap: 10 }}>
+          <View
             style={{
               flexDirection: rtl.flexDirection,
               alignItems: 'center',
-              gap: 4,
+              justifyContent: 'space-between',
             }}
           >
-            <T color="#fff" weight="medium">
-              {isPractice ? 'סיום תרגול' : 'סיום מבחן'}
+            <T weight="bold" size={16}>
+              שאלה {quiz.index + 1} מתוך {quiz.questions.length}
             </T>
-            <ChevronRight color="#fff" size={22} />
-          </Pressable>
-          {q ? (
-            <Pressable
-              hitSlop={10}
-              onPress={() => toggleSave({ questionId: q._id as never })}
+            <View
+              style={{
+                backgroundColor: palette.primaryTint,
+                borderRadius: 999,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+              }}
             >
-              <Bookmark
-                color="#fff"
-                size={22}
-                fill={isSaved ? '#fff' : 'transparent'}
-              />
-            </Pressable>
-          ) : null}
-        </View>
-        <View style={{ marginTop: 12, marginBottom: 8 }}>
-          <ProgressBar value={(quiz.index + 1) / quiz.questions.length} />
-        </View>
+              <T color={palette.primary} size={12} weight="medium">
+                {topic}
+              </T>
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: rtl.flexDirection,
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: rtl.flexDirection,
+                alignItems: 'center',
+                gap: 4,
+                backgroundColor: '#F0F1F5',
+                borderRadius: 999,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+              }}
+            >
+              <Timer color={palette.muted} size={14} />
+              <T color={palette.muted} size={13} weight="medium">
+                {timeStr}
+              </T>
+            </View>
+          </View>
+          <ProgressBar
+            value={(quiz.index + 1) / quiz.questions.length}
+            track={palette.primaryTint}
+            fill={palette.primary}
+          />
+        </Card>
+
+        {/* תמונה */}
+        {q.imageUrl ? (
+          <Card style={{ padding: 10 }}>
+            <Image
+              source={{ uri: q.imageUrl }}
+              style={{ width: '100%', height: 200, backgroundColor: '#fff' }}
+              resizeMode="contain"
+            />
+            <View
+              style={{
+                flexDirection: rtl.flexDirection,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 8,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: rtl.flexDirection,
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <Eye color={palette.primary} size={15} />
+                <T color={palette.muted} size={12}>
+                  התבונן בפרטים בתמונה
+                </T>
+              </View>
+              <T color={palette.success} size={12} weight="bold">
+                שאלה רשמית
+              </T>
+            </View>
+          </Card>
+        ) : null}
+
+        {/* שאלה */}
         <View
           style={{
             flexDirection: rtl.flexDirection,
-            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: 10,
           }}
         >
-          <T color="#fff" weight="bold">
-            {quiz.index + 1} מתוך {quiz.questions.length}
-          </T>
-          {!isPractice && (
-            <T color="#fff" weight="bold">
-              ⏱ {timeStr}
-            </T>
-          )}
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }}>
-        {q.imageUrl ? (
-          <Image
-            source={{ uri: q.imageUrl }}
+          <View
             style={{
-              width: '100%',
-              height: 200,
-              borderRadius: 12,
-              marginBottom: 16,
-              backgroundColor: '#fff',
+              width: 26,
+              height: 26,
+              borderRadius: 13,
+              backgroundColor: palette.primary,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 2,
             }}
-            resizeMode="contain"
-          />
-        ) : null}
-
-        <T weight="bold" size={19} style={{ marginBottom: 16 }}>
-          {q.text}
+          >
+            <T color="#fff" weight="bold" size={14}>
+              ?
+            </T>
+          </View>
+          <T weight="bold" size={18} style={{ flex: 1 }}>
+            {q.text}
+          </T>
+        </View>
+        <T color={palette.muted} size={13} style={{ marginTop: -6 }}>
+          בחר את התשובה הנכונה לפי תקנות התעבורה.
         </T>
 
-        <View style={{ gap: 12 }}>
+        {/* תשובות */}
+        <View style={{ gap: 10 }}>
           {q.answers.map((ans, i) => (
             <AnswerOption
               key={`${q._id}-${i}`}
@@ -260,10 +347,10 @@ export default function QuizScreen() {
           ))}
         </View>
 
+        {/* הסבר */}
         {isPractice && picked && q.explanation ? (
           <View
             style={{
-              marginTop: 16,
               backgroundColor: '#F3F0FF',
               borderRadius: 12,
               padding: 14,
@@ -294,7 +381,7 @@ export default function QuizScreen() {
       </ScrollView>
 
       {/* ניווט תחתון */}
-      <View style={{ padding: 16, gap: 12 }}>
+      <View style={{ backgroundColor: '#F4F5F7', padding: 16, gap: 12 }}>
         {isPractice ? (
           <Button
             label={isLast ? 'סיום' : picked ? 'הבא' : 'דלג'}

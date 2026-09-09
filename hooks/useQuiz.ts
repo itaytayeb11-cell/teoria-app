@@ -12,6 +12,7 @@ export type QuizQuestion = {
   correctAnswer: number;
   explanation?: string;
   category: string;
+  subCategory?: string;
   difficulty: number;
   imageUrl?: string;
 };

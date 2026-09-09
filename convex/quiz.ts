@@ -126,6 +126,7 @@ export const startQuiz = mutation({
         correctAnswer: q.correctAnswer,
         explanation: q.explanation,
         category: q.category,
+        subCategory: q.subCategory,
         difficulty: q.difficulty,
         imageUrl: q.imageUrl,
       })),
