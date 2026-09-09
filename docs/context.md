@@ -16,10 +16,10 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 |---|---|---|
 | 0. התקנות במחשב | ✅ | bun 1.3.14, node v24.16, git 2.50 |
 | 1. הקמת פרויקט | ✅ | bun install ✅ · context.md ✅ · git init ✅ · commit ✅ · GitHub private (teoria-app) ✅ 2026-09-09 |
-| 2. חיבור Convex | ⬜ | דורש `bunx convex dev` + אישור בדפדפן (משתמש) |
-| 3. Auth Keys | ⬜ | |
-| 4. Backend (schema + functions) | ⬜ | schema כרגע רק `users`. צריך `questions` + `userStats` + `convex/questions.ts` + `convex/stats.ts` |
-| 5. הורדת + טביעת שאלות | ⬜ | הורדה מ-data.gov.il (משתמש) → המרה + seed (Claude) |
+| 2. חיבור Convex | ✅ | `bun run setup` הורץ 2026-09-09, deployment cloud פעיל |
+| 3. Auth Keys | ✅ | Password provider, מפתחות נוצרו |
+| 4. Backend (schema + functions) | ✅ | schema: questions, quizSessions, answerLog, purchases. functions: questions/quiz/stats/purchases + model.ts helpers. deployed, typecheck+lint נקי |
+| 5. הורדת + טביעת שאלות | ⬜ | הורדה מ-data.gov.il (משתמש) → המרה + seed (Claude). internalMutation `questions:importQuestions` מוכן |
 | 6. הרצה ראשונה | ⬜ | |
 | 7. Auth Frontend | 🟡 | קיים בתבנית (sign-in/sign-up/paywall) — צריך התאמה |
 | 8. Quiz Screen | ⬜ | קיימים placeholders page1/page2 |
@@ -31,8 +31,8 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 
 | משתנה | קובץ | סטטוס |
 |---|---|---|
-| CONVEX_DEPLOYMENT | .env | ⬜ |
-| EXPO_PUBLIC_CONVEX_URL | .env | ⬜ |
+| CONVEX_DEPLOYMENT | .env.local | ✅ (נוצר ע"י convex) |
+| EXPO_PUBLIC_CONVEX_URL | .env.local | ✅ |
 | EXPO_PUBLIC_REVENUECAT_* | .env | ⬜ (אופציונלי, שלב 12) |
 
 ## מבנה קיים (מהתבנית)
@@ -45,7 +45,7 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 
 ## משימה נוכחית
 
-שלב 2 — המשתמש מריץ `bunx convex dev` ליצירת פרויקט Convex cloud. לאחר מכן Claude ממשיך ל-schema + functions.
+שלב 5 — המשתמש מוריד את מאגר השאלות הרשמי מ-data.gov.il ושולח ל-Claude. אז Claude בונה סקריפט המרה + seed.
 
 ## git
 

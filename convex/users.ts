@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { requireUserId } from './model';
 
 // שליפת המשתמש הנוכחי המחובר
 // מחזיר null אם המשתמש לא מחובר
@@ -151,35 +152,43 @@ export const remove = mutation({
 export const deleteMyAccount = mutation({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error('לא מחובר למערכת');
-    }
-
-    // קבלת מזהה המשתמש מה-identity
-    const userId = identity.subject;
+    const userId = await requireUserId(ctx);
     let deletedCount = 0;
 
-    // כאן תוכל להוסיף מחיקה של טבלאות נוספות שקשורות למשתמש
-    // לדוגמה:
-    // const userPosts = await ctx.db
-    //   .query('posts')
-    //   .withIndex('by_user', (q) => q.eq('userId', userId))
-    //   .collect();
-    // for (const post of userPosts) {
-    //   await ctx.db.delete(post._id);
-    //   deletedCount += 1;
-    // }
+    // מחיקת כל המבחנים של המשתמש
+    const sessions = await ctx.db
+      .query('quizSessions')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    for (const s of sessions) {
+      await ctx.db.delete(s._id);
+      deletedCount += 1;
+    }
 
-    // מחיקת המשתמש מטבלת המשתמשים
-    // הערה: Convex Auth מנהל את טבלת המשתמשים, אך אנחנו יכולים למחוק את הרשומה
-    const user = await ctx.db
-      .query('users')
-      .filter((q) => q.eq(q.field('_id'), userId))
-      .first();
+    // מחיקת יומן התשובות
+    const logs = await ctx.db
+      .query('answerLog')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    for (const l of logs) {
+      await ctx.db.delete(l._id);
+      deletedCount += 1;
+    }
 
+    // מחיקת רשומות רכישה
+    const purchases = await ctx.db
+      .query('purchases')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    for (const p of purchases) {
+      await ctx.db.delete(p._id);
+      deletedCount += 1;
+    }
+
+    // מחיקת רשומת המשתמש עצמה
+    const user = await ctx.db.get(userId);
     if (user) {
-      await ctx.db.delete(user._id);
+      await ctx.db.delete(userId);
       deletedCount += 1;
     }
 
