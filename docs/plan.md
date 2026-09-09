@@ -45,10 +45,10 @@
 - [ ] 🤖 QA: בדיקת 20 שאלות אקראיות מול המקור
 
 ### שלב 5 — עיצוב ומערכת עיצוב
-- [ ] 👤 שליחת השראה/צילומי מסך
-- [ ] 🤖 (אופציונלי) קנבס עיצוב ב-Claude Design — מסכי מפתח
-- [ ] 🤖 design tokens: צבעים, טיפוגרפיה, מרווחים, מצב כהה/בהיר, RTL מלא
-- [ ] 🤖 קומפוננטות בסיס: כפתור, כרטיס, progress bar, מסך תוצאה
+- [x] 👤 שליחת השראה (26 צילומים של אפליקציית "נוהג")
+- [x] 🤖 מערכת עיצוב מתועדת ב-docs/design.md
+- [x] 🤖 design tokens: constants/Colors.ts + tailwind.config.js
+- [ ] 🤖 קומפוננטות בסיס: ScreenHeader, Button, Card, AnswerOption, ProgressBar, ConfirmModal, GuestBanner, ExplanationPanel
 
 ### שלב 6 — Frontend: Auth
 - [ ] 🤖 התאמת מסכי sign-in / sign-up הקיימים לעיצוב + עברית + RTL

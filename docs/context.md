@@ -45,7 +45,16 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 
 ## משימה נוכחית
 
-שלב 6-8 — Frontend. בניית מסך המבחן (הליבה), חיבור לפונקציות Convex שכבר קיימות. הערה חשובה: הרשת במחשב חוסמת את aws-e.data.gov.il ומפנה ל-Google Family Link signin — אבל data.gov.il API הרגיל עובד, וכך גם convex (עם sandbox off).
+שלב 6 — Frontend. מערכת העיצוב מוכנה (docs/design.md, Colors.ts, tailwind). הבא: קומפוננטות בסיס, ואז מסך המבחן (ליבה), חיבור לפונקציות Convex הקיימות.
+
+## עיצוב
+
+השראה: אפליקציית "נוהג/VocarAi" (26 צילומים מהמשתמש). כחול ראשי #1D4ED8, כרטיסים לבנים על #F4F5F7, כותרות בפאנל כחול מעוגל. פירוט מלא: docs/design.md.
+MVP לא כולל: מטבעות, לידרבורד, ספר תאוריה, לוח תמרורים אנציקלופדי, מורי נהיגה, ריבוי שפות.
+
+## הערות רשת
+
+הרשת במחשב חוסמת את aws-e.data.gov.il ומפנה ל-Google Family Link signin — אבל data.gov.il API הרגיל עובד, וכך גם convex (עם sandbox off).
 
 ## git
 
