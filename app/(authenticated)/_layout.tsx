@@ -1,5 +1,10 @@
-import { useConvexAuth } from 'convex/react';
-import { Redirect, Tabs, useRootNavigationState } from 'expo-router';
+import { useConvexAuth, useQuery } from 'convex/react';
+import {
+  Redirect,
+  Tabs,
+  useRootNavigationState,
+  useSegments,
+} from 'expo-router';
 import {
   AlertCircle,
   Home,
@@ -10,6 +15,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
+import { api } from '@/convex/_generated/api';
 import { usePushRegistration } from '@/hooks/usePushRegistration';
 
 // טאבים גלויים בסרגל התחתון (בסדר RTL: הראשון מימין)
@@ -35,6 +41,11 @@ export default function AuthenticatedLayout() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { isPremium, isLoading: isRevenueCatLoading } = useRevenueCat();
   const navigationState = useRootNavigationState();
+  const segments = useSegments();
+  const currentUser = useQuery(
+    api.users.getCurrentUser,
+    isAuthenticated ? {} : 'skip'
+  );
 
   usePushRegistration(isAuthenticated);
 
@@ -62,6 +73,11 @@ export default function AuthenticatedLayout() {
   }
   if (PAYMENT_SYSTEM_ENABLED && !isPremium) {
     return <Redirect href="/(auth)/paywall" />;
+  }
+  // אונבורדינג: משתמש בלי סוג רישיון — לבחור לפני כניסה לאפליקציה
+  const onLicenseScreen = segments[segments.length - 1] === 'license';
+  if (currentUser && !currentUser.licenseType && !onLicenseScreen) {
+    return <Redirect href="/(authenticated)/license" />;
   }
 
   return (

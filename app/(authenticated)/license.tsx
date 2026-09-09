@@ -17,11 +17,17 @@ export default function LicenseScreen() {
 
   const current = selected ?? user?.licenseType ?? DEFAULT_LICENSE;
 
+  const isOnboarding = !user?.licenseType;
+
   const save = async () => {
     setSaving(true);
     try {
       await setLicense({ licenseType: current });
-      router.back();
+      if (isOnboarding || !router.canGoBack()) {
+        router.replace('/(authenticated)');
+      } else {
+        router.back();
+      }
     } finally {
       setSaving(false);
     }
@@ -29,7 +35,7 @@ export default function LicenseScreen() {
 
   return (
     <Screen edges={['top']}>
-      <ScreenHeader title="בחר" highlight="רישיון" />
+      <ScreenHeader title="בחר" highlight="רישיון" hideBack={isOnboarding} />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }}>
         {LICENSE_OPTIONS.map((opt) => {
           const on = current === opt.marker;
