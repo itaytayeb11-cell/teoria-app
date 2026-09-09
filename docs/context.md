@@ -45,7 +45,9 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 
 ## משימה נוכחית
 
-שלב 6 — Frontend. מערכת העיצוב מוכנה (docs/design.md, Colors.ts, tailwind). הבא: קומפוננטות בסיס, ואז מסך המבחן (ליבה), חיבור לפונקציות Convex הקיימות.
+שלבים 6-9 הושלמו — Frontend MVP בנוי (auth, בית, license, תרגול, מבחן, תוצאות, סטטיסטיקות, היסטוריה, הגדרות). typecheck+lint נקי.
+הבא: המשתמש מריץ `bun dev` + Expo Go בטלפון לבדיקה ראשונה. אחר כך: שלב 10 (RevenueCat), 11 (אבטחה/פרטיות).
+קומפוננטות ב-components/ui.tsx, hook ב-hooks/useQuiz.ts. ניווט Stack ב-(authenticated).
 
 ## עיצוב
 
