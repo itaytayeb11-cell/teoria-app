@@ -140,6 +140,7 @@ export const submitAnswer = mutation({
         userId,
         questionId,
         category: question.category,
+        subCategory: question.subCategory,
         isCorrect,
         answeredAt: Date.now(),
       });

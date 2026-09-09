@@ -106,6 +106,7 @@ const questionInput = v.object({
   correctAnswer: v.number(),
   explanation: v.optional(v.string()),
   category: v.string(),
+  subCategory: v.optional(v.string()),
   difficulty: v.number(),
   imageUrl: v.optional(v.string()),
   licenseTypes: v.optional(v.array(v.string())),

@@ -52,11 +52,62 @@ export const getMyStats = query({
       }))
       .sort((a, b) => a.accuracy - b.accuracy);
 
+    // חישוב אחוז הצלחה לכל תת-נושא
+    const perSub = new Map<
+      string,
+      { category: string; correct: number; total: number }
+    >();
+    for (const a of allAnswers) {
+      const sub = a.subCategory ?? a.category;
+      const entry = perSub.get(sub) ?? {
+        category: a.category,
+        correct: 0,
+        total: 0,
+      };
+      entry.total += 1;
+      if (a.isCorrect) {
+        entry.correct += 1;
+      }
+      perSub.set(sub, entry);
+    }
+
+    const subCategoryBreakdown = [...perSub.entries()]
+      .map(([subCategory, { category, correct, total }]) => ({
+        subCategory,
+        category,
+        total,
+        correct,
+        accuracy: total > 0 ? Math.round((correct / total) * 100) : 0,
+      }))
+      .sort((a, b) => a.accuracy - b.accuracy);
+
     // נושא חלש: הכי נמוך באחוזים מבין נושאים עם לפחות 3 תשובות
     const weakCategory =
       categoryBreakdown.find((c) => c.total >= 3) ??
       categoryBreakdown[0] ??
       null;
+    const weakSubCategories = subCategoryBreakdown
+      .filter((s) => s.total >= 3)
+      .slice(0, 3);
+
+    // מגמת ציונים — מהישן לחדש, עד 12 מבחנים אחרונים
+    const scoreTrend = [...completed]
+      .slice(0, 12)
+      .reverse()
+      .map((s) => ({
+        score: s.scorePercent,
+        date: s.completedAt ?? s.startedAt,
+      }));
+
+    // האם משתפרים? השוואת ממוצע 3 ראשונים מול 3 אחרונים
+    let trendDirection: 'up' | 'down' | 'flat' | null = null;
+    if (scoreTrend.length >= 4) {
+      const firstAvg =
+        scoreTrend.slice(0, 3).reduce((s, x) => s + x.score, 0) / 3;
+      const lastAvg = scoreTrend.slice(-3).reduce((s, x) => s + x.score, 0) / 3;
+      const diff = lastAvg - firstAvg;
+      trendDirection = diff > 3 ? 'up' : diff < -3 ? 'down' : 'flat';
+    }
 
     return {
       totalQuizzes: completed.length,
@@ -67,6 +118,10 @@ export const getMyStats = query({
       weakCategory: weakCategory?.category ?? null,
       weakCategoryAccuracy: weakCategory?.accuracy ?? null,
       categoryBreakdown,
+      subCategoryBreakdown,
+      weakSubCategories,
+      scoreTrend,
+      trendDirection,
     };
   },
 });

@@ -16,6 +16,7 @@
 
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { assignSubCategory } from './subcategories.mjs';
 
 // מזהה המשאב במאגר הממשלתי (פורמט XML/RSS, מכיל את כל השדות)
 const RESOURCE_ID = '8c0f314f-583d-48b6-9f5f-4483d95f6848';
@@ -92,11 +93,14 @@ function convert(record) {
     .map((m) => LICENSE_FIX[m[1]] ?? m[1])
     .filter((v, i, a) => a.indexOf(v) === i);
 
+  const category = record.category?.trim() || 'כללי';
+
   return {
     text,
     answers,
     correctAnswer,
-    category: record.category?.trim() || 'כללי',
+    category,
+    subCategory: assignSubCategory(category, text, answers),
     difficulty: 3, // המאגר הרשמי לא כולל דרגת קושי — ברירת מחדל, נכוונן בהמשך
     ...(imageUrl ? { imageUrl } : {}),
     ...(licenseTypes.length ? { licenseTypes } : {}),
@@ -125,9 +129,11 @@ async function main() {
   writeFileSync(outPath, converted.map((q) => JSON.stringify(q)).join('\n'));
 
   const byCategory = {};
+  const bySub = {};
   let withImage = 0;
   for (const q of converted) {
     byCategory[q.category] = (byCategory[q.category] ?? 0) + 1;
+    bySub[q.subCategory] = (bySub[q.subCategory] ?? 0) + 1;
     if (q.imageUrl) {
       withImage += 1;
     }
@@ -137,7 +143,8 @@ async function main() {
     `\n✅ Wrote ${converted.length} questions to ${outPath}\n` +
       `   skipped (unparseable): ${skipped}\n` +
       `   with image: ${withImage}\n` +
-      `   by category: ${JSON.stringify(byCategory, null, 2)}\n\n` +
+      `   by category: ${JSON.stringify(byCategory, null, 2)}\n` +
+      `   by sub-category: ${JSON.stringify(bySub, null, 2)}\n\n` +
       'Next: bunx convex import --table questions --replace scripts/questions.jsonl\n'
   );
 }

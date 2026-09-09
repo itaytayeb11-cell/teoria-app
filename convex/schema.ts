@@ -33,7 +33,8 @@ export default defineSchema({
     answers: v.array(v.string()), // מערך של 4 תשובות אפשריות
     correctAnswer: v.number(), // אינדקס התשובה הנכונה (0-3)
     explanation: v.optional(v.string()), // הסבר לתשובה הנכונה (מוצג אחרי מענה)
-    category: v.string(), // נושא ראשי: "תמרורים", "חוקי תנועה", "בטיחות", "הכרת הרכב", "עזרה ראשונה"
+    category: v.string(), // נושא ראשי: "תמרורים", "חוקי התנועה", "בטיחות", "הכרת הרכב"
+    subCategory: v.optional(v.string()), // תת-נושא לניתוח חולשות (למשל "זכות קדימה", "סימון על הכביש")
     difficulty: v.number(), // דרגת קושי 1-5
     imageUrl: v.optional(v.string()), // כתובת תמונה חיצונית (תמרור/מצב תנועה) ממאגר משרד התחבורה
     imageStorageId: v.optional(v.id('_storage')), // תמונה מאוחסנת ב-Convex (עתידי, במקום imageUrl)
@@ -84,6 +85,7 @@ export default defineSchema({
     userId: v.id('users'),
     questionId: v.id('questions'),
     category: v.string(),
+    subCategory: v.optional(v.string()),
     isCorrect: v.boolean(),
     answeredAt: v.number(),
   })
