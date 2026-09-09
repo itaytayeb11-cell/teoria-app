@@ -43,6 +43,10 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 - `components/` — Themed, WebViewModal, SetupScreen, PreviewModeBanner
 - `contexts/RevenueCatContext.tsx`
 
+## עדכון אחרון (session 2, המשך)
+
+מסך מבחן/תרגול עוצב מחדש לפי Stitch. תוקן: תשובות ניתנות לשינוי במבחן מדמה, חצי ניווט RTL, סרגל טאבים Liquid Glass (expo-blur) לא חתוך. מסכי תוצאות + תרגול עוצבו. מבחן מדמה: עובר = עד 4 שגיאות. תת-נושאים חודדו (28+ נושאים). useQuiz.retry לשגיאות רשת.
+
 ## משימה נוכחית
 
 Frontend MVP + עיצוב מלא לפי Stitch mockup של דף הבית. ניווט טאבים (בית/תרגול/תמרורים/מחסן טעויות).
