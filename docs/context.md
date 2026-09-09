@@ -15,7 +15,7 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 | שלב | סטטוס | הערות |
 |---|---|---|
 | 0. התקנות במחשב | ✅ | bun 1.3.14, node v24.16, git 2.50 |
-| 1. הקמת פרויקט | 🔄 | bun install ✅ · context.md ✅ · git init ✅ · commit ✅ · GitHub private ⬜ (משימת המשתמש) |
+| 1. הקמת פרויקט | ✅ | bun install ✅ · context.md ✅ · git init ✅ · commit ✅ · GitHub private (teoria-app) ✅ 2026-09-09 |
 | 2. חיבור Convex | ⬜ | דורש `bunx convex dev` + אישור בדפדפן (משתמש) |
 | 3. Auth Keys | ⬜ | |
 | 4. Backend (schema + functions) | ⬜ | schema כרגע רק `users`. צריך `questions` + `userStats` + `convex/questions.ts` + `convex/stats.ts` |
@@ -45,7 +45,11 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 
 ## משימה נוכחית
 
-סיום שלב 1 — המשתמש פותח repo private ב-GitHub ומריץ push. לאחר מכן: שלב 2 (Convex).
+שלב 2 — המשתמש מריץ `bunx convex dev` ליצירת פרויקט Convex cloud. לאחר מכן Claude ממשיך ל-schema + functions.
+
+## git
+
+remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה דרך GitHub Desktop → כפתור "Push origin".
 
 ## בעיות פתוחות
 
