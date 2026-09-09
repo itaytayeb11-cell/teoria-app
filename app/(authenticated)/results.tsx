@@ -1,12 +1,19 @@
 import { useQuery } from 'convex/react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
-import { Button, Card, Screen, ScreenHeader, T } from '@/components/ui';
+import {
+  Button,
+  Card,
+  RingProgress,
+  Screen,
+  ScreenHeader,
+  T,
+} from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { api } from '@/convex/_generated/api';
 import { rtl } from '@/lib/rtl';
 
-const PASS_MARK = 74; // ציון עובר בתאוריה בישראל
+const MAX_SIM_MISTAKES = 4; // עד 4 שגיאות = עובר במבחן המדמה
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -37,9 +44,10 @@ export default function ResultsScreen() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 16,
+            padding: 24,
           }}
         >
-          <T>לא נמצאו תוצאות</T>
+          <T center>לא נמצאו תוצאות</T>
           <Button
             label="חזרה לבית"
             onPress={() => router.replace('/(authenticated)')}
@@ -49,35 +57,41 @@ export default function ResultsScreen() {
     );
   }
 
-  const score = session.scorePercent;
-  const passed = score >= PASS_MARK;
+  const isSim = session.mode === 'simulation';
   const wrong = session.review.filter((r) => !r.isCorrect);
+  const incorrectCount = session.totalQuestions - session.correctCount;
+  const passed = isSim
+    ? incorrectCount <= MAX_SIM_MISTAKES
+    : session.scorePercent >= 74;
+  const accent = passed ? palette.success : palette.danger;
 
   return (
     <Screen edges={['top']}>
       <ScreenHeader
-        title="תוצאות"
+        title={isSim ? 'תוצאות המבחן' : 'סיכום התרגול'}
         onBack={() => router.replace('/(authenticated)')}
         backLabel="בית"
       />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-        <Card style={{ alignItems: 'center', paddingVertical: 28 }}>
-          <T
-            weight="bold"
-            size={48}
-            color={passed ? palette.success : palette.danger}
-          >
-            {score}%
+        <Card style={{ alignItems: 'center', paddingVertical: 24, gap: 10 }}>
+          <RingProgress
+            value={session.scorePercent}
+            size={128}
+            color={accent}
+            label={`${session.correctCount}/${session.totalQuestions}`}
+          />
+          <T weight="bold" size={18} color={accent}>
+            {passed
+              ? isSim
+                ? 'עברת! 🎉'
+                : 'כל הכבוד!'
+              : isSim
+                ? `לא עברת — ${incorrectCount} שגיאות (מותר עד ${MAX_SIM_MISTAKES})`
+                : 'יש עוד מה לחזק'}
           </T>
-          <T weight="medium" size={16} style={{ marginTop: 4 }}>
-            {session.correctCount} מתוך {session.totalQuestions} נכון
-          </T>
-          <T
-            color={passed ? palette.success : palette.danger}
-            weight="bold"
-            style={{ marginTop: 8 }}
-          >
-            {passed ? 'עברת! 🎉' : `לא עברת (צריך ${PASS_MARK}%)`}
+          <T color={palette.muted} size={13} center>
+            {session.correctCount} נכון · {incorrectCount} שגוי מתוך{' '}
+            {session.totalQuestions}
           </T>
         </Card>
 
@@ -87,10 +101,8 @@ export default function ResultsScreen() {
               טעויות ({wrong.length})
             </T>
             {wrong.map((r) => (
-              <Card key={r.questionId}>
-                <T weight="medium" style={{ marginBottom: 8 }}>
-                  {r.text}
-                </T>
+              <Card key={r.questionId} style={{ gap: 6 }}>
+                <T weight="medium">{r.text}</T>
                 {r.selected >= 0 ? (
                   <T color={palette.danger} size={14}>
                     ✕ תשובתך: {r.answers[r.selected]}
@@ -100,14 +112,14 @@ export default function ResultsScreen() {
                     ✕ לא ענית
                   </T>
                 )}
-                <T color={palette.success} size={14} style={{ marginTop: 2 }}>
+                <T color={palette.success} size={14}>
                   ✓ נכון: {r.answers[r.correctAnswer]}
                 </T>
                 {r.explanation ? (
                   <T
                     color="#4B3FA8"
                     size={13}
-                    style={{ marginTop: 6, textAlign: rtl.textAlign }}
+                    style={{ textAlign: rtl.textAlign }}
                   >
                     {r.explanation}
                   </T>
@@ -118,22 +130,35 @@ export default function ResultsScreen() {
         ) : (
           <Card>
             <T center weight="medium" color={palette.success}>
-              כל הכבוד — כל התשובות נכונות!
+              כל התשובות נכונות — מצוין!
             </T>
           </Card>
         )}
 
-        <View style={{ gap: 10, marginTop: 8 }}>
+        <View style={{ gap: 10, marginTop: 4 }}>
+          {wrong.length > 0 ? (
+            <Button
+              label="תרגל את הטעויות"
+              onPress={() =>
+                router.replace('/(authenticated)/quiz?mode=mistakes')
+              }
+            />
+          ) : null}
           <Button
-            label="חזרה לבית"
-            onPress={() => router.replace('/(authenticated)')}
+            label={isSim ? 'מבחן חדש' : 'תרגול נוסף'}
+            variant={wrong.length > 0 ? 'outline' : 'primary'}
+            onPress={() =>
+              router.replace(
+                isSim
+                  ? '/(authenticated)/quiz?mode=simulation'
+                  : '/(authenticated)/practice'
+              )
+            }
           />
           <Button
-            label="מבחן חדש"
+            label="חזרה לבית"
             variant="outline"
-            onPress={() =>
-              router.replace('/(authenticated)/quiz?mode=simulation')
-            }
+            onPress={() => router.replace('/(authenticated)')}
           />
         </View>
       </ScrollView>

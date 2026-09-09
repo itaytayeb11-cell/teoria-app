@@ -31,6 +31,7 @@ export function useQuiz() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const startedRef = useRef(false);
+  const lastParamsRef = useRef<Parameters<typeof startQuizMut>[0] | null>(null);
 
   const start = useCallback(
     async (params: {
@@ -48,6 +49,7 @@ export function useQuiz() {
         return;
       }
       startedRef.current = true;
+      lastParamsRef.current = params;
       setLoading(true);
       setError(null);
       try {
@@ -57,7 +59,11 @@ export function useQuiz() {
         setIndex(0);
         setAnswers({});
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'שגיאה בטעינת המבחן');
+        setError(
+          e instanceof Error && e.message
+            ? e.message
+            : 'לא הצלחנו לטעון את המבחן. בדוק את החיבור לאינטרנט ונסה שוב.'
+        );
         startedRef.current = false;
       } finally {
         setLoading(false);
@@ -65,6 +71,13 @@ export function useQuiz() {
     },
     [startQuizMut]
   );
+
+  const retry = useCallback(() => {
+    if (lastParamsRef.current) {
+      startedRef.current = false;
+      start(lastParamsRef.current);
+    }
+  }, [start]);
 
   // תרגול: מסמן, נועל, ושולח מיד (למשוב מיידי).
   // מבחן מדמה: רק מסמן מקומית — אפשר לשנות עד הסיום (immediate=false).
@@ -153,6 +166,7 @@ export function useQuiz() {
     error,
     stats,
     start,
+    retry,
     answer,
     submitAll,
     next,

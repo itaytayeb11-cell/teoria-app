@@ -114,6 +114,7 @@ export default function QuizScreen() {
           {quiz.error ? (
             <>
               <T center>{quiz.error}</T>
+              <Button label="נסה שוב" onPress={quiz.retry} />
               <Button
                 label="חזרה"
                 variant="outline"
