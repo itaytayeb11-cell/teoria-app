@@ -78,17 +78,22 @@
 - [ ] 🤖 בדיקה עם Test Store
 
 ### שלב 11 — קשיחות: באגים, אבטחה, פרטיות
-- [ ] 🤖 `/security-review` על כל ה-diff
-- [ ] 🤖 בדיקת חוקי גישה ב-Convex (אף אחד לא קורא נתונים של אחר)
-- [ ] 🤖 וידוא: אין מפתחות בקוד, .env ב-gitignore
+- [ ] 🤖 `/security-review` על כל ה-diff (לפני שלב 15)
+- [x] 🤖 בדיקת חוקי גישה ב-Convex — כל query/mutation עם requireUserId, unregisterToken scoped
+- [x] 🤖 וידוא: אין מפתחות בקוד, .env ב-gitignore
 - [ ] 🤖 מיפוי מדויק של מה נאסף → App Privacy (Apple) + Data Safety (Google)
-- [ ] 🤖 יצירת Privacy Policy + Terms (URL ציבורי) — לבדוק בפועל, לא לנחש
+- [x] 🤖 טיוטת Privacy Policy + Terms לפי מבנה הנתונים בפועל (docs/legal/) — נותר: אירוח ב-URL ציבורי + מילוי פרטי חברה + סקירת עו"ד
 - [ ] 🤖 טיפול בשגיאות: אין רשת, session פג, מבחן קטוע
+- [x] 🤖 התראות Push — תשתית (expo-notifications, pushTokens, cron תזכורת יומית). מופעל רק ב-dev build
+- [x] 🤖 אונבורדינג — משתמש בלי סוג רישיון מופנה לבחירה
 
 ### שלב 12 — הכנה לחנויות
 - [ ] 👤 Apple Developer ($99/שנה) + Google Play Console ($25)
-- [ ] 🤖 app.json: שם, bundle id, אייקון, splash, הרשאות
+- [x] 🤖 app.json: שם "תיאוריה", slug teoria, ערכת כחול, expo-notifications
+- [ ] 🤖 app.json: bundle id סופי, אייקון, splash (צריך אסטים גרפיים)
 - [ ] 🤖 eas.json profiles
+- [ ] 👤 Google OAuth client (Google Cloud) — ל-Sign in with Google
+- [ ] 🤖 חיבור Google + Apple Sign-In (עובד רק ב-dev build)
 
 ### שלב 13 — Build ראשון + בדיקה במכשיר
 - [ ] 🤖 `eas build` development (iOS + Android)
