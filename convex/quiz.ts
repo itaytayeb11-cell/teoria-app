@@ -33,7 +33,17 @@ async function pickPool(
       .withIndex('by_user', (q) => q.eq('userId', userId))
       .collect();
     const latest = latestAnswerByQuestion(logs);
-    const ids = [...latest.entries()].filter(([, ok]) => !ok).map(([id]) => id);
+    const dismissed = new Set(
+      (
+        await ctx.db
+          .query('mistakeDismissals')
+          .withIndex('by_user', (q) => q.eq('userId', userId))
+          .collect()
+      ).map((d) => d.questionId)
+    );
+    const ids = [...latest.entries()]
+      .filter(([qId, ok]) => !ok && !dismissed.has(qId))
+      .map(([id]) => id);
     const docs = await Promise.all(ids.map((id) => ctx.db.get(id)));
     return docs
       .filter((d): d is Doc<'questions'> => d !== null)
@@ -180,9 +190,23 @@ export const submitAnswer = mutation({
         category: question.category,
         subCategory: question.subCategory,
         isCorrect,
+        selected,
         answeredAt: Date.now(),
       });
       await touchStreak(ctx, userId);
+
+      // אם טעה שוב — מוציאים אותה מ"ידעתי" כדי שתחזור למחסן הטעויות
+      if (!isCorrect) {
+        const dismissal = await ctx.db
+          .query('mistakeDismissals')
+          .withIndex('by_user_question', (q) =>
+            q.eq('userId', userId).eq('questionId', questionId)
+          )
+          .first();
+        if (dismissal) {
+          await ctx.db.delete(dismissal._id);
+        }
+      }
     }
 
     return { isCorrect, correctAnswer: question.correctAnswer };

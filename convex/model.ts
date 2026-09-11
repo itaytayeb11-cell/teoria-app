@@ -121,3 +121,34 @@ export function latestAnswerByQuestion(
   }
   return new Map([...latest].map(([k, v]) => [k, v.correct]));
 }
+
+// כמו למעלה, אך שומר גם את התשובה שנבחרה (לתצוגת "התשובה שלך" במחסן הטעויות)
+export function latestAnswerRecordByQuestion(
+  logs: {
+    questionId: Id<'questions'>;
+    isCorrect: boolean;
+    selected?: number;
+    answeredAt: number;
+  }[]
+): Map<Id<'questions'>, { isCorrect: boolean; selected?: number }> {
+  const latest = new Map<
+    Id<'questions'>,
+    { at: number; isCorrect: boolean; selected?: number }
+  >();
+  for (const l of logs) {
+    const prev = latest.get(l.questionId);
+    if (!prev || l.answeredAt > prev.at) {
+      latest.set(l.questionId, {
+        at: l.answeredAt,
+        isCorrect: l.isCorrect,
+        selected: l.selected,
+      });
+    }
+  }
+  return new Map(
+    [...latest].map(([k, v]) => [
+      k,
+      { isCorrect: v.isCorrect, selected: v.selected },
+    ])
+  );
+}

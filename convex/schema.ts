@@ -91,10 +91,22 @@ export default defineSchema({
     category: v.string(),
     subCategory: v.optional(v.string()),
     isCorrect: v.boolean(),
+    selected: v.optional(v.number()), // התשובה שנבחרה (0-3) — לתצוגת "התשובה שלך" במחסן הטעויות
     answeredAt: v.number(),
   })
     .index('by_user', ['userId'])
     .index('by_user_category', ['userId', 'category']),
+
+  // ==========================================================================
+  // הסתרת שאלה ממחסן הטעויות ("סימנתי שידעתי") — עד שתיענה שוב לא נכון
+  // ==========================================================================
+  mistakeDismissals: defineTable({
+    userId: v.id('users'),
+    questionId: v.id('questions'),
+    dismissedAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_user_question', ['userId', 'questionId']),
 
   // ==========================================================================
   // שאלות שמורות — סימון שאלות לשינון חוזר (bookmark)

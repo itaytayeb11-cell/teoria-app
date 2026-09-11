@@ -92,7 +92,17 @@ export const getHome = query({
         ? (user?.streakDays ?? 0)
         : 0;
 
-    const mistakeCount = [...latest.values()].filter((ok) => !ok).length;
+    const dismissedIds = new Set(
+      (
+        await ctx.db
+          .query('mistakeDismissals')
+          .withIndex('by_user', (q) => q.eq('userId', userId))
+          .collect()
+      ).map((d) => d.questionId)
+    );
+    const mistakeCount = [...latest.entries()].filter(
+      ([qId, ok]) => !ok && !dismissedIds.has(qId)
+    ).length;
     const savedRows = await ctx.db
       .query('savedQuestions')
       .withIndex('by_user', (q) => q.eq('userId', userId))
