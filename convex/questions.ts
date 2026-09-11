@@ -85,26 +85,78 @@ export const signDictionary = query({
       .withIndex('by_active', (q) => q.eq('isActive', true))
       .collect();
 
-    const seen = new Set<string>();
+    const seenUrls = new Set<string>();
     const groups = new Map<
       string,
-      { url: string; text: string; officialId?: string }[]
+      {
+        id: string;
+        url: string;
+        text: string;
+        category: string;
+        officialId?: string;
+      }[]
     >();
 
     for (const q of all) {
-      if (!q.imageUrl || seen.has(q.imageUrl)) {
+      if (!q.imageUrl || seenUrls.has(q.imageUrl)) {
         continue;
       }
-      seen.add(q.imageUrl);
+      seenUrls.add(q.imageUrl);
       const group = q.subCategory ?? q.category;
       const list = groups.get(group) ?? [];
-      list.push({ url: q.imageUrl, text: q.text, officialId: q.officialId });
+      list.push({
+        id: q._id,
+        url: q.imageUrl,
+        text: q.text,
+        category: q.category,
+        officialId: q.officialId,
+      });
       groups.set(group, list);
     }
 
     return [...groups.entries()]
       .map(([group, items]) => ({ group, items }))
       .sort((a, b) => b.items.length - a.items.length);
+  },
+});
+
+// התקדמות במילון תמרורים — כמה תמונות שונות המשתמש כבר ראה בפועל בתרגול/מבחן
+export const signProgress = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getUserIdOrNull(ctx);
+
+    const all = await ctx.db
+      .query('questions')
+      .withIndex('by_active', (q) => q.eq('isActive', true))
+      .collect();
+    const withImage = new Map<string, string>(); // questionId -> imageUrl
+    const uniqueUrls = new Set<string>();
+    for (const q of all) {
+      if (q.imageUrl) {
+        withImage.set(q._id, q.imageUrl);
+        uniqueUrls.add(q.imageUrl);
+      }
+    }
+
+    if (!userId) {
+      return { seen: 0, total: uniqueUrls.size };
+    }
+
+    const logs = await ctx.db
+      .query('answerLog')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+
+    const seenUrls = new Set<string>();
+    for (const log of logs) {
+      const url = withImage.get(log.questionId);
+      if (url) {
+        seenUrls.add(url);
+      }
+    }
+
+    return { seen: seenUrls.size, total: uniqueUrls.size };
   },
 });
 

@@ -36,7 +36,11 @@ function fmt(sec: number) {
 export default function QuizScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ mode?: string; filter?: string }>();
+  const params = useLocalSearchParams<{
+    mode?: string;
+    filter?: string;
+    count?: string;
+  }>();
   const mode = params.mode ?? 'simulation';
   const isPractice = mode !== 'simulation';
   const quiz = useQuiz();
@@ -55,8 +59,9 @@ export default function QuizScreen() {
         : mode === 'mistakes' || mode === 'saved'
           ? mode
           : 'simulation';
-    startQuiz({ mode: startMode, filterValue: params.filter });
-  }, [startQuiz, mode, params.filter]);
+    const count = params.count ? Number(params.count) : undefined;
+    startQuiz({ mode: startMode, filterValue: params.filter, count });
+  }, [startQuiz, mode, params.filter, params.count]);
 
   const { finish, sessionId, submitAll } = quiz;
   const correctCount = quiz.stats.correct;
