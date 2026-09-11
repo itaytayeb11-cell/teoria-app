@@ -210,6 +210,40 @@ export function ScreenHeader(props: {
 // ----------------------------------------------------------------------------
 // Card
 // ----------------------------------------------------------------------------
+// תכונות "פריסה חיצונית" בלבד — איך הכרטיס יושב בתוך ה-row/column של ההורה.
+// אלה חייבות לשבת על ה-Pressable עצמו (לא רק על ה-View הפנימי).
+const LAYOUT_STYLE_KEYS = [
+  'flex',
+  'flexGrow',
+  'flexShrink',
+  'flexBasis',
+  'width',
+  'height',
+  'minWidth',
+  'maxWidth',
+  'minHeight',
+  'maxHeight',
+  'alignSelf',
+  'margin',
+  'marginTop',
+  'marginBottom',
+  'marginStart',
+  'marginEnd',
+  'marginHorizontal',
+  'marginVertical',
+] as const;
+
+function extractLayoutStyle(style: StyleProp<ViewStyle>): ViewStyle {
+  const flat = (StyleSheet.flatten(style) ?? {}) as Record<string, unknown>;
+  const picked: Record<string, unknown> = {};
+  for (const key of LAYOUT_STYLE_KEYS) {
+    if (flat[key] !== undefined) {
+      picked[key] = flat[key];
+    }
+  }
+  return picked;
+}
+
 export function Card(props: {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -236,11 +270,15 @@ export function Card(props: {
     </View>
   );
   if (props.onPress) {
-    // ה-style מועבר גם ל-Pressable עצמו: flex/width חייבים לשבת על אלמנט
-    // הפריסה (מי שממש נמצא בתוך ה-row/flex של ההורה), אחרת flex:1 על ה-View
-    // הפנימי לא משפיע כלום ושתי כרטיסיות באותה שורה יוצאות ברוחב שונה.
+    // רק תכונות הפריסה החיצונית (flex/width/margin...) עוברות ל-Pressable.
+    // flexDirection/gap/backgroundColor וכו' שייכות לפריסה הפנימית של
+    // הכרטיס ונשארות רק על ה-View — אחרת הן הופכות בטעות גם את ציר
+    // ההתמתחות של ה-Pressable וקורסות את הרוחב של הילדים בפנים.
     return (
-      <Pressable onPress={props.onPress} style={props.style}>
+      <Pressable
+        onPress={props.onPress}
+        style={extractLayoutStyle(props.style)}
+      >
         {body}
       </Pressable>
     );
