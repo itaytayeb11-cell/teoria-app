@@ -4,6 +4,7 @@ import { CheckCheck, ChevronDown, Target, Zap } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -323,7 +324,11 @@ export default function MistakesScreen() {
                       </T>
                     ) : null}
                     <Pressable
-                      onPress={() => dismiss({ questionId: q._id })}
+                      onPress={() =>
+                        dismiss({ questionId: q._id }).catch(() => {
+                          // סימון "ידעתי" נכשל — אפשר לנסות שוב, לא קריטי
+                        })
+                      }
                       style={{
                         flexDirection: rtl.flexDirection,
                         alignItems: 'center',
@@ -356,7 +361,14 @@ export default function MistakesScreen() {
             <Button
               label="סמן הכל כ'ידעתי' ונקה את המחסן"
               variant="outline"
-              onPress={() => dismissAll()}
+              onPress={() =>
+                dismissAll().catch(() =>
+                  Alert.alert(
+                    'שגיאה',
+                    'לא הצלחנו לנקות את המחסן. בדוק את החיבור ונסה שוב.'
+                  )
+                )
+              }
             />
           </Card>
         </ScrollView>

@@ -257,7 +257,11 @@ export default function QuizScreen() {
         </T>
         <Pressable
           hitSlop={10}
-          onPress={() => toggleSave({ questionId: q._id as never })}
+          onPress={() =>
+            toggleSave({ questionId: q._id as never }).catch(() => {
+              // שמירת סימנייה נכשלה (למשל בעיית רשת) — לא חוסם את המשך המבחן
+            })
+          }
         >
           <Bookmark
             color="#fff"

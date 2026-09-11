@@ -200,7 +200,11 @@ export default function SignsScreen() {
                 </View>
                 <Pressable
                   hitSlop={8}
-                  onPress={() => toggleSave({ questionId: item.id as never })}
+                  onPress={() =>
+                    toggleSave({ questionId: item.id as never }).catch(() => {
+                      // שמירת סימנייה נכשלה — לא קריטי, המשתמש יכול לנסות שוב
+                    })
+                  }
                 >
                   <Bookmark
                     color={palette.primary}

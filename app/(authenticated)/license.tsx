@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, Screen, ScreenHeader, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
@@ -30,6 +30,11 @@ export default function LicenseScreen() {
       } else {
         router.back();
       }
+    } catch {
+      Alert.alert(
+        'שגיאה',
+        'לא הצלחנו לשמור. בדוק את החיבור לאינטרנט ונסה שוב.'
+      );
     } finally {
       setSaving(false);
     }
