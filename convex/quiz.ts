@@ -265,6 +265,52 @@ export const getActiveSession = query({
   },
 });
 
+// שליפת מבחן פעיל להמשך — כולל נוסח כל השאלות, בפורמט זהה ל-startQuiz
+export const getResumable = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    const session = await ctx.db
+      .query('quizSessions')
+      .withIndex('by_user_status', (q) =>
+        q.eq('userId', userId).eq('status', 'in_progress')
+      )
+      .order('desc')
+      .first();
+    if (!session) {
+      return null;
+    }
+
+    const questions = [];
+    for (const qId of session.questionIds) {
+      const q = await ctx.db.get(qId);
+      if (q) {
+        questions.push({
+          _id: q._id,
+          text: q.text,
+          answers: q.answers,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation,
+          category: q.category,
+          subCategory: q.subCategory,
+          difficulty: q.difficulty,
+          imageUrl: q.imageUrl,
+        });
+      }
+    }
+
+    return {
+      sessionId: session._id,
+      mode: session.mode,
+      filterValue: session.filterValue,
+      totalQuestions: session.totalQuestions,
+      answeredCount: session.answers.length,
+      questions,
+      answers: session.answers,
+    };
+  },
+});
+
 // שליפת מבחן לפי מזהה (למסך תוצאות)
 export const getSession = query({
   args: { sessionId: v.id('quizSessions') },

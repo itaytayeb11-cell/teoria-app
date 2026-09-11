@@ -88,6 +88,45 @@ export function useQuiz() {
     }
   }, [start]);
 
+  // טוען מבחן שכבר קיים (המשך מבחן שנקטע) — בלי ליצור סשן חדש בשרת.
+  // ממשיך מהשאלה הראשונה שעדיין לא נענתה (לפי מה שבאמת נשמר בשרת).
+  const loadResumed = useCallback(
+    (data: {
+      sessionId: string;
+      questions: QuizQuestion[];
+      answers: { questionId: string; selected: number; isCorrect: boolean }[];
+    }) => {
+      const key = `resume:${data.sessionId}`;
+      if (startedKeyRef.current === key) {
+        return;
+      }
+      startedKeyRef.current = key;
+      lastParamsRef.current = null;
+
+      const answersByIndex: Record<number, AnswerRecord> = {};
+      for (const a of data.answers) {
+        const idx = data.questions.findIndex((q) => q._id === a.questionId);
+        if (idx >= 0) {
+          answersByIndex[idx] = {
+            selected: a.selected,
+            isCorrect: a.isCorrect,
+          };
+        }
+      }
+      const firstUnanswered = data.questions.findIndex(
+        (_, i) => answersByIndex[i] === undefined
+      );
+
+      setSessionId(data.sessionId);
+      setQuestions(data.questions);
+      setAnswers(answersByIndex);
+      setIndex(firstUnanswered >= 0 ? firstUnanswered : 0);
+      setError(null);
+      setLoading(false);
+    },
+    []
+  );
+
   // תרגול: מסמן, נועל, ושולח מיד (למשוב מיידי).
   // מבחן מדמה: רק מסמן מקומית — אפשר לשנות עד הסיום (immediate=false).
   const answer = useCallback(
@@ -176,6 +215,7 @@ export function useQuiz() {
     stats,
     start,
     retry,
+    loadResumed,
     answer,
     submitAll,
     next,

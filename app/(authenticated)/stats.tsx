@@ -27,11 +27,11 @@ export default function StatsScreen() {
         <ScrollView
           contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}
         >
-          <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{ flexDirection: rtl.flexDirection, gap: 12 }}>
             <Stat label="ציון ממוצע" value={`${stats.averageScore}%`} />
             <Stat label="מבחנים" value={String(stats.totalQuizzes)} />
           </View>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{ flexDirection: rtl.flexDirection, gap: 12 }}>
             <Stat label="שאלות שנענו" value={String(stats.totalAnswered)} />
             <Stat
               label="דיוק כללי"

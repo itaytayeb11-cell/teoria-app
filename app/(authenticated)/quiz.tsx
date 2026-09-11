@@ -40,8 +40,17 @@ export default function QuizScreen() {
     mode?: string;
     filter?: string;
     count?: string;
+    resume?: string; // sessionId של מבחן שנקטע — ממשיכים אותו במקום ליצור חדש
   }>();
-  const mode = params.mode ?? 'simulation';
+  const resumeSessionId = params.resume;
+  const resumable = useQuery(
+    api.quiz.getResumable,
+    resumeSessionId ? {} : 'skip'
+  );
+  // במצב "המשך מבחן" — מצב המבחן (מדמה/תרגול) מגיע מהסשן השמור, לא מה-URL
+  const mode = resumeSessionId
+    ? (resumable?.mode ?? 'simulation')
+    : (params.mode ?? 'simulation');
   const isPractice = mode !== 'simulation';
   const quiz = useQuiz();
   const toggleSave = useMutation(api.saved.toggle);
@@ -52,6 +61,7 @@ export default function QuizScreen() {
   const [elapsed, setElapsed] = useState(0);
 
   const startQuiz = quiz.start;
+  const loadResumed = quiz.loadResumed;
   useEffect(() => {
     // מסך זה חי בתוך Tabs ולא נטען מחדש כשעוברים בין מצבים (מבחן מדמה →
     // מחסן טעויות וכו') — לכן מאפסים כאן גם את מצב התצוגה המקומי, לא רק
@@ -61,6 +71,13 @@ export default function QuizScreen() {
     setSecondsLeft(SIMULATION_SECONDS);
     setElapsed(0);
 
+    if (resumeSessionId) {
+      if (resumable) {
+        loadResumed(resumable);
+      }
+      return; // ממתינים לשאילתה — לא פותחים סשן חדש
+    }
+
     const startMode =
       mode === 'practice'
         ? 'category'
@@ -69,7 +86,22 @@ export default function QuizScreen() {
           : 'simulation';
     const count = params.count ? Number(params.count) : undefined;
     startQuiz({ mode: startMode, filterValue: params.filter, count });
-  }, [startQuiz, mode, params.filter, params.count]);
+  }, [
+    startQuiz,
+    loadResumed,
+    resumeSessionId,
+    resumable,
+    mode,
+    params.filter,
+    params.count,
+  ]);
+
+  // המבחן שביקשנו להמשיך כבר לא קיים (הסתיים/נמחק במקום אחר) — חוזרים הביתה
+  useEffect(() => {
+    if (resumeSessionId && resumable === null) {
+      router.replace('/(authenticated)');
+    }
+  }, [resumeSessionId, resumable, router]);
 
   const { finish, sessionId, submitAll } = quiz;
   const correctCount = quiz.stats.correct;

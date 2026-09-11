@@ -34,6 +34,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const home = useQuery(api.stats.getHome);
+  const activeSession = useQuery(api.quiz.getActiveSession);
 
   const readiness = home?.readiness ?? 0;
   const passHigh = readiness >= 80;
@@ -102,6 +103,35 @@ export default function HomeScreen() {
             </View>
           ) : null}
         </View>
+
+        {/* מבחן שנקטע — אפשרות להמשיך */}
+        {activeSession && activeSession.answers.length > 0 ? (
+          <Card
+            onPress={() =>
+              router.push(`/(authenticated)/quiz?resume=${activeSession._id}`)
+            }
+            style={{
+              flexDirection: rtl.flexDirection,
+              alignItems: 'center',
+              gap: 12,
+              backgroundColor: palette.primaryTint,
+            }}
+          >
+            <T size={22}>⏸️</T>
+            <View style={{ flex: 1 }}>
+              <T weight="bold" size={15}>
+                {activeSession.mode === 'simulation'
+                  ? 'מבחן מדמה שנקטע'
+                  : 'תרגול שנקטע'}
+              </T>
+              <T color={palette.muted} size={13}>
+                {activeSession.answers.length} מתוך{' '}
+                {activeSession.totalQuestions} שאלות — המשך מאיפה שעצרת
+              </T>
+            </View>
+            <ChevronLeft color={palette.primary} size={20} />
+          </Card>
+        ) : null}
 
         {/* כרטיס מוכנות */}
         <Card>
