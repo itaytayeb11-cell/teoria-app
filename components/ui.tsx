@@ -463,6 +463,7 @@ export function ProgressBar(props: {
   return (
     <View
       style={{
+        flexDirection: rtl.flexDirection, // המילוי מתחיל מימין (RTL), לא משמאל
         height: 6,
         borderRadius: 3,
         backgroundColor: props.track ?? 'rgba(255,255,255,0.3)',
