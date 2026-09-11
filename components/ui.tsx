@@ -154,12 +154,22 @@ export function ScreenHeader(props: {
 }) {
   const router = useRouter();
   const back = props.onBack ?? (() => router.back());
+  // כותרת בלי תוכן נוסף (בלי progress bar וכו') — פאנל קטן יותר כברירת מחדל
+  const isCompact = props.compact ?? !props.children;
   return (
     <LinearGradient
       colors={[palette.primary, palette.primaryDark]}
-      style={[styles.header, props.compact && { paddingBottom: 16 }]}
+      style={[
+        styles.header,
+        isCompact && {
+          paddingTop: 4,
+          paddingBottom: 14,
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
+        },
+      ]}
     >
-      <View style={styles.headerRow}>
+      <View style={[styles.headerRow, isCompact && { minHeight: 26 }]}>
         {props.right ?? <View style={{ width: 28 }} />}
         {props.hideBack ? (
           <View style={{ width: 28 }} />
@@ -172,11 +182,16 @@ export function ScreenHeader(props: {
             {props.backLabel ? (
               <Text style={styles.backLabel}>{props.backLabel}</Text>
             ) : null}
-            <ChevronRight color="#fff" size={26} />
+            <ChevronRight color="#fff" size={22} />
           </Pressable>
         )}
       </View>
-      <Text style={styles.headerTitle}>
+      <Text
+        style={[
+          styles.headerTitle,
+          isCompact && { fontSize: 20, marginTop: 4 },
+        ]}
+      >
         {props.title}
         {props.highlight ? (
           <Text style={{ fontWeight: '800' }}> {props.highlight}</Text>

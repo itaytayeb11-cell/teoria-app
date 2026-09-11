@@ -8,6 +8,7 @@ import {
   Modal,
   Pressable,
   ScrollView,
+  Text,
   TextInput,
   View,
 } from 'react-native';
@@ -146,19 +147,25 @@ export default function SignsScreen() {
                 key={g.group}
                 onPress={() => setTab(i)}
                 style={{
+                  minHeight: 36,
                   paddingHorizontal: 14,
                   paddingVertical: 8,
                   borderRadius: 999,
                   backgroundColor: i === tab ? palette.primary : '#EAECF2',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                <T
-                  size={13}
-                  weight={i === tab ? 'bold' : 'regular'}
-                  color={i === tab ? '#fff' : palette.muted}
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: i === tab ? '700' : '400',
+                    color: i === tab ? '#fff' : palette.muted,
+                  }}
                 >
-                  {g.group} ({g.items.length})
-                </T>
+                  {`${g.group} (${g.items.length})`}
+                </Text>
               </Pressable>
             ))}
           </ScrollView>
