@@ -43,8 +43,10 @@ export const MOCK_PAYMENTS = false;
 // ============================================================================
 // קישורי תנאי שימוש ומדיניות פרטיות
 // ============================================================================
-
-// 👤 נדרשת פעולת משתמש: עדכן את הקישורים לדפי תנאי השימוש ומדיניות הפרטיות שלך
-// הקישורים צריכים להוביל לדפי Landing Page שלך (לא בתוך האפליקציה)
-export const TERMS_URL = 'https://yourdomain.com/terms';
-export const PRIVACY_URL = 'https://yourdomain.com/privacy';
+// מקור האמת היחיד הוא config/legalUrls.ts (נגזר מ-EXPO_PUBLIC_PRIVACY_POLICY_URL /
+// EXPO_PUBLIC_TERMS_OF_SERVICE_URL) — כדי שעדכון קישור במקום אחד ישתקף בכל
+// המסכים (הגדרות, הרשמה, ומסך התשלום). אין להגדיר כאן ערך שונה בנפרד.
+export {
+  PRIVACY_POLICY_URL as PRIVACY_URL,
+  TERMS_OF_SERVICE_URL as TERMS_URL,
+} from './legalUrls';
