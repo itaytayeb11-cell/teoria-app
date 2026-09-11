@@ -160,9 +160,6 @@ export const submitAnswer = mutation({
     if (!session || session.userId !== userId) {
       throw new Error('מבחן לא נמצא');
     }
-    if (session.status === 'completed') {
-      throw new Error('המבחן כבר הסתיים');
-    }
 
     const question = await ctx.db.get(questionId);
     if (!question) {
@@ -170,6 +167,13 @@ export const submitAnswer = mutation({
     }
 
     const isCorrect = selected === question.correctAnswer;
+
+    // אם המבחן כבר הסתיים — זה תשובה שנשלחה באיחור (submitAll מול finish
+    // שרצים כמעט ביחד). לא כותבים לסשן שכבר ננעל, אבל גם לא זורקים שגיאה
+    // שהמשתמש יראה — פשוט מחזירים את התוצאה בלי שינוי.
+    if (session.status === 'completed') {
+      return { isCorrect, correctAnswer: question.correctAnswer };
+    }
 
     // מונע רישום כפול של אותה שאלה
     const already = session.answers.some((a) => a.questionId === questionId);

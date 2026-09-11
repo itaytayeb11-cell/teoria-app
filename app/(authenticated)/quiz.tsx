@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from 'convex/react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Bookmark, ChevronRight, Eye, Timer } from 'lucide-react-native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -73,7 +73,12 @@ export default function QuizScreen() {
 
   const { finish, sessionId, submitAll } = quiz;
   const correctCount = quiz.stats.correct;
+  const finishingRef = useRef(false); // מונע הפעלה כפולה (לחיצה כפולה / ריבאונד של הכפתור)
   const goToResults = useCallback(async () => {
+    if (finishingRef.current) {
+      return;
+    }
+    finishingRef.current = true;
     if (!isPractice) {
       await submitAll(); // מבחן מדמה — שולח את כל התשובות לפני הסיום
     }
