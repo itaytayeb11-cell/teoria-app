@@ -53,6 +53,14 @@ export default function QuizScreen() {
 
   const startQuiz = quiz.start;
   useEffect(() => {
+    // מסך זה חי בתוך Tabs ולא נטען מחדש כשעוברים בין מצבים (מבחן מדמה →
+    // מחסן טעויות וכו') — לכן מאפסים כאן גם את מצב התצוגה המקומי, לא רק
+    // את שאלות המבחן (אחרת נשארים עם טיימר/הסבר פתוח מהמבחן הקודם).
+    setShowExplain(false);
+    setConfirmExit(false);
+    setSecondsLeft(SIMULATION_SECONDS);
+    setElapsed(0);
+
     const startMode =
       mode === 'practice'
         ? 'category'

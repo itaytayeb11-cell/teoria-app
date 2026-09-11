@@ -30,7 +30,11 @@ export function useQuiz() {
   const [answers, setAnswers] = useState<Record<number, AnswerRecord>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const startedRef = useRef(false);
+  // מפתח הפרמטרים של המבחן שכבר נטען. חייב (לא boolean) כי מסכי טאבים
+  // (quiz/results/...) לא נטענים מחדש כשעוברים בין מצבים שונים באותו
+  // מסלול — אם היינו רק שומרים "כבר התחלנו", מעבר ממבחן מדמה לתרגול
+  // טעויות היה משאיר את שאלות המבחן הקודם על המסך.
+  const startedKeyRef = useRef<string | null>(null);
   const lastParamsRef = useRef<Parameters<typeof startQuizMut>[0] | null>(null);
 
   const start = useCallback(
@@ -45,13 +49,18 @@ export function useQuiz() {
       filterValue?: string;
       count?: number;
     }) => {
-      if (startedRef.current) {
+      const key = JSON.stringify(params);
+      if (startedKeyRef.current === key) {
         return;
       }
-      startedRef.current = true;
+      startedKeyRef.current = key;
       lastParamsRef.current = params;
       setLoading(true);
       setError(null);
+      setSessionId(null);
+      setQuestions([]);
+      setIndex(0);
+      setAnswers({});
       try {
         const res = await startQuizMut(params);
         setSessionId(res.sessionId);
@@ -64,7 +73,7 @@ export function useQuiz() {
             ? e.message
             : 'לא הצלחנו לטעון את המבחן. בדוק את החיבור לאינטרנט ונסה שוב.'
         );
-        startedRef.current = false;
+        startedKeyRef.current = null;
       } finally {
         setLoading(false);
       }
@@ -74,7 +83,7 @@ export function useQuiz() {
 
   const retry = useCallback(() => {
     if (lastParamsRef.current) {
-      startedRef.current = false;
+      startedKeyRef.current = null;
       start(lastParamsRef.current);
     }
   }, [start]);
