@@ -2,6 +2,7 @@ import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, Screen, ScreenHeader, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { DEFAULT_LICENSE, LICENSE_OPTIONS } from '@/constants/licenses';
@@ -10,6 +11,7 @@ import { rtl } from '@/lib/rtl';
 
 export default function LicenseScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const user = useQuery(api.users.getCurrentUser);
   const setLicense = useMutation(api.users.setLicenseType);
   const [selected, setSelected] = useState<string | null>(null);
@@ -81,7 +83,7 @@ export default function LicenseScreen() {
           );
         })}
       </ScrollView>
-      <View style={{ padding: 16 }}>
+      <View style={{ padding: 16, paddingBottom: Math.max(insets.bottom, 16) }}>
         <Button label="שמור והמשך" loading={saving} onPress={save} />
       </View>
     </Screen>

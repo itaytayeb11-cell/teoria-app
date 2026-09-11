@@ -72,7 +72,9 @@ export default function ResultsScreen() {
         onBack={() => router.replace('/(authenticated)')}
         backLabel="בית"
       />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 16 }}
+      >
         <Card style={{ alignItems: 'center', paddingVertical: 24, gap: 10 }}>
           <RingProgress
             value={session.scorePercent}
