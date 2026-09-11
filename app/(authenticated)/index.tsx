@@ -13,6 +13,7 @@ import {
 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card, RingProgress, Screen, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { api } from '@/convex/_generated/api';
@@ -31,20 +32,22 @@ function greeting() {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const home = useQuery(api.stats.getHome);
 
   const readiness = home?.readiness ?? 0;
   const passHigh = readiness >= 80;
 
   return (
-    <Screen edges={['top']} style={{ backgroundColor: palette.primary }}>
-      {/* כותרת עליונה */}
+    <Screen edges={[]} style={{ backgroundColor: palette.primary }}>
+      {/* כותרת עליונה — נמתחת מאחורי פס הסטטוס */}
       <View
         style={{
           flexDirection: rtl.flexDirection,
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingHorizontal: 16,
+          paddingTop: insets.top + 8,
           paddingBottom: 12,
         }}
       >
@@ -193,7 +196,7 @@ export default function HomeScreen() {
         </LinearGradient>
 
         {/* גריד פעולות */}
-        <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flexDirection: rtl.flexDirection, gap: 12 }}>
           <FeatureCard
             title="לוח תמרורים"
             subtitle="250+ תמרורים רשמיים"
@@ -213,7 +216,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(authenticated)/practice')}
           />
         </View>
-        <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flexDirection: rtl.flexDirection, gap: 12 }}>
           <FeatureCard
             title="שאלות שמורות"
             subtitle={`${home?.savedCount ?? 0} שאלות לשינון חוזר`}
@@ -258,7 +261,7 @@ export default function HomeScreen() {
               סיכום התקדמות אישי
             </T>
           </View>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ flexDirection: rtl.flexDirection, gap: 10 }}>
             <MiniStat value={home?.totalQuizzes ?? 0} label="מבחנים עברו" />
             <MiniStat
               value={home?.mistakeCount ?? 0}

@@ -10,7 +10,7 @@ export default function SavedScreen() {
   const list = useQuery(api.saved.list);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader title="שאלות" highlight="שמורות" backLabel="בית" />
       {list === undefined ? (
         <View

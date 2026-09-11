@@ -15,7 +15,7 @@ export default function StatsScreen() {
   const stats = useQuery(api.stats.getMyStats);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader title="מעקב" highlight="התקדמות" />
       {stats === undefined ? (
         <View

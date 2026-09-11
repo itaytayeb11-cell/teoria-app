@@ -60,7 +60,7 @@ export default function SettingsScreen() {
   const name = user?.fullName || user?.email?.split('@')[0] || 'תלמיד';
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader title="שלום" highlight={name} backLabel="בית" />
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 10 }}

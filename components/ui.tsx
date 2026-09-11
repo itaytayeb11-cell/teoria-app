@@ -16,7 +16,10 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { palette } from '@/constants/Colors';
 import { useAppColors } from '@/constants/theme';
@@ -153,16 +156,18 @@ export function ScreenHeader(props: {
   children?: ReactNode; // תוכן נוסף בתוך הפאנל (פרוגרס וכו')
 }) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const back = props.onBack ?? (() => router.back());
   // כותרת בלי תוכן נוסף (בלי progress bar וכו') — פאנל קטן יותר כברירת מחדל
   const isCompact = props.compact ?? !props.children;
+  // הפאנל הכחול נמתח מאחורי פס הסטטוס (שעון/סוללה/Wi-Fi) — לכן פדינג עליון = גובה הפס הבטוח
   return (
     <LinearGradient
       colors={[palette.primary, palette.primaryDark]}
       style={[
         styles.header,
+        { paddingTop: insets.top + (isCompact ? 4 : 8) },
         isCompact && {
-          paddingTop: 4,
           paddingBottom: 14,
           borderBottomLeftRadius: 20,
           borderBottomRightRadius: 20,
@@ -231,7 +236,14 @@ export function Card(props: {
     </View>
   );
   if (props.onPress) {
-    return <Pressable onPress={props.onPress}>{body}</Pressable>;
+    // ה-style מועבר גם ל-Pressable עצמו: flex/width חייבים לשבת על אלמנט
+    // הפריסה (מי שממש נמצא בתוך ה-row/flex של ההורה), אחרת flex:1 על ה-View
+    // הפנימי לא משפיע כלום ושתי כרטיסיות באותה שורה יוצאות ברוחב שונה.
+    return (
+      <Pressable onPress={props.onPress} style={props.style}>
+        {body}
+      </Pressable>
+    );
   }
   return body;
 }

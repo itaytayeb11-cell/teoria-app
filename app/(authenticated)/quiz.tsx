@@ -192,14 +192,15 @@ export default function QuizScreen() {
   };
 
   return (
-    <Screen edges={['top']} style={{ backgroundColor: palette.primary }}>
-      {/* כותרת */}
+    <Screen edges={[]} style={{ backgroundColor: palette.primary }}>
+      {/* כותרת — נמתחת מאחורי פס הסטטוס */}
       <View
         style={{
           flexDirection: rtl.flexDirection,
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingHorizontal: 16,
+          paddingTop: insets.top + 8,
           paddingBottom: 14,
         }}
       >

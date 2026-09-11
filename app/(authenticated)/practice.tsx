@@ -29,7 +29,7 @@ export default function PracticeScreen() {
     router.push(`/(authenticated)/quiz?mode=practice${params}`);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader title="תרגול" highlight="שאלות" hideBack />
       {categories === undefined ? (
         <View

@@ -65,7 +65,7 @@ export default function SignsScreen() {
   );
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader title="לוח" highlight="תמרורים" hideBack />
 
       {data === undefined ? (
@@ -139,8 +139,12 @@ export default function SignsScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 12, gap: 8 }}
-            style={{ flexGrow: 0 }}
+            contentContainerStyle={{
+              paddingHorizontal: 12,
+              gap: 8,
+              alignItems: 'center',
+            }}
+            style={{ flexGrow: 0, height: 56 }}
           >
             {groups.map((g, i) => (
               <Pressable

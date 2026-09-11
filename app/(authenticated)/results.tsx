@@ -66,7 +66,7 @@ export default function ResultsScreen() {
   const accent = passed ? palette.success : palette.danger;
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader
         title={isSim ? 'תוצאות המבחן' : 'סיכום התרגול'}
         onBack={() => router.replace('/(authenticated)')}

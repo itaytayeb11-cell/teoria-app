@@ -18,7 +18,7 @@ export default function HistoryScreen() {
   const history = useQuery(api.stats.getHistory);
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader title="היסטוריית" highlight="מבחנים" />
       {history === undefined ? (
         <View

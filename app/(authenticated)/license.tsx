@@ -34,7 +34,7 @@ export default function LicenseScreen() {
   };
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader title="בחר" highlight="רישיון" hideBack={isOnboarding} />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }}>
         {LICENSE_OPTIONS.map((opt) => {

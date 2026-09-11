@@ -73,7 +73,7 @@ export default function MistakesScreen() {
     });
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={[]}>
       <ScreenHeader title="מחסן" highlight="הטעויות" hideBack />
 
       {list === undefined ? (
