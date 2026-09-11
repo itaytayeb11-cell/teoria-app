@@ -1,221 +1,55 @@
-# תבנית אפליקציית מובייל (React Native & Convex)
+# תיאוריה — Teoria App
 
-ברוכים הבאים לתבנית הפיתוח לאפליקציית React Native עם Expo ו-Convex. תבנית זו מותאמת מראש לעברית (RTL) וכוללת מערכת אימות מלאה, ניווט ועיצוב מודרני.
+אפליקציית iOS + Android לתרגול מבחן התאוריה של משרד התחבורה בישראל.
+מאגר של 1,802 שאלות רשמיות (data.gov.il, dataset `tqhe`), מבחן מדמה, תרגול לפי נושא,
+מחסן טעויות, מילון תמרורים, מעקב התקדמות והתראות תרגול.
+
+מדריך מלא לסטטוס הפרויקט, החלטות ותוכנית עבודה: **[docs/context.md](docs/context.md)**
+ו-**[docs/plan.md](docs/plan.md)** (16 שלבים מהקמה ועד פרסום בחנויות).
 
 ---
 
-## ⚡ התחלה מהירה — 2 פקודות בלבד / Quick Start — Just 2 Commands
+## טק סטאק
 
-> צריך רק **Node.js**, **Bun** ו-**Cursor** מותקנים על המחשב, ואת אפליקציית **Expo Go** בטלפון.
-> You only need **Node.js**, **Bun** and **Cursor** installed, plus the **Expo Go** app on your phone.
+| שכבה | טכנולוגיה |
+|---|---|
+| Frontend | Expo (React Native) + TypeScript + Expo Router + NativeWind |
+| Backend | Convex (DB + Server Functions בזמן אמת) |
+| אימות | Convex Auth (אימייל/סיסמה; Google בהכנה) |
+| תשלומים | RevenueCat (רכישה חד-פעמית) — טרם חובר |
+| התראות | expo-notifications + Convex cron |
 
-### 1️⃣ התקנה חד-פעמית / One-time setup
+RTL מלא (עברית), עיצוב לפי `docs/design.md`.
 
-פתחו טרמינל בתיקיית הפרויקט והריצו פקודה אחת:
-Open a terminal in the project folder and run a single command:
+---
+
+## הרצה
 
 ```bash
-bun run setup
+bun install       # פעם ראשונה בלבד
+bun dev           # מריץ את השרת + פותח QR לסריקה ב-Expo Go
 ```
 
-הפקודה עושה **הכל אוטומטית**: מתקינה חבילות, יוצרת לכם מסד נתונים אישי (ייפתח דפדפן — התחברו ואשרו), ומגדירה את מערכת ההתחברות. עושים את זה **פעם אחת בלבד**.
-This does **everything automatically**: installs packages, creates your own personal database (a browser opens — log in and approve), and sets up the login system. You only do this **once**.
+Convex כבר מחובר (`.env.local`). אם עוברים למחשב אחר: `bunx convex dev` פעם אחת ליצירת חיבור.
 
-### 2️⃣ הרצת האפליקציה / Run the app
+---
+
+## מבנה הפרויקט
+
+- `app/(auth)/` — התחברות, הרשמה, paywall (טרם פעיל)
+- `app/(authenticated)/` — האפליקציה עצמה: בית, מבחן/תרגול, תמרורים, מחסן טעויות, שמורות, סטטיסטיקות, היסטוריה, הגדרות, בחירת רישיון — ניווט בטאבים
+- `convex/` — schema, כל פונקציות השרת, cron להתראות
+- `components/ui.tsx` — ערכת קומפוננטות משותפת (Screen, Card, Button, AnswerOption, RingProgress...)
+- `constants/` — פלטת צבעים (`Colors.ts`), סוגי רישיון (`licenses.ts`)
+- `hooks/useQuiz.ts` — ניהול מצב מבחן/תרגול (כולל המשך מבחן שנקטע)
+- `scripts/convert-questions.mjs` — מושך את מאגר השאלות מ-data.gov.il וממיר לפורמט הסכמה
+- `docs/legal/` — טיוטות מדיניות פרטיות ותנאי שימוש (ממתינות לפרטי חברה + סקירת עו"ד לפני פרסום)
+
+---
+
+## עדכון מאגר השאלות
 
 ```bash
-bun dev
+node scripts/convert-questions.mjs             # מייצר scripts/questions.jsonl
+bunx convex import --table questions --replace --yes scripts/questions.jsonl
 ```
-
-סרקו את ה-QR שמופיע עם אפליקציית **Expo Go** בטלפון. האפליקציה תיפתח עם מסך ההתחברות — אפשר להירשם, להתחבר, והנתונים נשמרים. מכאן אתם חופשיים לשנות את האפליקציה כרצונכם 🎉
-Scan the QR code with **Expo Go** on your phone. The app opens with the sign-in screen — you can register, log in, and data is saved. From here you're free to change the app however you like 🎉
-
-> 💡 **בפעמים הבאות** מספיק להריץ `bun dev` — ההתקנה כבר נשמרה.
-> **Next time** just run `bun dev` — your setup is already saved.
-
-> 🏪 **כשתהיו מוכנים לפרסם בחנות** (App Store / Google Play), הריצו פעם אחת: `bunx @convex-dev/auth --prod`
-> **When you're ready to publish** to the App Store / Google Play, run once: `bunx @convex-dev/auth --prod`
-
----
-
-## 📚 תוכן עניינים
-
-1. [מבנה האפליקציה](#מבנה-האפליקציה)
-2. [צעדים ראשונים](#צעדים-ראשונים)
-3. [הגדרת מסד נתונים (Convex)](#הגדרת-מסד-נתונים-convex)
-4. [התקנה והרצה](#התקנה-והרצה)
-5. [פיצ'רים מרכזיים](#פיצרים-מרכזיים)
-
----
-
-## 🏗 מבנה האפליקציה
-
-האפליקציה בנויה ממספר רכיבים מרכזיים:
-
-- **Frontend (צד לקוח):**
-  - **Expo & React Native:** התשתית לפיתוח האפליקציה למובייל (iOS ו-Android).
-  - **Expo Router:** מערכת ניווט מבוססת קבצים (בתיקיית `app/`).
-  - **NativeWind:** ספריית עיצוב המאפשרת שימוש ב-Tailwind CSS בתוך React Native.
-  - **RTL Support:** תמיכה מובנית בשפות מימין-לשמאל (עברית), כולל פתרונות היברידיים ל-Expo Go ול-Production.
-
-- **Backend (צד שרת):**
-  - **Convex:** פלטפורמת Backend-as-a-Service המספקת מסד נתונים בזמן אמת, פונקציות שרת (Server Functions) ואימות משתמשים.
-  - **Convex Auth:** מערכת אימות משתמשים מאובטחת המוטמעת ישירות ב-Convex.
-
-### תיקיות חשובות:
-- `app/`: מכילה את מסכי האפליקציה והניווט.
-  - `(auth)/`: מסכי התחברות והרשמה (לפני אימות).
-    - `paywall/`: מסך Paywall (תשלום).
-  - `(authenticated)/`: מסכים הזמינים רק למשתמשים מחוברים (האפליקציה הראשית).
-- `convex/`: מכילה את לוגיקת השרת (Schema, פונקציות, הגדרות אימות).
-- `components/`: רכיבי UI לשימוש חוזר.
-- `config/`: קבצי קונפיגורציה מרכזיים.
-  - `appConfig.ts`: דגלי תכונות וקונפיגורציה כללית.
-- `contexts/`: קונטקסטים גלובליים.
-  - `RevenueCatContext.tsx`: ניהול מנויים ותשלומים.
-- `utils/`: כלי עזר.
-  - `revenueCatConfig.ts`: קונפיגורציית RevenueCat.
-- `lib/`: ספריות עזר (כגון `rtl.ts` לתמיכה בעברית).
-
----
-
-## 🚀 צעדים ראשונים (עם קבלת התבנית)
-
-> 📖 **מדריך מפורט:** ראה `docs/setup.md` להוראות התקנה מלאות עם צילומי מסך.
-
-### דרישות מקדימות
-
-לפני שמתחילים, התקינו את הכלים הבאים:
-
-#### 1. Node.js
-
-**🪟 Windows:**
-1. גשו ל-[nodejs.org](https://nodejs.org) והורידו את גרסת LTS
-2. בזמן ההתקנה, וודאו שהאפשרות **"Add to PATH"** מסומנת
-
-**🍎 Mac:**
-1. גשו ל-[nodejs.org](https://nodejs.org) והורידו את גרסת LTS (קובץ `.pkg`)
-2. או דרך Homebrew: `brew install node`
-
-#### 2. Git
-
-**🪟 Windows:**
-1. גשו ל-[git-scm.com/download/win](https://git-scm.com/download/win)
-2. הורידו והתקינו **Git for Windows**
-
-**🍎 Mac:**
-1. פתחו Terminal והריצו: `git --version`
-2. אם לא מותקן, Mac יציע להתקין Xcode Command Line Tools - לחצו Install
-3. או דרך Homebrew: `brew install git`
-
-#### 3. Bun
-
-לאחר התקנת Node.js, הריצו בטרמינל:
-```bash
-npm i -g bun
-```
-
-#### 4. אימות ההתקנות
-
-```bash
-node -v
-git --version
-bun -v
-```
-
-> ❌ **אם `node -v` לא עובד ב-Windows:** סגרו את Cursor/VSCode לחלוטין ופתחו מחדש.
-
-### הורדת התבנית
-
-1. הורידו את התבנית מהפלטפורמה
-2. חלצו את ה-ZIP לשולחן העבודה
-3. פתחו את התיקייה ב-Cursor/VSCode
-
----
-
-## 🗄 הגדרת מסד נתונים (Convex)
-
-כדי שהאפליקציה תעבוד, עליכם לקשר אותה לפרויקט Convex משלכם:
-
-1. **יצירת חשבון Convex:** הירשמו ב-[convex.dev](https://convex.dev).
-2. **התחברות דרך הטרמינל:**
-   הריצו את הפקודה בתיקיית הפרויקט:
-   ```bash
-   bunx convex login
-   ```
-3. **יצירת פרויקט חדש:**
-   הריצו את הפקודה ליצירת פרויקט וקישורו:
-   ```bash
-   bunx convex dev
-   ```
-   פקודה זו תבקש מכם לבחור שם לפרויקט וליצור אותו. בסיום, היא תיצור קובץ `.env.local` עם כתובת השרת שלכם (`CONVEX_DEPLOYMENT` ו-`NEXT_PUBLIC_CONVEX_URL` או `EXPO_PUBLIC_CONVEX_URL`).
-
-   **חשוב:** ודאו שבקובץ `.env.local` (או `.env`) מוגדר המשתנה `EXPO_PUBLIC_CONVEX_URL` (האפליקציה אינה קוראת את `NEXT_PUBLIC_CONVEX_URL`).
-   ```env
-   EXPO_PUBLIC_CONVEX_URL="https://your-convex-project-url.convex.cloud"
-   ```
-   (העתיקו את הכתובת ש-Convex יצר אוטומטית).
-
----
-
-## 📦 התקנה והרצה
-
-### 1. התקנת חבילות
-התקינו את כל התלויות של הפרויקט באמצעות bun:
-```bash
-bun install
-```
-
-### 2. הרצת השרת (Convex)
-פתחו טרמינל נפרד והריצו את שרת הפיתוח של Convex (כדי לסנכרן שינויים ב-Backend בזמן אמת):
-```bash
-bunx convex dev
-```
-(השאירו את הטרמינל הזה פתוח ברקע).
-
-### 3. הרצת האפליקציה (Expo)
-בטרמינל נוסף, הריצו את האפליקציה:
-```bash
-bun dev
-```
-לאחר מכן:
-- לחצו `i` כדי לפתוח בסימולטור **iOS**.
-- לחצו `a` כדי לפתוח באמולטור **Android**.
-- או סרקו את ה-QR Code עם אפליקציית **Expo Go** במכשיר הפיזי שלכם. (חייבים להיות מחוברים לאותו שרת או Wi-Fi)
-
----
-
----
-
-## 🎯 פיצ'רים מרכזיים
-
-### מערכת תשלומים (RevenueCat)
-האפליקציה כוללת אינטגרציה מלאה עם [RevenueCat](https://www.revenuecat.com) למערכת תשלומים:
-- **Paywall Screen:** מסך תשלום בעברית עם תוכניות מנוי (חודשי, שנתי)
-- **RevenueCat Context:** ניהול מנויים, רכישות ושחזור רכישות
-- **Mock Payments:** מצב בדיקה שמאפשר לבדוק את ה-Paywall בלי תשלום אמיתי
-- **Webhook Integration:** סנכרון אוטומטי של סטטוס מנוי ל-Convex Database
-
-📖 **מדריך הגדרה:** ראה `docs/REVENUECAT_SETUP.md` להגדרה מפורטת ל-iOS ו-Android.
-
-### קונפיגורציה מרכזית (`appConfig.ts`)
-קובץ קונפיגורציה מרכזי לניהול דגלי תכונות:
-- `PAYMENT_SYSTEM_ENABLED`: הפעלה/כיבוי של מערכת התשלומים האמיתית
-- `MOCK_PAYMENTS`: מצב בדיקה לתשלומים מדומים
-- `IS_DEV_MODE`: זיהוי אוטומטי של מצב פיתוח (מבוסס על `__DEV__`)
-- `APP_ENV`: סביבה נוכחית (`dev` או `prod`) - נגזרת אוטומטית מ-`__DEV__`
-
-### מחיקת חשבון
-משתמשים יכולים למחוק את החשבון שלהם דרך מסך ההגדרות, עם אישור דו-שלבי.
-
----
-
-## 💡 טיפים נוספים
-
-- **עברית (RTL):** האפליקציה מוגדרת לעבוד מימין לשמאל. אם אתם מוסיפים מסכים חדשים, השתמשו בקבצי העזר ב-`lib/rtl.ts` כדי להבטיח התאמה מלאה.
-- **אבטחה:** מפתחות API סודיים לא נשמרים בקוד אלא במשתני סביבה. ודאו שקובץ `.env` לא עולה ל-Git (הוא כבר ב-.gitignore).
-- **בדיקות:** הריצו `bun run check` כדי לוודא שאין שגיאות קוד לפני ביצוע שינויים משמעותיים.
-- **תשלומים:** לפני פריסה לייצור, ודאו שמוגדרים כל משתני הסביבה הנדרשים (ראה `docs/REVENUECAT_SETUP.md`).
-
-בהצלחה בפיתוח! 🚀
-
