@@ -1,5 +1,4 @@
 import { useConvexAuth, useQuery } from 'convex/react';
-import { BlurView } from 'expo-blur';
 import {
   Redirect,
   Tabs,
@@ -12,7 +11,7 @@ import {
   ListChecks,
   TrafficCone,
 } from 'lucide-react-native';
-import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
@@ -84,42 +83,33 @@ export default function AuthenticatedLayout() {
     return <Redirect href="/(authenticated)/license" />;
   }
 
-  const barHeight = 56 + insets.bottom;
+  const barHeight = 64 + insets.bottom;
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.primary,
-        tabBarInactiveTintColor: '#9AA3B2',
-        tabBarLabelStyle: { fontSize: 11, marginBottom: 2 },
-        // Liquid Glass — סרגל שקוף עם טשטוש, מרחף מעל התוכן
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.7)',
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        // סרגל כחול מלא — הטאב הפעיל מקבל "כדור" לבן מאחורי האייקון/תווית
         tabBarStyle: {
           position: 'absolute',
           height: barHeight,
           paddingBottom: insets.bottom,
           paddingTop: 8,
+          paddingHorizontal: 10,
           borderTopWidth: 0,
-          backgroundColor:
-            Platform.OS === 'android'
-              ? 'rgba(255,255,255,0.94)'
-              : 'transparent',
+          backgroundColor: palette.primary,
           elevation: 0,
         },
-        tabBarBackground: () => (
-          <BlurView
-            intensity={40}
-            tint="light"
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                backgroundColor: 'rgba(255,255,255,0.55)',
-                borderTopWidth: StyleSheet.hairlineWidth,
-                borderTopColor: 'rgba(0,0,0,0.06)',
-              },
-            ]}
-          />
-        ),
+        tabBarItemStyle: {
+          marginVertical: 4,
+          marginHorizontal: 3,
+          borderRadius: 18,
+        },
+        tabBarActiveBackgroundColor: '#fff',
+        tabBarInactiveBackgroundColor: 'transparent',
       }}
     >
       {TABS.map((t) => (

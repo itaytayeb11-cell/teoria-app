@@ -4,15 +4,9 @@ import { ChevronLeft, Shuffle, Target } from 'lucide-react-native';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { Card, ProgressBar, Screen, ScreenHeader, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
+import { CAT_ICON } from '@/constants/categories';
 import { api } from '@/convex/_generated/api';
 import { rtl } from '@/lib/rtl';
-
-const CAT_ICON: Record<string, string> = {
-  'חוקי התנועה': '📖',
-  תמרורים: '🚸',
-  בטיחות: '🛟',
-  'הכרת הרכב': '🚗',
-};
 
 export default function PracticeScreen() {
   const router = useRouter();

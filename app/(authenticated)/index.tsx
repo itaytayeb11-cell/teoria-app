@@ -6,15 +6,23 @@ import {
   Bell,
   Bookmark,
   ChevronLeft,
+  Gem,
   Menu,
   Play,
   Shapes,
   TrafficCone,
+  Trophy,
 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Card, RingProgress, Screen, T } from '@/components/ui';
+import {
+  CategoryCarousel,
+  type MetricPage,
+  MetricRingCarousel,
+  StatBadge,
+} from '@/components/HomeWidgets';
+import { Card, Screen, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { api } from '@/convex/_generated/api';
 import { rtl } from '@/lib/rtl';
@@ -35,9 +43,50 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const home = useQuery(api.stats.getHome);
   const activeSession = useQuery(api.quiz.getActiveSession);
+  const categories = useQuery(api.questions.listCategories);
+  const stats = useQuery(api.stats.getMyStats);
 
   const readiness = home?.readiness ?? 0;
-  const passHigh = readiness >= 80;
+
+  const accuracyByCat: Record<string, number> = {};
+  for (const c of stats?.categoryBreakdown ?? []) {
+    accuracyByCat[c.category] = c.accuracy;
+  }
+
+  const daysToTestLabel =
+    home?.daysToTest === null || home?.daysToTest === undefined
+      ? '—'
+      : home.daysToTest <= 0
+        ? 'היום'
+        : String(home.daysToTest);
+
+  const metricPages: MetricPage[] = [
+    {
+      key: 'readiness',
+      ringValue: readiness,
+      ringColor: palette.primary,
+      value: `${readiness}%`,
+      label: 'מוכנות',
+    },
+    {
+      key: 'daysToTest',
+      ringColor: palette.warning,
+      value: daysToTestLabel,
+      label: home?.daysToTest === null ? 'לא הוגדר תאריך' : 'ימים למבחן',
+    },
+    {
+      key: 'passed',
+      ringColor: palette.success,
+      value: String(home?.passedSimCount ?? 0),
+      label: 'מבחנים עברת',
+    },
+    {
+      key: 'failed',
+      ringColor: palette.danger,
+      value: String(home?.failedSimCount ?? 0),
+      label: 'מבחנים נכשלת',
+    },
+  ];
 
   return (
     <Screen edges={[]} style={{ backgroundColor: palette.primary }}>
@@ -70,39 +119,68 @@ export default function HomeScreen() {
         style={{ backgroundColor: '#F4F5F7' }}
         contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}
       >
-        {/* ברכה + רצף */}
+        {/* ברכה */}
+        <View>
+          <T weight="bold" size={22}>
+            {greeting()}, {home?.name ?? 'תלמיד'}! 🚗
+          </T>
+          <T color={palette.muted} size={14} style={{ marginTop: 2 }}>
+            {home
+              ? `אתה קרוב ב-${readiness}% למוכנות מלאה למבחן`
+              : 'טוען את הנתונים שלך…'}
+          </T>
+        </View>
+
+        {/* שורת ווידג'טים — יהלום (רצף) / טבעת-קרוסלה (מדדים) / טרופי (ניקוד) */}
         <View
           style={{
             flexDirection: rtl.flexDirection,
-            alignItems: 'flex-start',
+            alignItems: 'center',
             justifyContent: 'space-between',
+            paddingHorizontal: 4,
           }}
         >
-          <View style={{ flex: 1 }}>
-            <T weight="bold" size={22}>
-              {greeting()}, {home?.name ?? 'תלמיד'}! 🚗
-            </T>
-            <T color={palette.muted} size={14} style={{ marginTop: 2 }}>
-              {home
-                ? `אתה קרוב ב-${readiness}% למוכנות מלאה למבחן`
-                : 'טוען את הנתונים שלך…'}
-            </T>
-          </View>
-          {home && home.streakDays > 0 ? (
-            <View
-              style={{
-                backgroundColor: '#FFE7CC',
-                borderRadius: 999,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-              }}
-            >
-              <T color={palette.warning} weight="bold" size={13}>
-                🔥 רצף {home.streakDays} ימים
-              </T>
-            </View>
-          ) : null}
+          <StatBadge
+            icon={
+              <Gem
+                color={home?.streakDays ? palette.warning : '#B7BDC9'}
+                size={26}
+              />
+            }
+            value={home?.streakDays ?? 0}
+            label="רצף ימים"
+            tint={palette.warning}
+            tintBg="#FDEBCF"
+            dim={!home?.streakDays}
+          />
+          <MetricRingCarousel size={128} pages={metricPages} />
+          <StatBadge
+            icon={
+              <Trophy
+                color={home?.correctAnswered ? palette.primary : '#B7BDC9'}
+                size={26}
+              />
+            }
+            value={home?.correctAnswered ?? 0}
+            label="תשובות נכונות"
+            tint={palette.primary}
+            tintBg={palette.primaryTint}
+            dim={!home?.correctAnswered}
+          />
         </View>
+
+        {/* קרוסלת נושאים */}
+        {categories && categories.length > 0 ? (
+          <View style={{ gap: 10 }}>
+            <T weight="bold" size={15}>
+              התקדמות לפי נושא
+            </T>
+            <CategoryCarousel
+              categories={categories}
+              accuracyByCat={accuracyByCat}
+            />
+          </View>
+        ) : null}
 
         {/* מבחן שנקטע — אפשרות להמשיך */}
         {activeSession && activeSession.answers.length > 0 ? (
@@ -132,62 +210,6 @@ export default function HomeScreen() {
             <ChevronLeft color={palette.primary} size={20} />
           </Card>
         ) : null}
-
-        {/* כרטיס מוכנות */}
-        <Card>
-          <View
-            style={{
-              alignSelf: rtl.textAlign === 'right' ? 'flex-end' : 'flex-start',
-              backgroundColor: passHigh
-                ? palette.successBg
-                : palette.primaryTint,
-              borderRadius: 999,
-              paddingHorizontal: 12,
-              paddingVertical: 5,
-              marginBottom: 10,
-            }}
-          >
-            <T
-              size={12}
-              weight="bold"
-              color={passHigh ? palette.success : palette.primary}
-            >
-              {home?.readinessLabel ?? 'מחשב מוכנות…'}
-            </T>
-          </View>
-          <T weight="bold" size={20} style={{ marginBottom: 12 }}>
-            ציון מוכנות למבחן
-          </T>
-          <View
-            style={{
-              flexDirection: rtl.flexDirection,
-              alignItems: 'center',
-              gap: 16,
-            }}
-          >
-            <RingProgress value={readiness} label="מוכנות" size={120} />
-            <View style={{ flex: 1 }}>
-              <T color={palette.muted} size={13}>
-                {home && home.questionsToBoost > 0
-                  ? `מענה על עוד ${home.questionsToBoost} שאלות מחזק את הסיכוי שלך לעבור בטסט הראשון.`
-                  : 'המשך לתרגל כדי לשמור על המוכנות.'}
-              </T>
-              {home?.weeklyDelta !== null && home?.weeklyDelta !== undefined ? (
-                <T
-                  weight="bold"
-                  size={13}
-                  color={
-                    home.weeklyDelta >= 0 ? palette.success : palette.danger
-                  }
-                  style={{ marginTop: 10 }}
-                >
-                  {home.weeklyDelta >= 0 ? '↗ +' : '↘ '}
-                  {home.weeklyDelta}% השבוע
-                </T>
-              ) : null}
-            </View>
-          </View>
-        </Card>
 
         {/* מבחן מדמה */}
         <LinearGradient
