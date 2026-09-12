@@ -1,12 +1,15 @@
 // ============================================================================
 // רכיבי דף הבית — יהלום (רצף), טבעת-קרוסלה (מדדים), טרופי (ניקוד),
 // וקרוסלת נושאים. שימוש ייעודי ל-app/(authenticated)/index.tsx בלבד.
+// בנוי כדי להתאים במדויק למבנה של אפליקציית הרפרנס (רק בגוון כחול).
 // ============================================================================
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import {
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -14,58 +17,39 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { Card, ProgressBar, T } from '@/components/ui';
+import { ProgressBar, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { CAT_ICON } from '@/constants/categories';
 import { rtl } from '@/lib/rtl';
 
 // ----------------------------------------------------------------------------
-// תג צדדי עגול — יהלום (רצף) / טרופי (ניקוד)
+// תג צדדי — אמוג'י גולמי + מספר, בלי רקע ובלי כיתוב מתחת (בדיוק כמו הרפרנס)
 // ----------------------------------------------------------------------------
 export function StatBadge(props: {
-  icon: ReactNode;
+  emoji: string;
   value: number | string;
-  label: string;
-  tint: string;
-  tintBg: string;
-  dim?: boolean; // מוצג באפור כשאין עדיין נתון (למשל רצף 0)
+  color: string;
 }) {
-  const tint = props.dim ? '#B7BDC9' : props.tint;
-  const tintBg = props.dim ? '#F1F2F5' : props.tintBg;
   return (
-    <View style={{ alignItems: 'center', width: 72 }}>
-      <View
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: 28,
-          backgroundColor: tintBg,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {props.icon}
-      </View>
-      <T weight="bold" size={16} style={{ marginTop: 6 }} color={tint}>
+    <View style={{ alignItems: 'center', width: 64 }}>
+      <T size={30}>{props.emoji}</T>
+      <T weight="bold" size={19} style={{ marginTop: 4 }} color={props.color}>
         {props.value}
-      </T>
-      <T color={palette.muted} size={11} center>
-        {props.label}
       </T>
     </View>
   );
 }
 
 // ----------------------------------------------------------------------------
-// טבעת בודדת — עיגול רקע + קשת התקדמות (אופציונלי) + תוכן במרכז
+// טבעת בודדת — עיגול רקע דק + קשת התקדמות (אופציונלי, רק למוכנות %) + תוכן במרכז
 // ----------------------------------------------------------------------------
 function Ring(props: {
   size: number;
-  value?: number; // 0-100, קשת התקדמות אמיתית (למשל אחוז מוכנות)
+  value?: number; // 0-100, קשת התקדמות אמיתית
   color: string;
   children: ReactNode;
 }) {
-  const stroke = 10;
+  const stroke = 6;
   const r = (props.size - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const pct =
@@ -88,7 +72,7 @@ function Ring(props: {
           cx={props.size / 2}
           cy={props.size / 2}
           r={r}
-          stroke="#EDEFF4"
+          stroke="#E7EAF3"
           strokeWidth={stroke}
           fill="none"
         />
@@ -116,12 +100,13 @@ export type MetricPage = {
   key: string;
   ringValue?: number; // אם קיים — נצייר קשת התקדמות אמיתית (רק למוכנות %)
   ringColor: string;
-  value: string; // המספר/טקסט הגדול במרכז
-  label: string; // כיתוב קטן מתחת למספר
+  value: string; // הטקסט/מספר הגדול במרכז
+  label: string; // כיתוב קטן מתחת לקו המפריד
 };
 
 // ----------------------------------------------------------------------------
-// קרוסלת מדדים — טבעת אחת שמחליפים בין 4 מדדים באמצעות החלקה או נקודות
+// קרוסלת מדדים — טבעת אחת שמחליפים בין 4 מדדים, בלחיצה על נקודה או בהחלקה.
+// ערך + קו מפריד קצר + תווית — בדיוק מבנה התוכן שבתמונות הרפרנס.
 // ----------------------------------------------------------------------------
 export function MetricRingCarousel(props: {
   size: number;
@@ -129,56 +114,45 @@ export function MetricRingCarousel(props: {
 }) {
   const { size, pages } = props;
   const [index, setIndex] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
 
-  const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const raw = e.nativeEvent.contentOffset.x / size;
-    const i = Math.round(Math.abs(raw));
-    setIndex(Math.max(0, Math.min(pages.length - 1, i)));
-  };
+  // לפי בקשה מפורשת: המדד מתחלף בלחיצה, לא בהחלקה — לחיצה על הטבעת עצמה
+  // מתקדמת למדד הבא, ולחיצה על נקודה קופצת ישירות אליו
+  const goTo = (i: number) => setIndex(i);
+  const active = pages[index];
 
-  const goTo = (i: number) => {
-    setIndex(i);
-    scrollRef.current?.scrollTo({ x: i * size, animated: true });
-  };
+  const next = () => goTo((index + 1) % pages.length);
 
   return (
     <View style={{ alignItems: 'center' }}>
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        snapToInterval={size}
-        decelerationRate="fast"
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onScrollEnd}
-        style={{ width: size, height: size }}
-      >
-        {pages.map((p) => (
-          <View
-            key={p.key}
-            style={{
-              width: size,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+      <Pressable onPress={next} hitSlop={4}>
+        <Ring size={size} value={active.ringValue} color={active.ringColor}>
+          <T
+            weight="bold"
+            size={active.value.length > 3 ? size * 0.14 : size * 0.22}
+            color={active.ringColor}
+            center
           >
-            <Ring size={size} value={p.ringValue} color={p.ringColor}>
-              <T weight="bold" size={size * 0.19} color={p.ringColor}>
-                {p.value}
-              </T>
-              <T color={palette.muted} size={11} style={{ marginTop: 2 }}>
-                {p.label}
-              </T>
-            </Ring>
-          </View>
-        ))}
-      </ScrollView>
+            {active.value}
+          </T>
+          <View
+            style={{
+              width: 18,
+              height: 2,
+              borderRadius: 1,
+              backgroundColor: '#D8DCE6',
+              marginVertical: 5,
+            }}
+          />
+          <T color={palette.muted} size={11}>
+            {active.label}
+          </T>
+        </Ring>
+      </Pressable>
       <View
         style={{
           flexDirection: 'row',
           gap: 5,
-          marginTop: 8,
+          marginTop: 10,
         }}
       >
         {pages.map((p, i) => (
@@ -199,81 +173,149 @@ export function MetricRingCarousel(props: {
 }
 
 // ----------------------------------------------------------------------------
-// קרוסלת נושאים — מחליפה את "15 השיעורים" בגרסת המקור, לפי 4 הנושאים הרשמיים
+// קרוסלת נושאים — כרטיס כחול מלא-רוחב לכל נושא (אחוז גדול, שם נושא, פס
+// התקדמות, כפתור שחור), בדיוק כמו כרטיס "X מתוך Y שיעורים" ברפרנס.
 // ----------------------------------------------------------------------------
 export function CategoryCarousel(props: {
   categories: { category: string; count: number }[];
   accuracyByCat: Record<string, number>;
 }) {
   const router = useRouter();
+  const [page, setPage] = useState(0);
+  const [cardWidth, setCardWidth] = useState(0);
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w > 0 && w !== cardWidth) {
+      setCardWidth(w);
+    }
+  };
+
+  const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (!cardWidth) {
+      return;
+    }
+    const i = Math.round(e.nativeEvent.contentOffset.x / cardWidth);
+    setPage(Math.max(0, Math.min(props.categories.length - 1, i)));
+  };
+
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 12, paddingHorizontal: 2 }}
-    >
-      {props.categories.map((cat) => {
-        const acc = props.accuracyByCat[cat.category];
-        return (
-          <Card
-            key={cat.category}
-            onPress={() =>
-              router.push(
-                `/(authenticated)/quiz?mode=practice&filter=${encodeURIComponent(cat.category)}`
-              )
-            }
-            style={{ width: 168, gap: 8 }}
-          >
+    <View onLayout={onLayout}>
+      {cardWidth > 0 ? (
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={cardWidth}
+          decelerationRate="fast"
+          onMomentumScrollEnd={onScrollEnd}
+        >
+          {props.categories.map((cat) => {
+            const acc = props.accuracyByCat[cat.category];
+            return (
+              <View key={cat.category} style={{ width: cardWidth }}>
+                <LinearGradient
+                  colors={[palette.primary, palette.primaryDark]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ borderRadius: 20, padding: 18, marginRight: 2 }}
+                >
+                  <View
+                    style={{
+                      flexDirection: rtl.flexDirection,
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <T color="#fff" weight="bold" size={32}>
+                      {acc !== undefined ? `${acc}%` : '—'}
+                    </T>
+                    <View
+                      style={{
+                        alignItems:
+                          rtl.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                      }}
+                    >
+                      <View
+                        style={{
+                          flexDirection: rtl.flexDirection,
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
+                        <T size={17}>{CAT_ICON[cat.category] ?? '•'}</T>
+                        <T color="#fff" weight="bold" size={15}>
+                          {cat.category}
+                        </T>
+                      </View>
+                      <T
+                        color="rgba(255,255,255,0.8)"
+                        size={12}
+                        style={{ marginTop: 2 }}
+                      >
+                        {cat.count} שאלות בנושא
+                      </T>
+                    </View>
+                  </View>
+                  <View style={{ marginTop: 16 }}>
+                    <ProgressBar
+                      value={(acc ?? 0) / 100}
+                      track="rgba(255,255,255,0.25)"
+                      fill="#fff"
+                    />
+                  </View>
+                  <Pressable
+                    onPress={() =>
+                      router.push(
+                        `/(authenticated)/quiz?mode=practice&filter=${encodeURIComponent(cat.category)}`
+                      )
+                    }
+                    style={{
+                      marginTop: 16,
+                      backgroundColor: '#12151C',
+                      borderRadius: 999,
+                      height: 46,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: rtl.flexDirection,
+                      gap: 6,
+                    }}
+                  >
+                    <T color="#fff" weight="bold" size={14}>
+                      תרגל נושא
+                    </T>
+                    <ChevronLeft color="#fff" size={16} />
+                  </Pressable>
+                </LinearGradient>
+              </View>
+            );
+          })}
+        </ScrollView>
+      ) : (
+        <View style={{ height: 190 }} />
+      )}
+      {props.categories.length > 1 ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 5,
+            marginTop: 10,
+          }}
+        >
+          {props.categories.map((c, i) => (
             <View
+              key={c.category}
               style={{
-                flexDirection: rtl.flexDirection,
-                alignItems: 'center',
-                gap: 8,
+                width: i === page ? 16 : 6,
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: i === page ? palette.primary : '#D8DCE6',
               }}
-            >
-              <T size={20}>{CAT_ICON[cat.category] ?? '•'}</T>
-              <T weight="bold" size={14} style={{ flex: 1 }} numberOfLines={1}>
-                {cat.category}
-              </T>
-            </View>
-            {acc !== undefined ? (
-              <>
-                <ProgressBar
-                  value={acc / 100}
-                  track="#EDEFF4"
-                  fill={
-                    acc >= 74
-                      ? palette.success
-                      : acc >= 50
-                        ? palette.warning
-                        : palette.danger
-                  }
-                />
-                <T color={palette.muted} size={11}>
-                  דיוק {acc}%
-                </T>
-              </>
-            ) : (
-              <T color={palette.muted} size={11}>
-                עוד לא תרגלת בנושא הזה
-              </T>
-            )}
-            <View
-              style={{
-                flexDirection: rtl.flexDirection,
-                alignItems: 'center',
-                gap: 4,
-                marginTop: 2,
-              }}
-            >
-              <T color={palette.primary} weight="bold" size={12}>
-                תרגל נושא
-              </T>
-              <ChevronLeft color={palette.primary} size={14} />
-            </View>
-          </Card>
-        );
-      })}
-    </ScrollView>
+            />
+          ))}
+        </View>
+      ) : null}
+    </View>
   );
 }

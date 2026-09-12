@@ -1,4 +1,5 @@
 import { useConvexAuth, useQuery } from 'convex/react';
+import { BlurView } from 'expo-blur';
 import {
   Redirect,
   Tabs,
@@ -11,7 +12,7 @@ import {
   ListChecks,
   TrafficCone,
 } from 'lucide-react-native';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
@@ -83,30 +84,45 @@ export default function AuthenticatedLayout() {
     return <Redirect href="/(authenticated)/license" />;
   }
 
-  const barHeight = 64 + insets.bottom;
+  // סרגל צף עם שוליים מכל הצדדים — Liquid Glass כחול, מעוגל לגמרי,
+  // הטאב הפעיל מקבל "כדור" לבן מאחורי האייקון (בדיוק כמו הרפרנס)
+  const barBottom = Math.max(insets.bottom, 14);
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.primary,
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.7)',
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.75)',
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        // סרגל כחול מלא — הטאב הפעיל מקבל "כדור" לבן מאחורי האייקון/תווית
         tabBarStyle: {
           position: 'absolute',
-          height: barHeight,
-          paddingBottom: insets.bottom,
-          paddingTop: 8,
-          paddingHorizontal: 10,
+          left: 14,
+          right: 14,
+          bottom: barBottom,
+          height: 62,
+          paddingTop: 6,
+          paddingHorizontal: 8,
           borderTopWidth: 0,
-          backgroundColor: palette.primary,
+          borderRadius: 31,
+          backgroundColor: 'transparent',
           elevation: 0,
+          overflow: 'hidden',
         },
+        tabBarBackground: () => (
+          <BlurView
+            intensity={55}
+            tint="dark"
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: 'rgba(29,78,216,0.62)' },
+            ]}
+          />
+        ),
         tabBarItemStyle: {
           marginVertical: 4,
           marginHorizontal: 3,
-          borderRadius: 18,
+          borderRadius: 22,
         },
         tabBarActiveBackgroundColor: '#fff',
         tabBarInactiveBackgroundColor: 'transparent',

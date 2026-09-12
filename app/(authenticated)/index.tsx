@@ -6,12 +6,10 @@ import {
   Bell,
   Bookmark,
   ChevronLeft,
-  Gem,
   Menu,
   Play,
   Shapes,
   TrafficCone,
-  Trophy,
 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -53,9 +51,9 @@ export default function HomeScreen() {
     accuracyByCat[c.category] = c.accuracy;
   }
 
-  const daysToTestLabel =
+  const daysToTestValue =
     home?.daysToTest === null || home?.daysToTest === undefined
-      ? '—'
+      ? 'לא הוגדר'
       : home.daysToTest <= 0
         ? 'היום'
         : String(home.daysToTest);
@@ -71,8 +69,8 @@ export default function HomeScreen() {
     {
       key: 'daysToTest',
       ringColor: palette.warning,
-      value: daysToTestLabel,
-      label: home?.daysToTest === null ? 'לא הוגדר תאריך' : 'ימים למבחן',
+      value: daysToTestValue,
+      label: 'ימים למבחן',
     },
     {
       key: 'passed',
@@ -89,9 +87,11 @@ export default function HomeScreen() {
   ];
 
   return (
-    <Screen edges={[]} style={{ backgroundColor: palette.primary }}>
-      {/* כותרת עליונה — נמתחת מאחורי פס הסטטוס */}
-      <View
+    <Screen edges={[]} style={{ backgroundColor: '#F4F5F7' }}>
+      {/* כותרת עליונה — גרדיאנט בשני גוונים של כחול, נמתחת מאחורי פס הסטטוס.
+          התפריט וההתראות בצד ימין (ראשון ב-RTL), שם האפליקציה בצד שמאל */}
+      <LinearGradient
+        colors={[palette.primaryDark, palette.primary]}
         style={{
           flexDirection: rtl.flexDirection,
           alignItems: 'center',
@@ -101,19 +101,27 @@ export default function HomeScreen() {
           paddingBottom: 12,
         }}
       >
-        <Pressable hitSlop={10}>
-          <Bell color="#fff" size={24} />
-        </Pressable>
-        <T color="#fff" weight="bold" size={20}>
+        <View
+          style={{
+            flexDirection: rtl.flexDirection,
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
+          <Pressable
+            hitSlop={10}
+            onPress={() => router.push('/(authenticated)/settings')}
+          >
+            <Menu color="#fff" size={24} />
+          </Pressable>
+          <Pressable hitSlop={10}>
+            <Bell color="#fff" size={22} />
+          </Pressable>
+        </View>
+        <T color="#fff" weight="bold" size={19}>
           תיאוריה
         </T>
-        <Pressable
-          hitSlop={10}
-          onPress={() => router.push('/(authenticated)/settings')}
-        >
-          <Menu color="#fff" size={26} />
-        </Pressable>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         style={{ backgroundColor: '#F4F5F7' }}
@@ -141,31 +149,15 @@ export default function HomeScreen() {
           }}
         >
           <StatBadge
-            icon={
-              <Gem
-                color={home?.streakDays ? palette.warning : '#B7BDC9'}
-                size={26}
-              />
-            }
+            emoji="💎"
             value={home?.streakDays ?? 0}
-            label="רצף ימים"
-            tint={palette.warning}
-            tintBg="#FDEBCF"
-            dim={!home?.streakDays}
+            color={palette.primary}
           />
           <MetricRingCarousel size={128} pages={metricPages} />
           <StatBadge
-            icon={
-              <Trophy
-                color={home?.correctAnswered ? palette.primary : '#B7BDC9'}
-                size={26}
-              />
-            }
+            emoji="🏆"
             value={home?.correctAnswered ?? 0}
-            label="תשובות נכונות"
-            tint={palette.primary}
-            tintBg={palette.primaryTint}
-            dim={!home?.correctAnswered}
+            color={palette.warning}
           />
         </View>
 
