@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
+import type { Doc } from './_generated/dataModel';
 import { internalAction, internalQuery, mutation } from './_generated/server';
 import { israelDay, requireUserId } from './model';
 
@@ -61,13 +62,16 @@ export const usersNeedingReminder = internalQuery({
     const today = israelDay();
 
     const targets: { token: string; name: string; streakDays: number }[] = [];
-    const seenUsers = new Set<string>();
+    // מטמון קטן כדי לא לשלוף את אותו משתמש שוב לכל טוקן שלו (יכול להיות
+    // רשום עם כמה מכשירים) — אבל כן שולחים לכל הטוקנים שלו, לא רק לראשון
+    const userCache = new Map<string, Doc<'users'> | null>();
 
     for (const t of tokens) {
-      if (seenUsers.has(t.userId)) {
-        continue;
+      let user = userCache.get(t.userId);
+      if (user === undefined) {
+        user = await ctx.db.get(t.userId);
+        userCache.set(t.userId, user);
       }
-      const user = await ctx.db.get(t.userId);
       if (!user) {
         continue;
       }
@@ -77,7 +81,6 @@ export const usersNeedingReminder = internalQuery({
         last < twoDaysAgo ||
         (last !== today && (user.streakDays ?? 0) >= 2)
       ) {
-        seenUsers.add(t.userId);
         targets.push({
           token: t.token,
           name: user.fullName || 'תלמיד',

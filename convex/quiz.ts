@@ -330,20 +330,27 @@ export const getSession = query({
       }
     }
 
-    return {
-      ...session,
-      review: session.answers.map((a) => {
-        const q = questionsById.get(a.questionId);
-        return {
-          questionId: a.questionId,
-          text: q?.text ?? '',
-          answers: q?.answers ?? [],
-          selected: a.selected,
-          correctAnswer: q?.correctAnswer ?? -1,
-          explanation: q?.explanation,
-          isCorrect: a.isCorrect,
-        };
-      }),
-    };
+    // עוברים על כל השאלות של המבחן (session.questionIds) ולא רק על אלה
+    // שיש להן תשובה שמורה — אחרת שאלה שדולגה לגמרי (מבחן מדמה: המשתמש
+    // עבר "הבא" בלי לבחור) פשוט נעלמת מסקירת הטעויות, בעוד שהיא כן
+    // נספרת כלא-נכונה בציון (finishQuiz סופר לפי totalQuestions).
+    const answersByQuestion = new Map(
+      session.answers.map((a) => [a.questionId, a])
+    );
+    const review = session.questionIds.map((qId) => {
+      const q = questionsById.get(qId);
+      const a = answersByQuestion.get(qId);
+      return {
+        questionId: qId,
+        text: q?.text ?? '',
+        answers: q?.answers ?? [],
+        selected: a?.selected ?? -1, // -1 = לא נענתה (דולגה)
+        correctAnswer: q?.correctAnswer ?? -1,
+        explanation: q?.explanation,
+        isCorrect: a?.isCorrect ?? false,
+      };
+    });
+
+    return { ...session, review };
   },
 });
