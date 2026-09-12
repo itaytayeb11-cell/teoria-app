@@ -197,7 +197,8 @@ export const submitAnswer = mutation({
         selected,
         answeredAt: Date.now(),
       });
-      await touchStreak(ctx, userId);
+      // שים לב: הרצף (streak) לא מתעדכן כאן — רק בסיום מבחן שלם (finishQuiz),
+      // לפי בקשת המשתמש: "כל יום חייב להשלים מבחן אחד כדי שהיהלום יירשם"
 
       // אם טעה שוב — מוציאים אותה מ"ידעתי" כדי שתחזור למחסן הטעויות
       if (!isCorrect) {
@@ -243,6 +244,9 @@ export const finishQuiz = mutation({
       incorrectCount: session.totalQuestions - correctCount,
       scorePercent,
     });
+
+    // הרצף (יהלומים) עולה כשמשלימים מבחן/תרגול שלם — פעם ביום, לא לכל תשובה
+    await touchStreak(ctx, userId);
 
     return { scorePercent, correctCount, total: session.totalQuestions };
   },

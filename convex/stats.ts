@@ -9,6 +9,7 @@ import {
 const RECENT_WINDOW = 5; // כמה מבחנים אחרונים לחישוב ממוצע
 const READINESS_TARGET = 400; // כמה שאלות "מספיק" לכיסוי מלא
 const DAY_MS = 24 * 60 * 60 * 1000;
+const MAX_SIM_MISTAKES = 4; // עד 4 שגיאות = עובר במבחן מדמה — תואם ל-MAX_SIM_MISTAKES ב-app/(authenticated)/results.tsx
 
 // ==========================================================================
 // נתוני מסך הבית — ציון מוכנות, רצף, שינוי שבועי, ספירות
@@ -108,6 +109,24 @@ export const getHome = query({
       .withIndex('by_user', (q) => q.eq('userId', userId))
       .collect();
 
+    // כמה מבחני-מדמה עברת/נכשלת בהם (לא כולל תרגול — רק "מבחן תיאוריה אמיתי")
+    const simulations = completed.filter((s) => s.mode === 'simulation');
+    let passedSimCount = 0;
+    let failedSimCount = 0;
+    for (const s of simulations) {
+      const incorrect = s.totalQuestions - s.correctCount;
+      if (incorrect <= MAX_SIM_MISTAKES) {
+        passedSimCount += 1;
+      } else {
+        failedSimCount += 1;
+      }
+    }
+
+    // ספירה לאחור לתאריך המבחן (אם נקבע)
+    const daysToTest = user?.testDate
+      ? Math.ceil((user.testDate - now) / DAY_MS)
+      : null;
+
     return {
       name: user?.fullName || user?.email?.split('@')[0] || 'תלמיד',
       readiness,
@@ -119,6 +138,10 @@ export const getHome = query({
       savedCount: savedRows.length,
       totalQuizzes: completed.length,
       correctAnswered: answers.filter((a) => a.isCorrect).length,
+      testDate: user?.testDate ?? null,
+      daysToTest,
+      passedSimCount,
+      failedSimCount,
     };
   },
 });

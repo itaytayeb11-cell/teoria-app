@@ -17,8 +17,9 @@ export default defineSchema({
     role: v.union(v.literal('admin'), v.literal('user')), // תפקיד המשתמש (מנהל או משתמש רגיל)
     userType: v.optional(v.union(v.literal('free'), v.literal('paid'))), // סוג משתמש (חינמי או בתשלום) - אופציונלי לתאימות לאחור
     licenseType: v.optional(v.string()), // סוג הרישיון שנבחר: "B" (פרטי), "A" (אופנוע), "C1", "C", "D", "1" (טרקטור)
-    streakDays: v.optional(v.number()), // רצף ימי תרגול
-    lastActiveDay: v.optional(v.string()), // יום פעילות אחרון (YYYY-MM-DD, שעון ישראל)
+    streakDays: v.optional(v.number()), // רצף ימים — עולה רק כשמשלימים מבחן/תרגול שלם ביום הזה, מתאפס אם דילגו יום
+    lastActiveDay: v.optional(v.string()), // יום השלמת מבחן אחרון (YYYY-MM-DD, שעון ישראל) — לחישוב הרצף
+    testDate: v.optional(v.number()), // תאריך מבחן התאוריה המתוכנן (timestamp) — לספירה לאחור בדף הבית
     isActive: v.boolean(), // האם המשתמש פעיל
     createdAt: v.number(), // זמן יצירה (Timestamp)
     updatedAt: v.number(), // זמן עדכון אחרון (Timestamp)

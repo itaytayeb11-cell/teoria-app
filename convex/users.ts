@@ -32,6 +32,35 @@ export const setLicenseType = mutation({
   },
 });
 
+// עדכון פרטי הפרופיל של המשתמש המחובר בלבד — לא מקבל userId מהלקוח בכלל,
+// כדי שלא יהיה אפשרי (בטעות או בזדון) לערוך פרופיל של מישהו אחר
+export const updateMyProfile = mutation({
+  args: { fullName: v.string() },
+  handler: async (ctx, { fullName }) => {
+    const userId = await requireUserId(ctx);
+    const trimmed = fullName.trim();
+    await ctx.db.patch(userId, {
+      fullName: trimmed || undefined,
+      updatedAt: Date.now(),
+    });
+    return userId;
+  },
+});
+
+// קביעת תאריך מבחן התאוריה המתוכנן — לספירה לאחור בדף הבית.
+// null מוחק תאריך שכבר נקבע (למשל אם המבחן נדחה)
+export const setTestDate = mutation({
+  args: { testDate: v.union(v.number(), v.null()) },
+  handler: async (ctx, { testDate }) => {
+    const userId = await requireUserId(ctx);
+    await ctx.db.patch(userId, {
+      testDate: testDate ?? undefined,
+      updatedAt: Date.now(),
+    });
+    return userId;
+  },
+});
+
 // מחיקת חשבון המשתמש הנוכחי וכל הנתונים המשויכים אליו
 // ⚠️ אזהרה: פעולה זו בלתי הפיכה ותמחק את כל הנתונים לצמיתות!
 export const deleteMyAccount = mutation({
