@@ -62,14 +62,26 @@ export default function QuizScreen() {
 
   const startQuiz = quiz.start;
   const loadResumed = quiz.loadResumed;
+  // מזהה יציב של "איזה מבחן זה" — לא כולל resumable, כי getResumable הוא
+  // שאילתה חיה שמחזירה אובייקט חדש בכל תשובה שנשלחת (session.answers גדל).
+  // בלי ה-key הנפרד הזה, כל תשובה במבחן שהמשך היה מאפס את הטיימר ל-0
+  // מחדש, כי ה-useEffect למטה היה רץ שוב על כל עדכון חי של השאילתה.
+  const loadKey = resumeSessionId
+    ? `resume:${resumeSessionId}`
+    : `new:${mode}:${params.filter ?? ''}:${params.count ?? ''}`;
+  const resetKeyRef = useRef<string | null>(null);
   useEffect(() => {
     // מסך זה חי בתוך Tabs ולא נטען מחדש כשעוברים בין מצבים (מבחן מדמה →
     // מחסן טעויות וכו') — לכן מאפסים כאן גם את מצב התצוגה המקומי, לא רק
-    // את שאלות המבחן (אחרת נשארים עם טיימר/הסבר פתוח מהמבחן הקודם).
-    setShowExplain(false);
-    setConfirmExit(false);
-    setSecondsLeft(SIMULATION_SECONDS);
-    setElapsed(0);
+    // את שאלות המבחן (אחרת נשארים עם טיימר/הסבר פתוח מהמבחן הקודם). אבל
+    // רק פעם אחת לכל loadKey, לא בכל רינדור מחדש של resumable.
+    if (resetKeyRef.current !== loadKey) {
+      resetKeyRef.current = loadKey;
+      setShowExplain(false);
+      setConfirmExit(false);
+      setSecondsLeft(SIMULATION_SECONDS);
+      setElapsed(0);
+    }
 
     if (resumeSessionId) {
       if (resumable) {
@@ -87,6 +99,7 @@ export default function QuizScreen() {
     const count = params.count ? Number(params.count) : undefined;
     startQuiz({ mode: startMode, filterValue: params.filter, count });
   }, [
+    loadKey,
     startQuiz,
     loadResumed,
     resumeSessionId,
