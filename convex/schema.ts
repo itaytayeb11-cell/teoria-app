@@ -66,8 +66,8 @@ export default defineSchema({
     questionIds: v.array(v.id('questions')), // רשימת השאלות במבחן, לפי הסדר
     answers: v.array(
       v.object({
-        questionId: v.id('questions'),
-        selected: v.number(), // מה המשתמש בחר (0-3), -1 אם דילג
+        questionId: v.id('questions'), // שאלה שדולגה (לא נענתה) פשוט לא מופיעה כאן בכלל
+        selected: v.number(), // מה המשתמש בחר (0-3)
         isCorrect: v.boolean(),
       })
     ),

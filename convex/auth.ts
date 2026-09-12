@@ -12,13 +12,20 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
     // פונקציה שנקראת בעת יצירה או עדכון של משתמש
     async createOrUpdateUser(ctx, args) {
       const now = Date.now();
+      // מסך ההרשמה לא אוסף שם — args.profile.name תמיד undefined כרגע.
+      // חשוב: לא לכתוב ברירת מחדל קבועה ('User') לתוך fullName, כי אז
+      // ההתחברות הבאה הייתה "מנעלת" אותה קבוע על כל משתמש, וזה גם דורס
+      // fallback יפה יותר במסכים (אימייל / "תלמיד") שסומך על fullName
+      // ריק כשאין שם אמיתי.
+      const name = args.profile.name || undefined;
 
-      // אם המשתמש כבר קיים (למשל, התחברות נוספת), נעדכן את הפרטים שלו
+      // אם המשתמש כבר קיים (התחברות נוספת) — מעדכנים רק מה שבאמת יכול
+      // להשתנות מהספק (אימייל/אימות), ולא דורסים שם קיים בלי שם חדש אמיתי
       if (args.existingUserId) {
         await ctx.db.patch(args.existingUserId, {
           email: args.profile.email,
           emailVerified: args.profile.emailVerified ?? false,
-          fullName: args.profile.name || 'User',
+          ...(name ? { fullName: name } : {}),
           updatedAt: now,
         });
         return args.existingUserId;
@@ -28,7 +35,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       return await ctx.db.insert('users', {
         email: args.profile.email ?? '',
         emailVerified: args.profile.emailVerified ?? false,
-        fullName: args.profile.name || 'User',
+        fullName: name,
         role: 'user', // תפקיד ברירת מחדל
         isActive: true, // משתמש פעיל כברירת מחדל
         createdAt: now,
