@@ -1,6 +1,8 @@
 import { useQuery } from 'convex/react';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import {
   AlertCircle,
   Bell,
@@ -12,7 +14,7 @@ import {
   TrafficCone,
 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Polygon } from 'react-native-svg';
 import {
@@ -121,23 +123,36 @@ export default function HomeScreen() {
 
   return (
     <Screen edges={[]} style={{ backgroundColor: '#F4F5F7' }}>
-      {/* כותרת עליונה — גרדיאנט בשני גוונים של כחול, נמתחת מאחורי פס הסטטוס.
-          התפריט נשאר בצד ימין, הפעמון עבר לצד שמאל, השם+לוגו במרכז */}
-      <LinearGradient
-        colors={[palette.primaryDark, palette.primary]}
+      {/* כותרת עליונה — לבנה עם גוון כחול עדין + Liquid Glass מטושטש מעליה
+          (לא כחול שטוח!). סטטוס-בר כהה כל עוד המסך הזה בפוקוס. */}
+      <StatusBar style="dark" backgroundColor="#EAF1FE" />
+      <View
         style={{
           flexDirection: rtl.flexDirection,
           alignItems: 'center',
           paddingHorizontal: 16,
           paddingTop: insets.top + 8,
           paddingBottom: 12,
+          overflow: 'hidden',
         }}
       >
+        <BlurView
+          intensity={45}
+          tint="light"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: 'rgba(219,232,252,0.75)',
+              borderBottomWidth: StyleSheet.hairlineWidth,
+              borderBottomColor: 'rgba(29,78,216,0.12)',
+            },
+          ]}
+        />
         <Pressable
           hitSlop={10}
           onPress={() => router.push('/(authenticated)/settings')}
         >
-          <Menu color="#fff" size={24} />
+          <Menu color={palette.primary} size={24} />
         </Pressable>
         <View
           style={{
@@ -148,15 +163,15 @@ export default function HomeScreen() {
             gap: 8,
           }}
         >
-          <T color="#fff" weight="bold" size={19}>
+          <T color={palette.black} weight="bold" size={19}>
             תיאוריה
           </T>
           <LogoMark />
         </View>
         <Pressable hitSlop={10}>
-          <Bell color="#fff" size={22} />
+          <Bell color={palette.primary} size={22} />
         </Pressable>
-      </LinearGradient>
+      </View>
 
       <ScrollView
         style={{ backgroundColor: '#F4F5F7' }}
