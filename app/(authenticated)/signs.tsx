@@ -139,6 +139,7 @@ export default function SignsScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
             contentContainerStyle={{
               paddingHorizontal: 12,
               gap: 8,
@@ -176,6 +177,7 @@ export default function SignsScreen() {
 
           <ScrollView
             contentContainerStyle={{ padding: 12, paddingBottom: 12, gap: 10 }}
+            keyboardShouldPersistTaps="handled"
           >
             {visibleItems.map((item) => (
               <Card

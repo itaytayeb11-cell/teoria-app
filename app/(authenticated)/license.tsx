@@ -78,7 +78,10 @@ export default function LicenseScreen() {
   return (
     <Screen edges={[]}>
       <ScreenHeader title="השלמת" highlight="פרופיל" hideBack={isOnboarding} />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, gap: 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <TextField
           label="שם מלא"
           value={currentName}

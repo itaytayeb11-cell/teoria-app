@@ -3,7 +3,6 @@ import { useQuery } from 'convex/react';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import {
   AlertCircle,
   Bell,
@@ -147,269 +146,274 @@ export default function HomeScreen() {
   ];
 
   return (
-    <Screen edges={[]} style={{ backgroundColor: '#F4F5F7' }}>
-      {/* כותרת עליונה — לבנה עם גוון כחול עדין + Liquid Glass מטושטש מעליה
-          (לא כחול שטוח!). סטטוס-בר כהה כל עוד המסך הזה בפוקוס. */}
-      <StatusBar style="dark" backgroundColor="#EAF1FE" />
-      <View
-        style={{
-          flexDirection: rtl.flexDirection,
-          alignItems: 'center',
-          paddingHorizontal: 16,
-          paddingTop: insets.top + 8,
-          paddingBottom: 12,
-          overflow: 'hidden',
-        }}
-      >
-        <BlurView
-          intensity={45}
-          tint="light"
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              backgroundColor: 'rgba(219,232,252,0.75)',
-              borderBottomWidth: StyleSheet.hairlineWidth,
-              borderBottomColor: 'rgba(29,78,216,0.12)',
-            },
-          ]}
-        />
-        <Pressable
-          hitSlop={10}
-          onPress={() => router.push('/(authenticated)/settings')}
-        >
-          <Menu color={palette.primary} size={24} />
-        </Pressable>
-        <View
-          style={{
-            flex: 1,
-            flexDirection: rtl.flexDirection,
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-          }}
-        >
-          <T color={palette.black} weight="bold" size={19}>
-            תיאוריה
-          </T>
-          <LogoMark />
-        </View>
-        <Pressable hitSlop={10}>
-          <Bell color={palette.primary} size={22} />
-        </Pressable>
-      </View>
-
-      <ScrollView
-        style={{ backgroundColor: '#F4F5F7' }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}
-      >
-        {/* ברכה */}
-        <View>
-          <T weight="bold" size={22}>
-            {greeting()}, {home?.name ?? 'תלמיד'}! 🚗
-          </T>
-          <T color={palette.muted} size={14} style={{ marginTop: 2 }}>
-            {home
-              ? `אתה קרוב ב-${readiness}% למוכנות מלאה למבחן`
-              : 'טוען את הנתונים שלך…'}
-          </T>
-        </View>
-
-        {/* שורת ווידג'טים — יהלום (רצף) / טבעת-קרוסלה (מדדים) / טרופי (ניקוד) */}
-        <View
-          style={{
-            flexDirection: rtl.flexDirection,
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingHorizontal: 4,
-          }}
-        >
-          <StatBadge
-            emoji="💎"
-            value={home?.streakDays ?? 0}
-            color={palette.primary}
-            onPress={() => router.push('/(authenticated)/streak')}
-          />
-          <MetricRingCarousel size={128} pages={metricPages} />
-          <StatBadge
-            emoji="🏆"
-            value={home?.correctAnswered ?? 0}
-            color={palette.warning}
-            onPress={() => router.push('/(authenticated)/leaderboard')}
-          />
-        </View>
-
-        {/* קרוסלת נושאים */}
-        {categories && categories.length > 0 ? (
-          <View style={{ gap: 10 }}>
-            <T weight="bold" size={15}>
-              התקדמות לפי נושא
-            </T>
-            <CategoryCarousel
-              categories={categories}
-              accuracyByCat={accuracyByCat}
-            />
-          </View>
-        ) : null}
-
-        {/* מבחן שנקטע — אפשרות להמשיך */}
-        {activeSession && activeSession.answers.length > 0 ? (
-          <Card
-            onPress={() =>
-              router.push(`/(authenticated)/quiz?resume=${activeSession._id}`)
-            }
-            style={{
-              flexDirection: rtl.flexDirection,
-              alignItems: 'center',
-              gap: 12,
-              backgroundColor: palette.primaryTint,
-            }}
-          >
-            <T size={22}>⏸️</T>
-            <View style={{ flex: 1 }}>
-              <T weight="bold" size={15}>
-                {activeSession.mode === 'simulation'
-                  ? 'מבחן מדמה שנקטע'
-                  : 'תרגול שנקטע'}
-              </T>
-              <T color={palette.muted} size={13}>
-                {activeSession.answers.length} מתוך{' '}
-                {activeSession.totalQuestions} שאלות — המשך מאיפה שעצרת
-              </T>
-            </View>
-            <ChevronLeft color={palette.primary} size={20} />
-          </Card>
-        ) : null}
-
-        {/* מבחן מדמה */}
+    <Screen edges={[]}>
+      {/* רקע כללי למסך: לבן למעלה, דוהה לגוונים של כחול ככל שיורדים */}
+      <LinearGradient colors={['#FFFFFF', '#D7E4FB']} style={{ flex: 1 }}>
+        {/* כותרת עליונה — כחול מלא (כמו במקור), לא בהיר */}
         <LinearGradient
-          colors={[palette.primary, palette.primaryDark]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ borderRadius: 18, padding: 18 }}
+          colors={[palette.primaryDark, palette.primary]}
+          style={{
+            flexDirection: rtl.flexDirection,
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingTop: insets.top + 8,
+            paddingBottom: 12,
+          }}
         >
-          <T color="rgba(255,255,255,0.85)" size={12}>
-            ⏱ סימולציה רשמית משרד הרישוי
-          </T>
-          <T color="#fff" weight="bold" size={22} style={{ marginTop: 4 }}>
-            מבחן תיאוריה אמיתי
-          </T>
-          <T color="rgba(255,255,255,0.9)" size={13} style={{ marginTop: 4 }}>
-            30 שאלות אקראיות • 40 דקות • עד 4 שגיאות למעבר
-          </T>
           <Pressable
-            onPress={() => router.push('/(authenticated)/quiz?mode=simulation')}
+            hitSlop={10}
+            onPress={() => router.push('/(authenticated)/settings')}
+          >
+            <Menu color="#fff" size={24} />
+          </Pressable>
+          <View
             style={{
-              backgroundColor: '#fff',
-              borderRadius: 12,
-              height: 50,
-              marginTop: 14,
+              flex: 1,
+              flexDirection: rtl.flexDirection,
               alignItems: 'center',
               justifyContent: 'center',
-              flexDirection: rtl.flexDirection,
               gap: 8,
             }}
           >
-            <Play color={palette.primary} size={18} fill={palette.primary} />
-            <T color={palette.primary} weight="bold" size={16}>
-              התחל מבחן עכשיו
+            <T color="#fff" weight="bold" size={19}>
+              תיאוריה
             </T>
+            <LogoMark />
+          </View>
+          <Pressable hitSlop={10}>
+            <Bell color="#fff" size={22} />
           </Pressable>
         </LinearGradient>
 
-        {/* גריד פעולות */}
-        <View style={{ flexDirection: rtl.flexDirection, gap: 12 }}>
-          <FeatureCard
-            title="לוח תמרורים"
-            subtitle="250+ תמרורים רשמיים"
-            action="צפה במילון"
-            actionColor={palette.warning}
-            iconBg="#FDEBCF"
-            icon={<TrafficCone color={palette.warning} size={22} />}
-            onPress={() => router.push('/(authenticated)/signs')}
-          />
-          <FeatureCard
-            title="תרגול נושאים"
-            subtitle="זכות קדימה, רכב ועוד"
-            action="התחל תרגול"
-            actionColor={palette.primary}
-            iconBg="#E4EAFB"
-            icon={<Shapes color={palette.primary} size={22} />}
-            onPress={() => router.push('/(authenticated)/practice')}
-          />
-        </View>
-        <View style={{ flexDirection: rtl.flexDirection, gap: 12 }}>
-          <FeatureCard
-            title="שאלות שמורות"
-            subtitle={`${home?.savedCount ?? 0} שאלות לשינון חוזר`}
-            action="תרגל שמורים"
-            actionColor={palette.success}
-            iconBg="#D4F5E2"
-            icon={<Bookmark color={palette.success} size={22} />}
-            onPress={() => router.push('/(authenticated)/saved')}
-          />
-          <FeatureCard
-            title="מחסן הטעויות"
-            subtitle="חיזוק נקודות תורפה"
-            action="תקן טעויות"
-            actionColor={palette.danger}
-            iconBg="#FCE0E0"
-            icon={<AlertCircle color={palette.danger} size={22} />}
-            badge={
-              home && home.mistakeCount > 0
-                ? `${home.mistakeCount} שגיאות`
-                : undefined
-            }
-            onPress={() => router.push('/(authenticated)/mistakes')}
-          />
-        </View>
+        <ScrollView
+          style={{ backgroundColor: 'transparent' }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}
+        >
+          {/* פאנל זכוכית (Liquid Glass) — עוטף את הברכה ושורת הווידג'טים,
+              יושב על הרקע הלבן-לכחול שמעליו */}
+          <View style={{ borderRadius: 24, overflow: 'hidden' }}>
+            <BlurView
+              intensity={40}
+              tint="light"
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: 'rgba(255,255,255,0.6)' },
+              ]}
+            />
+            <View style={{ padding: 16, gap: 16 }}>
+              {/* ברכה */}
+              <View>
+                <T weight="bold" size={22}>
+                  {greeting()}, {home?.name ?? 'תלמיד'}! 🚗
+                </T>
+                <T color={palette.muted} size={14} style={{ marginTop: 2 }}>
+                  {home
+                    ? `אתה קרוב ב-${readiness}% למוכנות מלאה למבחן`
+                    : 'טוען את הנתונים שלך…'}
+                </T>
+              </View>
 
-        {/* סיכום התקדמות */}
-        <Card>
-          <View
-            style={{
-              flexDirection: rtl.flexDirection,
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 12,
-            }}
+              {/* שורת ווידג'טים — יהלום (רצף) / טבעת-קרוסלה (מדדים) / טרופי (ניקוד) */}
+              <View
+                style={{
+                  flexDirection: rtl.flexDirection,
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 4,
+                }}
+              >
+                <StatBadge
+                  emoji="💎"
+                  value={home?.streakDays ?? 0}
+                  color={palette.primary}
+                  onPress={() => router.push('/(authenticated)/streak')}
+                />
+                <MetricRingCarousel size={128} pages={metricPages} />
+                <StatBadge
+                  emoji="🏆"
+                  value={home?.correctAnswered ?? 0}
+                  color={palette.warning}
+                  onPress={() => router.push('/(authenticated)/leaderboard')}
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* קרוסלת נושאים */}
+          {categories && categories.length > 0 ? (
+            <View style={{ gap: 10 }}>
+              <T weight="bold" size={15}>
+                התקדמות לפי נושא
+              </T>
+              <CategoryCarousel
+                categories={categories}
+                accuracyByCat={accuracyByCat}
+              />
+            </View>
+          ) : null}
+
+          {/* מבחן שנקטע — אפשרות להמשיך */}
+          {activeSession && activeSession.answers.length > 0 ? (
+            <Card
+              onPress={() =>
+                router.push(`/(authenticated)/quiz?resume=${activeSession._id}`)
+              }
+              style={{
+                flexDirection: rtl.flexDirection,
+                alignItems: 'center',
+                gap: 12,
+                backgroundColor: palette.primaryTint,
+              }}
+            >
+              <T size={22}>⏸️</T>
+              <View style={{ flex: 1 }}>
+                <T weight="bold" size={15}>
+                  {activeSession.mode === 'simulation'
+                    ? 'מבחן מדמה שנקטע'
+                    : 'תרגול שנקטע'}
+                </T>
+                <T color={palette.muted} size={13}>
+                  {activeSession.answers.length} מתוך{' '}
+                  {activeSession.totalQuestions} שאלות — המשך מאיפה שעצרת
+                </T>
+              </View>
+              <ChevronLeft color={palette.primary} size={20} />
+            </Card>
+          ) : null}
+
+          {/* מבחן מדמה */}
+          <LinearGradient
+            colors={[palette.primary, palette.primaryDark]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ borderRadius: 18, padding: 18 }}
           >
-            <Pressable onPress={() => router.push('/(authenticated)/stats')}>
-              <T color={palette.primary} weight="bold" size={13}>
-                סטטיסטיקה מלאה
+            <T color="rgba(255,255,255,0.85)" size={12}>
+              ⏱ סימולציה רשמית משרד הרישוי
+            </T>
+            <T color="#fff" weight="bold" size={22} style={{ marginTop: 4 }}>
+              מבחן תיאוריה אמיתי
+            </T>
+            <T color="rgba(255,255,255,0.9)" size={13} style={{ marginTop: 4 }}>
+              30 שאלות אקראיות • 40 דקות • עד 4 שגיאות למעבר
+            </T>
+            <Pressable
+              onPress={() =>
+                router.push('/(authenticated)/quiz?mode=simulation')
+              }
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: 12,
+                height: 50,
+                marginTop: 14,
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: rtl.flexDirection,
+                gap: 8,
+              }}
+            >
+              <Play color={palette.primary} size={18} fill={palette.primary} />
+              <T color={palette.primary} weight="bold" size={16}>
+                התחל מבחן עכשיו
               </T>
             </Pressable>
-            <T weight="bold" size={17}>
-              סיכום התקדמות אישי
-            </T>
-          </View>
-          <View style={{ flexDirection: rtl.flexDirection, gap: 10 }}>
-            <MiniStat value={home?.totalQuizzes ?? 0} label="מבחנים עברו" />
-            <MiniStat
-              value={home?.mistakeCount ?? 0}
-              label="לתיקון"
-              color={palette.danger}
-            />
-            <MiniStat
-              value={home?.correctAnswered ?? 0}
-              label="נענו נכון"
-              color={palette.success}
-            />
-          </View>
-        </Card>
-      </ScrollView>
+          </LinearGradient>
 
-      <ConfirmModal
-        visible={showDateReminder}
-        title="מתי מבחן התאוריה שלך?"
-        message="קביעת תאריך עוזרת לנו להראות לך כמה זמן נשאר עד המבחן. אפשר לקבוע אותו עכשיו או בהמשך מההגדרות."
-        confirmLabel="קבע תאריך"
-        cancelLabel="אחר כך"
-        onConfirm={() => {
-          setShowDateReminder(false);
-          router.push('/(authenticated)/license');
-        }}
-        onCancel={() => setShowDateReminder(false)}
-      />
+          {/* גריד פעולות */}
+          <View style={{ flexDirection: rtl.flexDirection, gap: 12 }}>
+            <FeatureCard
+              title="לוח תמרורים"
+              subtitle="250+ תמרורים רשמיים"
+              action="צפה במילון"
+              actionColor={palette.warning}
+              iconBg="#FDEBCF"
+              icon={<TrafficCone color={palette.warning} size={22} />}
+              onPress={() => router.push('/(authenticated)/signs')}
+            />
+            <FeatureCard
+              title="תרגול נושאים"
+              subtitle="זכות קדימה, רכב ועוד"
+              action="התחל תרגול"
+              actionColor={palette.primary}
+              iconBg="#E4EAFB"
+              icon={<Shapes color={palette.primary} size={22} />}
+              onPress={() => router.push('/(authenticated)/practice')}
+            />
+          </View>
+          <View style={{ flexDirection: rtl.flexDirection, gap: 12 }}>
+            <FeatureCard
+              title="שאלות שמורות"
+              subtitle={`${home?.savedCount ?? 0} שאלות לשינון חוזר`}
+              action="תרגל שמורים"
+              actionColor={palette.success}
+              iconBg="#D4F5E2"
+              icon={<Bookmark color={palette.success} size={22} />}
+              onPress={() => router.push('/(authenticated)/saved')}
+            />
+            <FeatureCard
+              title="מחסן הטעויות"
+              subtitle="חיזוק נקודות תורפה"
+              action="תקן טעויות"
+              actionColor={palette.danger}
+              iconBg="#FCE0E0"
+              icon={<AlertCircle color={palette.danger} size={22} />}
+              badge={
+                home && home.mistakeCount > 0
+                  ? `${home.mistakeCount} שגיאות`
+                  : undefined
+              }
+              onPress={() => router.push('/(authenticated)/mistakes')}
+            />
+          </View>
+
+          {/* סיכום התקדמות */}
+          <Card>
+            <View
+              style={{
+                flexDirection: rtl.flexDirection,
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 12,
+              }}
+            >
+              <Pressable onPress={() => router.push('/(authenticated)/stats')}>
+                <T color={palette.primary} weight="bold" size={13}>
+                  סטטיסטיקה מלאה
+                </T>
+              </Pressable>
+              <T weight="bold" size={17}>
+                סיכום התקדמות אישי
+              </T>
+            </View>
+            <View style={{ flexDirection: rtl.flexDirection, gap: 10 }}>
+              <MiniStat value={home?.totalQuizzes ?? 0} label="מבחנים עברו" />
+              <MiniStat
+                value={home?.mistakeCount ?? 0}
+                label="לתיקון"
+                color={palette.danger}
+              />
+              <MiniStat
+                value={home?.correctAnswered ?? 0}
+                label="נענו נכון"
+                color={palette.success}
+              />
+            </View>
+          </Card>
+        </ScrollView>
+
+        <ConfirmModal
+          visible={showDateReminder}
+          title="מתי מבחן התאוריה שלך?"
+          message="קביעת תאריך עוזרת לנו להראות לך כמה זמן נשאר עד המבחן. אפשר לקבוע אותו עכשיו או בהמשך מההגדרות."
+          confirmLabel="קבע תאריך"
+          cancelLabel="אחר כך"
+          onConfirm={() => {
+            setShowDateReminder(false);
+            router.push('/(authenticated)/license');
+          }}
+          onCancel={() => setShowDateReminder(false)}
+        />
+      </LinearGradient>
     </Screen>
   );
 }
