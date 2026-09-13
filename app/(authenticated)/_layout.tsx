@@ -132,6 +132,7 @@ export default function AuthenticatedLayout() {
             width: '100%',
             alignItems: 'center',
             justifyContent: 'center',
+            paddingTop: 10,
           }}
         >
           {children}
