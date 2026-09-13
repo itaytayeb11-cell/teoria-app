@@ -109,18 +109,18 @@ export default function AuthenticatedLayout() {
     const focused = props['aria-selected'] === true;
     // מתעלמים מה-style המקורי (חוץ מ-flex, לחלוקה שווה בין הטאבים) —
     // הוא נושא יישור פנימי של הספרייה שדחף את האייקון הצידה בתוך הבועה.
-    // עוטפים את children בתוכן ב-View ממורכז משלנו במקום.
+    // עוטפים את children ב-View ממורכז משלנו במקום. בלי overflow:hidden —
+    // זה מה שחתך את האייקונים כשהבועה יצאה נמוכה מגובה התוכן.
     const flat = StyleSheet.flatten(style) as { flex?: number } | undefined;
     return (
       <Pressable
         {...rest}
         style={{
           flex: flat?.flex ?? 1,
-          marginVertical: 6,
+          marginVertical: 3,
           marginHorizontal: 3,
           borderRadius: 20,
           backgroundColor: focused ? '#fff' : 'transparent',
-          overflow: 'hidden',
         }}
       >
         <View
