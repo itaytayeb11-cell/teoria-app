@@ -20,6 +20,7 @@ import { palette } from '@/constants/Colors';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
 import { api } from '@/convex/_generated/api';
 import { usePushRegistration } from '@/hooks/usePushRegistration';
+import { needsExplicitRTL } from '@/lib/rtl';
 
 // טאבים גלויים בסרגל התחתון (בסדר RTL: הראשון מימין)
 const TABS = [
@@ -97,6 +98,12 @@ export default function AuthenticatedLayout() {
   // כי השילוב המובנה עם ה-blur יצר קו/שכבה לבנה שגויה בפועל.
   const barBottom = Math.max(insets.bottom, 14);
 
+  // הטאב-בר עצמו הוא 'row' רגיל שלא מתהפך אוטומטית ל-RTL (בניגוד לרוב
+  // הרכיבים באפליקציה) — ב-Expo Go זה גורם לטאבים להיראות בסדר הפוך
+  // (בית משמאל במקום מימין). באנדרואיד/iOS build עם RTL טבעי הסדר המקורי
+  // כבר נכון, אז הופכים את המערך רק כשצריך RTL מפורש.
+  const orderedTabs = needsExplicitRTL() ? [...TABS].reverse() : TABS;
+
   const renderTabButton = (props: BottomTabBarButtonProps) => {
     const { children, style, ref: _ref, ...rest } = props;
     const focused = props['aria-selected'] === true;
@@ -158,7 +165,7 @@ export default function AuthenticatedLayout() {
         ),
       }}
     >
-      {TABS.map((t) => (
+      {orderedTabs.map((t) => (
         <Tabs.Screen
           key={t.name}
           name={t.name}
