@@ -156,26 +156,30 @@ export function useQuiz() {
     [questions, index, sessionId, answers, submitAnswerMut]
   );
 
-  // שולח את כל התשובות המקומיות לשרת (מבחן מדמה, לפני סיום)
+  // שולח את כל התשובות המקומיות לשרת (מבחן מדמה, לפני סיום).
+  // כל הקריאות יוצאות במקביל (לא await בלולאה) — עד 30 שאלות בהמתנה
+  // עוקבת = כמה שניות טעינה, בעוד שבמקביל זה בערך זמן קריאה בודדת.
   const submitAll = useCallback(async () => {
     if (!sessionId) {
       return;
     }
-    for (const [i, rec] of Object.entries(answers)) {
-      const q = questions[Number(i)];
-      if (!q) {
-        continue;
-      }
-      try {
-        await submitAnswerMut({
-          sessionId: sessionId as never,
-          questionId: q._id as never,
-          selected: rec.selected,
-        });
-      } catch {
-        // ממשיכים גם אם תשובה אחת נכשלה
-      }
-    }
+    await Promise.all(
+      Object.entries(answers).map(async ([i, rec]) => {
+        const q = questions[Number(i)];
+        if (!q) {
+          return;
+        }
+        try {
+          await submitAnswerMut({
+            sessionId: sessionId as never,
+            questionId: q._id as never,
+            selected: rec.selected,
+          });
+        } catch {
+          // ממשיכים גם אם תשובה אחת נכשלה
+        }
+      })
+    );
   }, [sessionId, answers, questions, submitAnswerMut]);
 
   const next = useCallback(() => {

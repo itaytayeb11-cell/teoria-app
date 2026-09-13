@@ -62,17 +62,6 @@ function LogoMark() {
   );
 }
 
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) {
-    return 'בוקר טוב';
-  }
-  if (h < 18) {
-    return 'צהריים טובים';
-  }
-  return 'ערב טוב';
-}
-
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -188,18 +177,6 @@ export default function HomeScreen() {
           style={{ backgroundColor: 'transparent' }}
           contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}
         >
-          {/* ברכה — בלי רקע, יושבת ישירות על גרדיאנט המסך */}
-          <View>
-            <T weight="bold" size={22}>
-              {greeting()}, {home?.name ?? 'תלמיד'}! 🚗
-            </T>
-            <T color={palette.muted} size={14} style={{ marginTop: 2 }}>
-              {home
-                ? `אתה קרוב ב-${readiness}% למוכנות מלאה למבחן`
-                : 'טוען את הנתונים שלך…'}
-            </T>
-          </View>
-
           {/* שורת ווידג'טים — יהלום (רצף) / טבעת-קרוסלה (מדדים) / טרופי (ניקוד).
               כל פריט בפני עצמו בלי רקע — משתקף על גבי גרדיאנט המסך */}
           <View
