@@ -14,6 +14,7 @@ import {
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Polygon } from 'react-native-svg';
 import {
   CategoryCarousel,
   type MetricPage,
@@ -24,6 +25,38 @@ import { Card, Screen, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { api } from '@/convex/_generated/api';
 import { rtl } from '@/lib/rtl';
+
+// לוגו האפליקציה — תמרור משולש עם האות "ל" (רמז ל"לומד נהיגה"), ליד השם בכותרת
+function LogoMark() {
+  return (
+    <View
+      style={{
+        width: 26,
+        height: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Svg
+        width={26}
+        height={24}
+        viewBox="0 0 26 24"
+        style={{ position: 'absolute' }}
+      >
+        <Polygon
+          points="13,1 25,22 1,22"
+          fill={palette.primary}
+          stroke="#fff"
+          strokeWidth={2}
+          strokeLinejoin="round"
+        />
+      </Svg>
+      <T color="#fff" weight="bold" size={13} style={{ marginTop: 4 }}>
+        ל
+      </T>
+    </View>
+  );
+}
 
 function greeting() {
   const h = new Date().getHours();
@@ -89,38 +122,40 @@ export default function HomeScreen() {
   return (
     <Screen edges={[]} style={{ backgroundColor: '#F4F5F7' }}>
       {/* כותרת עליונה — גרדיאנט בשני גוונים של כחול, נמתחת מאחורי פס הסטטוס.
-          התפריט וההתראות בצד ימין (ראשון ב-RTL), שם האפליקציה בצד שמאל */}
+          התפריט נשאר בצד ימין, הפעמון עבר לצד שמאל, השם+לוגו במרכז */}
       <LinearGradient
         colors={[palette.primaryDark, palette.primary]}
         style={{
           flexDirection: rtl.flexDirection,
           alignItems: 'center',
-          justifyContent: 'space-between',
           paddingHorizontal: 16,
           paddingTop: insets.top + 8,
           paddingBottom: 12,
         }}
       >
+        <Pressable
+          hitSlop={10}
+          onPress={() => router.push('/(authenticated)/settings')}
+        >
+          <Menu color="#fff" size={24} />
+        </Pressable>
         <View
           style={{
+            flex: 1,
             flexDirection: rtl.flexDirection,
             alignItems: 'center',
-            gap: 16,
+            justifyContent: 'center',
+            gap: 8,
           }}
         >
-          <Pressable
-            hitSlop={10}
-            onPress={() => router.push('/(authenticated)/settings')}
-          >
-            <Menu color="#fff" size={24} />
-          </Pressable>
-          <Pressable hitSlop={10}>
-            <Bell color="#fff" size={22} />
-          </Pressable>
+          <T color="#fff" weight="bold" size={19}>
+            תיאוריה
+          </T>
+          <LogoMark />
         </View>
-        <T color="#fff" weight="bold" size={19}>
-          תיאוריה
-        </T>
+        <Pressable hitSlop={10}>
+          <Bell color="#fff" size={22} />
+        </Pressable>
       </LinearGradient>
 
       <ScrollView

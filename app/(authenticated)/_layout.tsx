@@ -84,8 +84,8 @@ export default function AuthenticatedLayout() {
     return <Redirect href="/(authenticated)/license" />;
   }
 
-  // סרגל צף עם שוליים מכל הצדדים — Liquid Glass כחול, מעוגל לגמרי,
-  // הטאב הפעיל מקבל "כדור" לבן מאחורי האייקון (בדיוק כמו הרפרנס)
+  // סרגל צף עם שוליים מכל הצדדים — Liquid Glass: רקע לבן-שקוף עם גוון כחול
+  // עדין (לא כחול רווי!), מטושטש, הטאב הפעיל מקבל "כדור" לבן מאחוריו
   const barBottom = Math.max(insets.bottom, 14);
 
   return (
@@ -93,7 +93,7 @@ export default function AuthenticatedLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.primary,
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.75)',
+        tabBarInactiveTintColor: '#9AA3B2',
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         tabBarStyle: {
           position: 'absolute',
@@ -111,11 +111,15 @@ export default function AuthenticatedLayout() {
         },
         tabBarBackground: () => (
           <BlurView
-            intensity={55}
-            tint="dark"
+            intensity={45}
+            tint="light"
             style={[
               StyleSheet.absoluteFill,
-              { backgroundColor: 'rgba(29,78,216,0.62)' },
+              {
+                backgroundColor: 'rgba(234,241,254,0.72)',
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: 'rgba(29,78,216,0.12)',
+              },
             ]}
           />
         ),
