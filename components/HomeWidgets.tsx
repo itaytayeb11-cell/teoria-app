@@ -29,14 +29,23 @@ export function StatBadge(props: {
   emoji: string;
   value: number | string;
   color: string;
+  onPress?: () => void;
 }) {
-  return (
+  const content = (
     <View style={{ alignItems: 'center', width: 64 }}>
       <T size={30}>{props.emoji}</T>
       <T weight="bold" size={19} style={{ marginTop: 4 }} color={props.color}>
         {props.value}
       </T>
     </View>
+  );
+  if (!props.onPress) {
+    return content;
+  }
+  return (
+    <Pressable onPress={props.onPress} hitSlop={6}>
+      {content}
+    </Pressable>
   );
 }
 

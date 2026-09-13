@@ -38,6 +38,8 @@ const HIDDEN: { name: string; focus?: boolean }[] = [
   { name: 'history' },
   { name: 'settings' },
   { name: 'saved' },
+  { name: 'streak' },
+  { name: 'leaderboard' },
 ];
 
 export default function AuthenticatedLayout() {
@@ -78,9 +80,13 @@ export default function AuthenticatedLayout() {
   if (PAYMENT_SYSTEM_ENABLED && !isPremium) {
     return <Redirect href="/(auth)/paywall" />;
   }
-  // אונבורדינג: משתמש בלי סוג רישיון — לבחור לפני כניסה לאפליקציה
+  // אונבורדינג: משתמש בלי שם או בלי סוג רישיון — להשלים פרופיל לפני כניסה
   const onLicenseScreen = segments[segments.length - 1] === 'license';
-  if (currentUser && !currentUser.licenseType && !onLicenseScreen) {
+  if (
+    currentUser &&
+    (!currentUser.licenseType || !currentUser.fullName) &&
+    !onLicenseScreen
+  ) {
     return <Redirect href="/(authenticated)/license" />;
   }
 

@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from 'convex/react';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,6 +15,7 @@ import {
   TrafficCone,
 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Polygon } from 'react-native-svg';
@@ -23,10 +25,12 @@ import {
   MetricRingCarousel,
   StatBadge,
 } from '@/components/HomeWidgets';
-import { Card, Screen, T } from '@/components/ui';
+import { Card, ConfirmModal, Screen, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { api } from '@/convex/_generated/api';
 import { rtl } from '@/lib/rtl';
+
+const TEST_DATE_REMINDER_KEY = 'testDateReminderShownOn';
 
 // לוגו האפליקציה — תמרור משולש עם האות "ל" (רמז ל"לומד נהיגה"), ליד השם בכותרת
 function LogoMark() {
@@ -78,6 +82,27 @@ export default function HomeScreen() {
   const activeSession = useQuery(api.quiz.getActiveSession);
   const categories = useQuery(api.questions.listCategories);
   const stats = useQuery(api.stats.getMyStats);
+  const [showDateReminder, setShowDateReminder] = useState(false);
+
+  const testDate = home?.testDate;
+  // תזכורת פעם ביום (לא בכל פתיחה) כל עוד לא נקבע תאריך מבחן
+  useEffect(() => {
+    if (testDate === undefined || testDate !== null) {
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const last = await AsyncStorage.getItem(TEST_DATE_REMINDER_KEY);
+      if (!cancelled && last !== today) {
+        await AsyncStorage.setItem(TEST_DATE_REMINDER_KEY, today);
+        setShowDateReminder(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [testDate]);
 
   const readiness = home?.readiness ?? 0;
 
@@ -202,12 +227,14 @@ export default function HomeScreen() {
             emoji="💎"
             value={home?.streakDays ?? 0}
             color={palette.primary}
+            onPress={() => router.push('/(authenticated)/streak')}
           />
           <MetricRingCarousel size={128} pages={metricPages} />
           <StatBadge
             emoji="🏆"
             value={home?.correctAnswered ?? 0}
             color={palette.warning}
+            onPress={() => router.push('/(authenticated)/leaderboard')}
           />
         </View>
 
@@ -370,6 +397,19 @@ export default function HomeScreen() {
           </View>
         </Card>
       </ScrollView>
+
+      <ConfirmModal
+        visible={showDateReminder}
+        title="מתי מבחן התאוריה שלך?"
+        message="קביעת תאריך עוזרת לנו להראות לך כמה זמן נשאר עד המבחן. אפשר לקבוע אותו עכשיו או בהמשך מההגדרות."
+        confirmLabel="קבע תאריך"
+        cancelLabel="אחר כך"
+        onConfirm={() => {
+          setShowDateReminder(false);
+          router.push('/(authenticated)/license');
+        }}
+        onCancel={() => setShowDateReminder(false)}
+      />
     </Screen>
   );
 }

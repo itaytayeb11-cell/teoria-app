@@ -66,7 +66,7 @@ export default function SettingsScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 10 }}
       >
         <Row
-          label={`סוג רישיון: ${licenseLabel(user?.licenseType ?? undefined)}`}
+          label={`עריכת פרופיל (${licenseLabel(user?.licenseType ?? undefined)})`}
           onPress={() => router.push('/(authenticated)/license')}
         />
         <Row

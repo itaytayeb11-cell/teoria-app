@@ -12,6 +12,7 @@ import {
   type StyleProp,
   StyleSheet,
   Text,
+  TextInput,
   type TextStyle,
   View,
   type ViewStyle,
@@ -120,6 +121,46 @@ export function T(props: {
     >
       {props.children}
     </Text>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// TextField — שדה טקסט עם תווית, בסגנון אחיד (משמש בטפסי פרופיל/אונבורדינג)
+// ----------------------------------------------------------------------------
+export function TextField(props: {
+  label: string;
+  value: string;
+  onChangeText: (t: string) => void;
+  placeholder?: string;
+  keyboardType?: 'default' | 'email-address' | 'numeric';
+}) {
+  const c = useAppColors();
+  return (
+    <View style={{ marginBottom: 16 }}>
+      <T weight="medium" size={14} style={{ marginBottom: 6 }}>
+        {props.label}
+      </T>
+      <TextInput
+        value={props.value}
+        onChangeText={props.onChangeText}
+        placeholder={props.placeholder}
+        placeholderTextColor="#9CA3AF"
+        keyboardType={props.keyboardType}
+        autoCorrect={false}
+        style={{
+          backgroundColor: c.card,
+          borderWidth: 1,
+          borderColor: c.border,
+          borderRadius: 12,
+          paddingHorizontal: 14,
+          paddingVertical: 14,
+          fontSize: 16,
+          color: c.text,
+          textAlign: rtl.textAlign,
+          writingDirection: 'rtl',
+        }}
+      />
+    </View>
   );
 }
 
