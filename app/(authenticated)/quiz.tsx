@@ -139,10 +139,7 @@ export default function QuizScreen() {
       // לא נתקע כפתור מת לצמיתות — משחררים כדי שאפשר יהיה לנסות שוב
       finishingRef.current = false;
       setFinishing(false);
-      Alert.alert(
-        'שגיאה בשליחת המבחן',
-        'בדוק את החיבור לאינטרנט ונסה שוב.'
-      );
+      Alert.alert('שגיאה בשליחת המבחן', 'בדוק את החיבור לאינטרנט ונסה שוב.');
     }
   }, [isPractice, submitAll, finish, sessionId, correctCount, router]);
 
@@ -482,6 +479,7 @@ export default function QuizScreen() {
           <Button
             label={isLast ? 'סיום' : picked ? 'הבא' : 'דלג'}
             onPress={onNext}
+            loading={isLast && finishing}
           />
         ) : (
           <>
@@ -491,7 +489,11 @@ export default function QuizScreen() {
               prevDisabled={quiz.index === 0}
             />
             {isLast ? (
-              <Button label="סיים מבחן" onPress={() => setConfirmExit(true)} />
+              <Button
+                label="סיים מבחן"
+                onPress={() => setConfirmExit(true)}
+                loading={finishing}
+              />
             ) : null}
           </>
         )}
@@ -509,6 +511,7 @@ export default function QuizScreen() {
         cancelLabel="חזרה למבחן"
         onConfirm={goToResults}
         onCancel={() => setConfirmExit(false)}
+        loading={finishing}
       />
     </Screen>
   );
