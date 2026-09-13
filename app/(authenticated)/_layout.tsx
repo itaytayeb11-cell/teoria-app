@@ -41,6 +41,7 @@ const HIDDEN: { name: string; focus?: boolean }[] = [
   { name: 'saved' },
   { name: 'streak' },
   { name: 'leaderboard' },
+  { name: 'faq' },
 ];
 
 export default function AuthenticatedLayout() {

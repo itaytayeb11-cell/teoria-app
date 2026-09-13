@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Polygon } from 'react-native-svg';
+import { AppDrawer } from '@/components/AppDrawer';
 import {
   CategoryCarousel,
   type MetricPage,
@@ -70,6 +71,7 @@ export default function HomeScreen() {
   const categories = useQuery(api.questions.listCategories);
   const stats = useQuery(api.stats.getMyStats);
   const [showDateReminder, setShowDateReminder] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const testDate = home?.testDate;
   // תזכורת פעם ביום (לא בכל פתיחה) כל עוד לא נקבע תאריך מבחן
@@ -148,10 +150,7 @@ export default function HomeScreen() {
             paddingBottom: 12,
           }}
         >
-          <Pressable
-            hitSlop={10}
-            onPress={() => router.push('/(authenticated)/settings')}
-          >
+          <Pressable hitSlop={10} onPress={() => setDrawerOpen(true)}>
             <Menu color="#fff" size={24} />
           </Pressable>
           <View
@@ -376,6 +375,8 @@ export default function HomeScreen() {
           }}
           onCancel={() => setShowDateReminder(false)}
         />
+
+        <AppDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
       </LinearGradient>
     </Screen>
   );
