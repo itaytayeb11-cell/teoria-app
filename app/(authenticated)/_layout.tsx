@@ -1,4 +1,3 @@
-import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { BlurView } from 'expo-blur';
 import {
@@ -13,7 +12,7 @@ import {
   ListChecks,
   TrafficCone,
 } from 'lucide-react-native';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
@@ -93,9 +92,8 @@ export default function AuthenticatedLayout() {
   }
 
   // סרגל צף עם שוליים מכל הצדדים — Liquid Glass: רקע לבן-שקוף עם גוון כחול
-  // עדין (לא כחול רווי!), מטושטש, הטאב הפעיל מקבל "כדור" לבן מאחוריו.
-  // הכדור מצויר ידנית ב-tabBarButton (במקום tabBarActiveBackgroundColor)
-  // כי השילוב המובנה עם ה-blur יצר קו/שכבה לבנה שגויה בפועל.
+  // עדין, מטושטש. הטאב הפעיל מסומן רק בצבע (כחול) — בלי "כדור" רקע לבן,
+  // אחרי כמה סבבים שבהם ה"כדור" יצא ממורכז/חתוך/גבוה מדי. פשוט ועובד.
   const barBottom = Math.max(insets.bottom, 14);
 
   // הטאב-בר עצמו הוא 'row' רגיל שלא מתהפך אוטומטית ל-RTL (בניגוד לרוב
@@ -104,43 +102,6 @@ export default function AuthenticatedLayout() {
   // כבר נכון, אז הופכים את המערך רק כשצריך RTL מפורש.
   const orderedTabs = needsExplicitRTL() ? [...TABS].reverse() : TABS;
 
-  const renderTabButton = (props: BottomTabBarButtonProps) => {
-    const { children, style, ref: _ref, ...rest } = props;
-    const focused = props['aria-selected'] === true;
-    // מתעלמים מה-style המקורי (חוץ מ-flex, לחלוקה שווה בין הטאבים) —
-    // הוא נושא יישור פנימי של הספרייה שדחף את האייקון הצידה בתוך הבועה.
-    // עוטפים את children ב-View ממורכז משלנו במקום. בלי overflow:hidden —
-    // זה מה שחתך את האייקונים כשהבועה יצאה נמוכה מגובה התוכן.
-    const flat = StyleSheet.flatten(style) as { flex?: number } | undefined;
-    return (
-      <Pressable
-        {...rest}
-        style={{
-          flex: flat?.flex ?? 1,
-          // גובה מפורש (לא flex:1 על ה-View הפנימי) — כדי לא להסתמך על
-          // ה-stretch האוטומטי של ההורה, שלא הבטיח מירכוז אנכי בפועל
-          height: '100%',
-          marginVertical: 3,
-          marginHorizontal: 3,
-          borderRadius: 20,
-          backgroundColor: focused ? '#fff' : 'transparent',
-        }}
-      >
-        <View
-          style={{
-            height: '100%',
-            width: '100%',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingTop: 6,
-          }}
-        >
-          {children}
-        </View>
-      </Pressable>
-    );
-  };
-
   return (
     <Tabs
       screenOptions={{
@@ -148,14 +109,13 @@ export default function AuthenticatedLayout() {
         tabBarActiveTintColor: palette.primary,
         tabBarInactiveTintColor: '#9AA3B2',
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        tabBarButton: renderTabButton,
         tabBarStyle: {
           position: 'absolute',
           left: 14,
           right: 14,
           bottom: barBottom,
-          height: 72,
-          paddingTop: 6,
+          height: 62,
+          paddingTop: 10,
           paddingHorizontal: 8,
           borderTopWidth: 0,
           borderRadius: 31,
