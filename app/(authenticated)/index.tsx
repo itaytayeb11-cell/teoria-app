@@ -148,7 +148,7 @@ export default function HomeScreen() {
   return (
     <Screen edges={[]}>
       {/* רקע כללי למסך: לבן למעלה, דוהה לגוונים של כחול ככל שיורדים */}
-      <LinearGradient colors={['#FFFFFF', '#D7E4FB']} style={{ flex: 1 }}>
+      <LinearGradient colors={['#FFFFFF', '#87A9EE']} style={{ flex: 1 }}>
         {/* כותרת עליונה — כחול מלא (כמו במקור), לא בהיר */}
         <LinearGradient
           colors={[palette.primaryDark, palette.primary]}
