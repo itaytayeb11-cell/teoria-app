@@ -1,3 +1,4 @@
+import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { BlurView } from 'expo-blur';
 import {
@@ -12,7 +13,7 @@ import {
   ListChecks,
   TrafficCone,
 } from 'lucide-react-native';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
@@ -91,8 +92,33 @@ export default function AuthenticatedLayout() {
   }
 
   // סרגל צף עם שוליים מכל הצדדים — Liquid Glass: רקע לבן-שקוף עם גוון כחול
-  // עדין (לא כחול רווי!), מטושטש, הטאב הפעיל מקבל "כדור" לבן מאחוריו
+  // עדין (לא כחול רווי!), מטושטש, הטאב הפעיל מקבל "כדור" לבן מאחוריו.
+  // הכדור מצויר ידנית ב-tabBarButton (במקום tabBarActiveBackgroundColor)
+  // כי השילוב המובנה עם ה-blur יצר קו/שכבה לבנה שגויה בפועל.
   const barBottom = Math.max(insets.bottom, 14);
+
+  const renderTabButton = (props: BottomTabBarButtonProps) => {
+    const { children, style, ref: _ref, ...rest } = props;
+    const focused = props['aria-selected'] === true;
+    return (
+      <Pressable
+        {...rest}
+        style={[
+          style,
+          {
+            marginVertical: 6,
+            marginHorizontal: 3,
+            borderRadius: 20,
+            backgroundColor: focused ? '#fff' : 'transparent',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+        ]}
+      >
+        {children}
+      </Pressable>
+    );
+  };
 
   return (
     <Tabs
@@ -101,6 +127,7 @@ export default function AuthenticatedLayout() {
         tabBarActiveTintColor: palette.primary,
         tabBarInactiveTintColor: '#9AA3B2',
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarButton: renderTabButton,
         tabBarStyle: {
           position: 'absolute',
           left: 14,
@@ -117,25 +144,18 @@ export default function AuthenticatedLayout() {
         },
         tabBarBackground: () => (
           <BlurView
-            intensity={45}
+            intensity={35}
             tint="light"
             style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: 'rgba(234,241,254,0.72)',
+                backgroundColor: 'rgba(234,241,254,0.45)',
                 borderWidth: StyleSheet.hairlineWidth,
                 borderColor: 'rgba(29,78,216,0.12)',
               },
             ]}
           />
         ),
-        tabBarItemStyle: {
-          marginVertical: 4,
-          marginHorizontal: 3,
-          borderRadius: 22,
-        },
-        tabBarActiveBackgroundColor: '#fff',
-        tabBarInactiveBackgroundColor: 'transparent',
       }}
     >
       {TABS.map((t) => (
