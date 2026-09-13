@@ -132,7 +132,7 @@ export default function AuthenticatedLayout() {
             width: '100%',
             alignItems: 'center',
             justifyContent: 'center',
-            paddingTop: 10,
+            paddingTop: 6,
           }}
         >
           {children}
@@ -154,7 +154,7 @@ export default function AuthenticatedLayout() {
           left: 14,
           right: 14,
           bottom: barBottom,
-          height: 62,
+          height: 72,
           paddingTop: 6,
           paddingHorizontal: 8,
           borderTopWidth: 0,
