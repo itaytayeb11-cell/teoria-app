@@ -20,13 +20,24 @@ export default defineSchema({
     streakDays: v.optional(v.number()), // רצף ימים — עולה רק כשמשלימים מבחן/תרגול שלם ביום הזה, מתאפס אם דילגו יום
     lastActiveDay: v.optional(v.string()), // יום השלמת מבחן אחרון (YYYY-MM-DD, שעון ישראל) — לחישוב הרצף
     testDate: v.optional(v.number()), // תאריך מבחן התאוריה המתוכנן (timestamp) — לספירה לאחור בדף הבית
+    leaderboardScore: v.optional(v.number()), // ניקוד מחושב מראש לטבלת דירוג כלל-משתמשים (מתעדכן בסיום כל מבחן)
     isActive: v.boolean(), // האם המשתמש פעיל
     createdAt: v.number(), // זמן יצירה (Timestamp)
     updatedAt: v.number(), // זמן עדכון אחרון (Timestamp)
   })
     .index('by_email', ['email']) // אינדקס לחיפוש מהיר לפי אימייל
     .index('by_role', ['role']) // אינדקס לסינון מהיר לפי תפקיד
-    .index('by_userType', ['userType']), // אינדקס לסינון מהיר לפי סוג משתמש
+    .index('by_userType', ['userType']) // אינדקס לסינון מהיר לפי סוג משתמש
+    .index('by_leaderboardScore', ['leaderboardScore']), // למיון טבלת הדירוג
+
+  // ==========================================================================
+  // יומן ימי-רצף — שורה אחת לכל יום שבו המשתמש השלים מבחן/תרגול (streak).
+  // משמש למסך פירוט הרצף (כמה ימים, אילו ימים, תדירות)
+  // ==========================================================================
+  streakLog: defineTable({
+    userId: v.id('users'),
+    day: v.string(), // YYYY-MM-DD, שעון ישראל
+  }).index('by_user', ['userId']),
 
   // ==========================================================================
   // טבלת שאלות — מאגר שאלות התאוריה

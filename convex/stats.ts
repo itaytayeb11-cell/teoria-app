@@ -293,3 +293,101 @@ export const getHistory = query({
     }));
   },
 });
+
+// ==========================================================================
+// פירוט הרצף (מסך שנפתח בלחיצה על היהלום) — כמה ימים, אילו ימים, תדירות
+// ==========================================================================
+export const getStreakDetail = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    const user = await ctx.db.get(userId);
+    const now = Date.now();
+
+    const logs = await ctx.db
+      .query('streakLog')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    const activeDays = new Set(logs.map((l) => l.day));
+
+    const today = israelDay();
+    const yesterday = israelDay(now - DAY_MS);
+    const currentStreak =
+      user?.lastActiveDay === today || user?.lastActiveDay === yesterday
+        ? (user?.streakDays ?? 0)
+        : 0;
+
+    // 30 הימים האחרונים, מהיום אחורה — לתצוגת "אילו ימים היו פעילים"
+    const last30 = Array.from({ length: 30 }, (_, i) => {
+      const day = israelDay(now - i * DAY_MS);
+      return { day, active: activeDays.has(day) };
+    });
+
+    // תדירות: אחוז הימים הפעילים מתוך החלון הרלוונטי (30 יום, או גיל
+    // החשבון בימים אם הוא צעיר יותר — כדי לא "להעניש" חשבון חדש)
+    const accountAgeDays = user
+      ? Math.max(1, Math.floor((now - user.createdAt) / DAY_MS) + 1)
+      : 30;
+    const windowSize = Math.min(30, accountAgeDays);
+    const activeInWindow = last30
+      .slice(0, windowSize)
+      .filter((d) => d.active).length;
+    const frequencyPercent = Math.round((activeInWindow / windowSize) * 100);
+
+    return {
+      currentStreak,
+      totalActiveDays: activeDays.size,
+      last30,
+      frequencyPercent,
+    };
+  },
+});
+
+// ==========================================================================
+// טבלת דירוג כלל-משתמשים (מסך שנפתח בלחיצה על הטרופי) — לפי leaderboardScore
+// המחושב מראש (ראו model.recomputeLeaderboardScore). לא חושף אימייל אף פעם —
+// משתמש בלי שם מלא מוצג כ"משתמש".
+// ==========================================================================
+const LEADERBOARD_LIMIT = 200; // מספיק לשלב הנוכחי; ידרוש pagination בעתיד
+
+export const getLeaderboard = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+
+    const top = await ctx.db
+      .query('users')
+      .withIndex('by_leaderboardScore')
+      .order('desc')
+      .take(LEADERBOARD_LIMIT);
+
+    const rows = top.map((u, i) => ({
+      rank: i + 1,
+      name: u.fullName?.trim() || 'משתמש',
+      score: u.leaderboardScore ?? 0,
+      isMe: u._id === userId,
+    }));
+
+    const myRow = rows.find((r) => r.isMe) ?? null;
+    let me = myRow;
+    if (!me) {
+      // המשתמש לא בין המובילים — מחשבים את הדירוג שלו בנפרד כדי שתמיד יוצג
+      const myUser = await ctx.db.get(userId);
+      const myScore = myUser?.leaderboardScore ?? 0;
+      const higher = await ctx.db
+        .query('users')
+        .withIndex('by_leaderboardScore', (q) =>
+          q.gt('leaderboardScore', myScore)
+        )
+        .collect();
+      me = {
+        rank: higher.length + 1,
+        name: myUser?.fullName?.trim() || 'משתמש',
+        score: myScore,
+        isMe: true,
+      };
+    }
+
+    return { top: rows, me };
+  },
+});

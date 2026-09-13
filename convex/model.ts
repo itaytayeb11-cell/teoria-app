@@ -102,6 +102,44 @@ export async function touchStreak(
     streakDays: continues ? (user.streakDays ?? 0) + 1 : 1,
     updatedAt: Date.now(),
   });
+  // רושם את היום ביומן הרצף (פעם אחת ליום) — למסך פירוט הרצף
+  await ctx.db.insert('streakLog', { userId, day: today });
+}
+
+// ==========================================================================
+// ניקוד לטבלת הדירוג הכללית — משוקלל משלושה מדדים אמיתיים:
+// דיוק תשובות (0-40 נק'), יחס הצלחה במבחני-מדמה (0-30 נק'), נפח תרגול
+// (0-30 נק', עד תקרה של 500 תשובות נכונות). מחושב מחדש בסיום כל מבחן.
+// ==========================================================================
+export async function recomputeLeaderboardScore(
+  ctx: MutationCtx,
+  userId: Id<'users'>
+): Promise<void> {
+  const answers = await ctx.db
+    .query('answerLog')
+    .withIndex('by_user', (q) => q.eq('userId', userId))
+    .collect();
+  const totalCorrect = answers.filter((a) => a.isCorrect).length;
+  const accuracy = answers.length > 0 ? totalCorrect / answers.length : 0;
+
+  const completed = await ctx.db
+    .query('quizSessions')
+    .withIndex('by_user_status', (q) =>
+      q.eq('userId', userId).eq('status', 'completed')
+    )
+    .collect();
+  const simulations = completed.filter((s) => s.mode === 'simulation');
+  const MAX_SIM_MISTAKES = 4; // תואם ל-stats.ts ול-app/(authenticated)/results.tsx
+  const passedSims = simulations.filter(
+    (s) => s.totalQuestions - s.correctCount <= MAX_SIM_MISTAKES
+  ).length;
+  const examRatio =
+    simulations.length > 0 ? passedSims / simulations.length : 0;
+
+  const volumeScore = Math.min(totalCorrect, 500) / 500;
+
+  const score = Math.round(accuracy * 40 + examRatio * 30 + volumeScore * 30);
+  await ctx.db.patch(userId, { leaderboardScore: score });
 }
 
 // מפה של questionId -> התשובה האחרונה (isCorrect) של המשתמש

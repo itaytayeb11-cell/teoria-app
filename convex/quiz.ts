@@ -4,6 +4,7 @@ import { type MutationCtx, mutation, query } from './_generated/server';
 import {
   filterByLicense,
   latestAnswerByQuestion,
+  recomputeLeaderboardScore,
   requireUserId,
   shuffle,
   touchStreak,
@@ -247,6 +248,8 @@ export const finishQuiz = mutation({
 
     // הרצף (יהלומים) עולה כשמשלימים מבחן/תרגול שלם — פעם ביום, לא לכל תשובה
     await touchStreak(ctx, userId);
+    // ניקוד טבלת הדירוג (הטרופי) מתעדכן מחדש בכל סיום מבחן
+    await recomputeLeaderboardScore(ctx, userId);
 
     return { scorePercent, correctCount, total: session.totalQuestions };
   },
