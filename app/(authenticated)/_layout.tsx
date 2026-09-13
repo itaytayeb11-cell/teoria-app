@@ -104,6 +104,10 @@ export default function AuthenticatedLayout() {
 
   return (
     <Tabs
+      // חשוב: מפורש, לא נגזר מסדר ה-Tabs.Screen — היפוך המערך ל-RTL למעלה
+      // הפך גם את סדר ה-registration, מה שגרם ל"מחסן טעויות" (עכשיו ראשון
+      // במערך ההפוך) להיהפך בטעות לטאב ברירת המחדל שחוזרים אליו מכל מסך
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.primary,

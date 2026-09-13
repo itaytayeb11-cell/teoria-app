@@ -4,6 +4,7 @@ import { Bookmark, ChevronRight, Eye, Timer } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -119,18 +120,30 @@ export default function QuizScreen() {
   const { finish, sessionId, submitAll } = quiz;
   const correctCount = quiz.stats.correct;
   const finishingRef = useRef(false); // מונע הפעלה כפולה (לחיצה כפולה / ריבאונד של הכפתור)
+  const [finishing, setFinishing] = useState(false); // מציג ספינר על הכפתור בזמן השליחה
   const goToResults = useCallback(async () => {
     if (finishingRef.current) {
       return;
     }
     finishingRef.current = true;
-    if (!isPractice) {
-      await submitAll(); // מבחן מדמה — שולח את כל התשובות לפני הסיום
+    setFinishing(true);
+    try {
+      if (!isPractice) {
+        await submitAll(); // מבחן מדמה — שולח את כל התשובות לפני הסיום
+      }
+      const res = await finish();
+      router.replace(
+        `/(authenticated)/results?sessionId=${sessionId}&score=${res?.scorePercent ?? correctCount}`
+      );
+    } catch {
+      // לא נתקע כפתור מת לצמיתות — משחררים כדי שאפשר יהיה לנסות שוב
+      finishingRef.current = false;
+      setFinishing(false);
+      Alert.alert(
+        'שגיאה בשליחת המבחן',
+        'בדוק את החיבור לאינטרנט ונסה שוב.'
+      );
     }
-    const res = await finish();
-    router.replace(
-      `/(authenticated)/results?sessionId=${sessionId}&score=${res?.scorePercent ?? correctCount}`
-    );
   }, [isPractice, submitAll, finish, sessionId, correctCount, router]);
 
   const hasQuestions = quiz.questions.length > 0;

@@ -564,6 +564,7 @@ export function ConfirmModal(props: {
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  loading?: boolean; // מציג ספינר על כפתור האישור ונועל את שניהם — למניעת ריבוי לחיצות בפעולה א-סינכרונית
 }) {
   const c = useAppColors();
   return (
@@ -615,12 +616,14 @@ export function ConfirmModal(props: {
           <Button
             label={props.confirmLabel ?? 'אישור'}
             onPress={props.onConfirm}
+            loading={props.loading}
           />
           <View style={{ height: 10 }} />
           <Button
             label={props.cancelLabel ?? 'ביטול'}
             variant="outline"
             onPress={props.onCancel}
+            disabled={props.loading}
           />
         </View>
       </View>

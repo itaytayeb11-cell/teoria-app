@@ -134,13 +134,13 @@ export default function HomeScreen() {
       key: 'passed',
       ringColor: palette.success,
       value: String(home?.passedSimCount ?? 0),
-      label: 'מבחנים עברת',
+      label: 'מבחנים שעברת',
     },
     {
       key: 'failed',
       ringColor: palette.danger,
       value: String(home?.failedSimCount ?? 0),
-      label: 'מבחנים נכשלת',
+      label: 'מבחנים שנכשלת',
     },
   ];
 
