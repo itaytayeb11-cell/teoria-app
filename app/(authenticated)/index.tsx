@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from 'convex/react';
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import {
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Polygon } from 'react-native-svg';
 import {
@@ -189,54 +188,41 @@ export default function HomeScreen() {
           style={{ backgroundColor: 'transparent' }}
           contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}
         >
-          {/* פאנל זכוכית (Liquid Glass) — עוטף את הברכה ושורת הווידג'טים,
-              יושב על הרקע הלבן-לכחול שמעליו */}
-          <View style={{ borderRadius: 24, overflow: 'hidden' }}>
-            <BlurView
-              intensity={40}
-              tint="light"
-              style={[
-                StyleSheet.absoluteFill,
-                { backgroundColor: 'rgba(255,255,255,0.6)' },
-              ]}
-            />
-            <View style={{ padding: 16, gap: 16 }}>
-              {/* ברכה */}
-              <View>
-                <T weight="bold" size={22}>
-                  {greeting()}, {home?.name ?? 'תלמיד'}! 🚗
-                </T>
-                <T color={palette.muted} size={14} style={{ marginTop: 2 }}>
-                  {home
-                    ? `אתה קרוב ב-${readiness}% למוכנות מלאה למבחן`
-                    : 'טוען את הנתונים שלך…'}
-                </T>
-              </View>
+          {/* ברכה — בלי רקע, יושבת ישירות על גרדיאנט המסך */}
+          <View>
+            <T weight="bold" size={22}>
+              {greeting()}, {home?.name ?? 'תלמיד'}! 🚗
+            </T>
+            <T color={palette.muted} size={14} style={{ marginTop: 2 }}>
+              {home
+                ? `אתה קרוב ב-${readiness}% למוכנות מלאה למבחן`
+                : 'טוען את הנתונים שלך…'}
+            </T>
+          </View>
 
-              {/* שורת ווידג'טים — יהלום (רצף) / טבעת-קרוסלה (מדדים) / טרופי (ניקוד) */}
-              <View
-                style={{
-                  flexDirection: rtl.flexDirection,
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingHorizontal: 4,
-                }}
-              >
-                <StatBadge
-                  emoji="💎"
-                  value={home?.streakDays ?? 0}
-                  color={palette.primary}
-                  onPress={() => router.push('/(authenticated)/streak')}
-                />
-                <MetricRingCarousel size={128} pages={metricPages} />
-                <StatBadge
-                  emoji="🏆"
-                  value={home?.correctAnswered ?? 0}
-                  color={palette.warning}
-                  onPress={() => router.push('/(authenticated)/leaderboard')}
-                />
-              </View>
-            </View>
+          {/* שורת ווידג'טים — יהלום (רצף) / טבעת-קרוסלה (מדדים) / טרופי (ניקוד).
+              כל פריט בפני עצמו בלי רקע — משתקף על גבי גרדיאנט המסך */}
+          <View
+            style={{
+              flexDirection: rtl.flexDirection,
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingHorizontal: 4,
+            }}
+          >
+            <StatBadge
+              emoji="💎"
+              value={home?.streakDays ?? 0}
+              color={palette.primary}
+              onPress={() => router.push('/(authenticated)/streak')}
+            />
+            <MetricRingCarousel size={128} pages={metricPages} />
+            <StatBadge
+              emoji="🏆"
+              value={home?.correctAnswered ?? 0}
+              color={palette.warning}
+              onPress={() => router.push('/(authenticated)/leaderboard')}
+            />
           </View>
 
           {/* קרוסלת נושאים */}

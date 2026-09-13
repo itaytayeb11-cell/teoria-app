@@ -7,8 +7,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
+  Animated,
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -114,8 +115,8 @@ export type MetricPage = {
 };
 
 // ----------------------------------------------------------------------------
-// קרוסלת מדדים — טבעת אחת שמחליפים בין 4 מדדים, בלחיצה על נקודה או בהחלקה.
-// ערך + קו מפריד קצר + תווית — בדיוק מבנה התוכן שבתמונות הרפרנס.
+// קרוסלת מדדים — טבעת אחת שמחליפים בין 4 מדדים בלחיצה עליה, עם "קפיצה"
+// עדינה (התכווצות+דהייה ואז חזרה) בין מדד למדד — לא רק חילוף מסך יבש.
 // ----------------------------------------------------------------------------
 export function MetricRingCarousel(props: {
   size: number;
@@ -123,60 +124,71 @@ export function MetricRingCarousel(props: {
 }) {
   const { size, pages } = props;
   const [index, setIndex] = useState(0);
+  const anim = useRef(new Animated.Value(1)).current;
 
-  // לפי בקשה מפורשת: המדד מתחלף בלחיצה, לא בהחלקה — לחיצה על הטבעת עצמה
-  // מתקדמת למדד הבא, ולחיצה על נקודה קופצת ישירות אליו
-  const goTo = (i: number) => setIndex(i);
+  const goTo = (i: number) => {
+    if (i === index) {
+      return;
+    }
+    Animated.timing(anim, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start(() => {
+      setIndex(i);
+      Animated.spring(anim, {
+        toValue: 1,
+        friction: 6,
+        tension: 90,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
   const active = pages[index];
-
   const next = () => goTo((index + 1) % pages.length);
 
   return (
     <View style={{ alignItems: 'center' }}>
       <Pressable onPress={next} hitSlop={4}>
         <Ring size={size} value={active.ringValue} color={active.ringColor}>
-          <T
-            weight="bold"
-            size={active.value.length > 3 ? size * 0.14 : size * 0.22}
-            color={active.ringColor}
-            center
-          >
-            {active.value}
-          </T>
-          <View
+          <Animated.View
             style={{
-              width: 18,
-              height: 2,
-              borderRadius: 1,
-              backgroundColor: '#D8DCE6',
-              marginVertical: 5,
+              alignItems: 'center',
+              opacity: anim,
+              transform: [
+                {
+                  scale: anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.8, 1],
+                  }),
+                },
+              ],
             }}
-          />
-          <T color={palette.muted} size={11}>
-            {active.label}
-          </T>
-        </Ring>
-      </Pressable>
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: 5,
-          marginTop: 10,
-        }}
-      >
-        {pages.map((p, i) => (
-          <Pressable key={p.key} hitSlop={8} onPress={() => goTo(i)}>
+          >
+            <T
+              weight="bold"
+              size={active.value.length > 3 ? size * 0.14 : size * 0.22}
+              color={active.ringColor}
+              center
+            >
+              {active.value}
+            </T>
             <View
               style={{
-                width: i === index ? 16 : 6,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: i === index ? palette.primary : '#D8DCE6',
+                width: 18,
+                height: 2,
+                borderRadius: 1,
+                backgroundColor: '#D8DCE6',
+                marginVertical: 5,
               }}
             />
-          </Pressable>
-        ))}
-      </View>
+            <T color={palette.muted} size={11}>
+              {active.label}
+            </T>
+          </Animated.View>
+        </Ring>
+      </Pressable>
     </View>
   );
 }
