@@ -95,8 +95,10 @@ export const usersNeedingReminder = internalQuery({
 type ReminderTarget = { token: string; name: string; streakDays: number };
 
 export const sendPracticeReminders = internalAction({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    slot: v.optional(v.union(v.literal('morning'), v.literal('evening'))),
+  },
+  handler: async (ctx, { slot }) => {
     const targets: ReminderTarget[] = await ctx.runQuery(
       internal.notifications.usersNeedingReminder,
       {}
@@ -105,10 +107,14 @@ export const sendPracticeReminders = internalAction({
       return { sent: 0 };
     }
 
+    const title =
+      slot === 'morning'
+        ? 'בוקר טוב! זמן לתרגל תאוריה ☀️'
+        : 'זמן לתרגל תאוריה 📚';
     const messages = targets.map((t) => ({
       to: t.token,
       sound: 'default',
-      title: 'זמן לתרגל תאוריה 📚',
+      title,
       body:
         t.streakDays >= 2
           ? `אל תפספס! הרצף שלך (${t.streakDays} ימים) בסכנה. תרגול קצר שומר עליו.`
