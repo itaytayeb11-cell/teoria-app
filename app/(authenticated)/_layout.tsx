@@ -117,6 +117,9 @@ export default function AuthenticatedLayout() {
         {...rest}
         style={{
           flex: flat?.flex ?? 1,
+          // גובה מפורש (לא flex:1 על ה-View הפנימי) — כדי לא להסתמך על
+          // ה-stretch האוטומטי של ההורה, שלא הבטיח מירכוז אנכי בפועל
+          height: '100%',
           marginVertical: 3,
           marginHorizontal: 3,
           borderRadius: 20,
@@ -124,7 +127,12 @@ export default function AuthenticatedLayout() {
         }}
       >
         <View
-          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            height: '100%',
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
           {children}
         </View>
