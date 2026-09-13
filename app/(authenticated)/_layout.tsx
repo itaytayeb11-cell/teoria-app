@@ -107,22 +107,27 @@ export default function AuthenticatedLayout() {
   const renderTabButton = (props: BottomTabBarButtonProps) => {
     const { children, style, ref: _ref, ...rest } = props;
     const focused = props['aria-selected'] === true;
+    // מתעלמים מה-style המקורי (חוץ מ-flex, לחלוקה שווה בין הטאבים) —
+    // הוא נושא יישור פנימי של הספרייה שדחף את האייקון הצידה בתוך הבועה.
+    // עוטפים את children בתוכן ב-View ממורכז משלנו במקום.
+    const flat = StyleSheet.flatten(style) as { flex?: number } | undefined;
     return (
       <Pressable
         {...rest}
-        style={[
-          style,
-          {
-            marginVertical: 6,
-            marginHorizontal: 3,
-            borderRadius: 20,
-            backgroundColor: focused ? '#fff' : 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center',
-          },
-        ]}
+        style={{
+          flex: flat?.flex ?? 1,
+          marginVertical: 6,
+          marginHorizontal: 3,
+          borderRadius: 20,
+          backgroundColor: focused ? '#fff' : 'transparent',
+          overflow: 'hidden',
+        }}
       >
-        {children}
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          {children}
+        </View>
       </Pressable>
     );
   };
