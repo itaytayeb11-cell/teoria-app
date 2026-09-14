@@ -15,12 +15,13 @@ const TEST_INTERSTITIAL_IOS = 'ca-app-pub-3940256099942544/4411468910';
 const TEST_BANNER_ANDROID = 'ca-app-pub-3940256099942544/6300978111';
 const TEST_BANNER_IOS = 'ca-app-pub-3940256099942544/2934735716';
 
-// 👤 נדרשת פעולת משתמש: להחליף למזהי היחידות האמיתיים שלך מ-AdMob לפני
-// שמדליקים ADS_ENABLED=true בפרודקשן. עד אז אלה placeholder בלבד.
-const PROD_INTERSTITIAL_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
-const PROD_INTERSTITIAL_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ';
-const PROD_BANNER_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/WWWWWWWWWW';
-const PROD_BANNER_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/VVVVVVVVVV';
+// מזהי יחידות פרסומת אמיתיים (AdMob, חשבון "Teoria", 2026-09-14).
+// שתי האפליקציות מסומנות "נדרשת בדיקה" אצל גוגל (עד 24 שעות) — לא חוסם
+// שימוש, אבל אין הכנסה אמיתית עד שהבדיקה מאושרת.
+const PROD_INTERSTITIAL_ANDROID = 'ca-app-pub-3979305920257836/8825227793';
+const PROD_INTERSTITIAL_IOS = 'ca-app-pub-3979305920257836/2315272720';
+const PROD_BANNER_ANDROID = 'ca-app-pub-3979305920257836/3764472806';
+const PROD_BANNER_IOS = 'ca-app-pub-3979305920257836/6973090077';
 
 // 👤 נדרשת פעולת משתמש: ב-AdMob Dashboard, על יחידת ה-interstitial —
 // Frequency Capping: מקסימום 2 חשיפות כל 30 דקות. זו הגדרה שנקבעת בדשבורד
