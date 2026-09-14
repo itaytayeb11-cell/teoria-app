@@ -11,8 +11,6 @@ import { useRef, useState } from 'react';
 import {
   Animated,
   type LayoutChangeEvent,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
   Pressable,
   ScrollView,
   View,
@@ -202,7 +200,6 @@ export function CategoryCarousel(props: {
   accuracyByCat: Record<string, number>;
 }) {
   const router = useRouter();
-  const [page, setPage] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
 
   const onLayout = (e: LayoutChangeEvent) => {
@@ -210,14 +207,6 @@ export function CategoryCarousel(props: {
     if (w > 0 && w !== cardWidth) {
       setCardWidth(w);
     }
-  };
-
-  const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (!cardWidth) {
-      return;
-    }
-    const i = Math.round(e.nativeEvent.contentOffset.x / cardWidth);
-    setPage(Math.max(0, Math.min(props.categories.length - 1, i)));
   };
 
   return (
@@ -229,7 +218,6 @@ export function CategoryCarousel(props: {
           showsHorizontalScrollIndicator={false}
           snapToInterval={cardWidth}
           decelerationRate="fast"
-          onMomentumScrollEnd={onScrollEnd}
         >
           {props.categories.map((cat) => {
             const acc = props.accuracyByCat[cat.category];
@@ -315,28 +303,6 @@ export function CategoryCarousel(props: {
       ) : (
         <View style={{ height: 190 }} />
       )}
-      {props.categories.length > 1 ? (
-        <View
-          style={{
-            flexDirection: rtl.flexDirection,
-            justifyContent: 'center',
-            gap: 5,
-            marginTop: 10,
-          }}
-        >
-          {props.categories.map((c, i) => (
-            <View
-              key={c.category}
-              style={{
-                width: i === page ? 16 : 6,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: i === page ? palette.primary : '#D8DCE6',
-              }}
-            />
-          ))}
-        </View>
-      ) : null}
     </View>
   );
 }

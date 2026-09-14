@@ -215,15 +215,17 @@ export function ScreenHeader(props: {
         },
       ]}
     >
+      {/* הערה: ה-headerRow הזה מתנהג בפועל כ-row-reverse על המכשיר שנבדק
+          (הילד הראשון ב-JSX נוחת בצד ימין) — לכן כפתור החזרה (שאמור להיות
+          בימין) מופיע כאן ראשון, ולא לפי flexDirection. */}
       <View style={[styles.headerRow, isCompact && { minHeight: 26 }]}>
-        {props.right ?? <View style={{ width: 28 }} />}
         {props.hideBack ? (
           <View style={{ width: 28 }} />
         ) : (
           <Pressable
             onPress={back}
             hitSlop={12}
-            style={{ flexDirection: rtl.flexDirection, alignItems: 'center' }}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
           >
             {props.backLabel ? (
               <Text style={styles.backLabel}>{props.backLabel}</Text>
@@ -231,6 +233,7 @@ export function ScreenHeader(props: {
             <ChevronRight color="#fff" size={22} />
           </Pressable>
         )}
+        {props.right ?? <View style={{ width: 28 }} />}
       </View>
       <Text
         style={[
@@ -650,26 +653,25 @@ export function NavArrows(props: {
     justifyContent: 'center',
   };
   // RTL: "הבא" בצד שמאל (חץ ←), "הקודם" בצד ימין (חץ →)
+  // הערה: ה-View הזה מתנהג בפועל כ-row-reverse (גם עם flexDirection:'row'
+  // רגיל) על המכשיר שנבדק — כלומר הילד הראשון ב-JSX תמיד נוחת בצד ימין.
+  // לכן סדר הרכיבים כאן נקבע ישירות לפי זה (קודם=ראשון→ימין, הבא=שני→שמאל),
+  // ולא לפי flexDirection.
   return (
-    <View
-      style={{
-        flexDirection: rtl.flexDirection,
-        justifyContent: 'space-between',
-      }}
-    >
-      <Pressable
-        onPress={props.onNext}
-        disabled={props.nextDisabled}
-        style={[box, { opacity: props.nextDisabled ? 0.4 : 1 }]}
-      >
-        <ChevronLeft color={palette.primary} size={24} />
-      </Pressable>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <Pressable
         onPress={props.onPrev}
         disabled={props.prevDisabled}
         style={[box, { opacity: props.prevDisabled ? 0.4 : 1 }]}
       >
         <ChevronRight color={palette.primary} size={24} />
+      </Pressable>
+      <Pressable
+        onPress={props.onNext}
+        disabled={props.nextDisabled}
+        style={[box, { opacity: props.nextDisabled ? 0.4 : 1 }]}
+      >
+        <ChevronLeft color={palette.primary} size={24} />
       </Pressable>
     </View>
   );
