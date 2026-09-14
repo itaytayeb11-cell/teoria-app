@@ -32,15 +32,26 @@ export const getHome = query({
       )
       .collect();
 
-    // גודל המאגר הרלוונטי לסוג הרישיון
+    // גודל המאגר הרלוונטי לסוג הרישיון — וגם ספירת נושאים, כדי שדף הבית
+    // לא יצטרך שאילתה נפרדת (questions.listCategories) שסורקת שוב את כל
+    // המאגר; זה היה שני סריקות מלאות זהות על אותו מסך
     const activeQuestions = await ctx.db
       .query('questions')
       .withIndex('by_active', (q) => q.eq('isActive', true))
       .collect();
-    const bankSize = filterByLicense(
+    const licensedQuestions = filterByLicense(
       activeQuestions,
       user?.licenseType ?? undefined
-    ).length;
+    );
+    const bankSize = licensedQuestions.length;
+
+    const categoryCounts = new Map<string, number>();
+    for (const q of licensedQuestions) {
+      categoryCounts.set(q.category, (categoryCounts.get(q.category) ?? 0) + 1);
+    }
+    const categories = [...categoryCounts.entries()]
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
 
     // כיסוי: כמה שאלות שונות נענו מתוך היעד
     const latest = latestAnswerByQuestion(answers);
@@ -137,6 +148,7 @@ export const getHome = query({
       mistakeCount,
       savedCount: savedRows.length,
       totalQuizzes: completed.length,
+      categories,
       correctAnswered: answers.filter((a) => a.isCorrect).length,
       testDate: user?.testDate ?? null,
       daysToTest,

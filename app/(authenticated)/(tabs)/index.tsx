@@ -69,7 +69,9 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const home = useQuery(api.stats.getHome);
   const activeSession = useQuery(api.quiz.getActiveSession);
-  const categories = useQuery(api.questions.listCategories);
+  // הנושאים מגיעים מ-getHome עצמו (לא עוד שאילתה נפרדת שסורקת שוב את כל
+  // המאגר) — חוסך סריקה כפולה של 1,800+ שאלות בכל טעינה של דף הבית
+  const categories = home?.categories;
   const stats = useQuery(api.stats.getMyStats);
   const [showDateReminder, setShowDateReminder] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
