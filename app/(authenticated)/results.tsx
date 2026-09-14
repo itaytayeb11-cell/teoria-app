@@ -10,13 +10,17 @@ import {
   T,
 } from '@/components/ui';
 import { palette } from '@/constants/Colors';
+import { useRevenueCat } from '@/contexts/RevenueCatContext';
 import { api } from '@/convex/_generated/api';
+import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 import { rtl } from '@/lib/rtl';
 
 const MAX_SIM_MISTAKES = 4; // עד 4 שגיאות = עובר במבחן המדמה
 
 export default function ResultsScreen() {
   const router = useRouter();
+  const { isPremium: adsRemoved } = useRevenueCat();
+  const { showBeforeSimulation } = useInterstitialAd(adsRemoved);
   const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
   const session = useQuery(
     api.quiz.getSession,
@@ -149,13 +153,15 @@ export default function ResultsScreen() {
           <Button
             label={isSim ? 'מבחן חדש' : 'תרגול נוסף'}
             variant={wrong.length > 0 ? 'outline' : 'primary'}
-            onPress={() =>
-              router.replace(
-                isSim
-                  ? '/(authenticated)/quiz?mode=simulation'
-                  : '/(authenticated)/practice'
-              )
-            }
+            onPress={() => {
+              if (isSim) {
+                showBeforeSimulation(() =>
+                  router.replace('/(authenticated)/quiz?mode=simulation')
+                );
+              } else {
+                router.replace('/(authenticated)/practice');
+              }
+            }}
           />
           <Button
             label="חזרה לבית"

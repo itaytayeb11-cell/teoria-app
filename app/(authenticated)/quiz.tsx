@@ -58,7 +58,7 @@ export default function QuizScreen() {
   const isPractice = mode !== 'simulation';
   const quiz = useQuiz();
   const { isPremium: adsRemoved } = useRevenueCat();
-  const { maybeShowAfterQuiz } = useInterstitialAd(adsRemoved);
+  const { onPracticeAnswered } = useInterstitialAd(adsRemoved);
   const toggleSave = useMutation(api.saved.toggle);
   const savedIds = useQuery(api.saved.listIds);
   const [showExplain, setShowExplain] = useState(false);
@@ -137,28 +137,18 @@ export default function QuizScreen() {
         await submitAll(); // מבחן מדמה — שולח את כל התשובות לפני הסיום
       }
       const res = await finish();
-      // פרסומת (אם רלוונטי) מוצגת כאן — בין הסשן שהסתיים למסך התוצאות,
-      // לא בתוך תוכן הלימוד עצמו. תמיד ממשיך לתוצאות בסוף, עם/בלי פרסומת
-      maybeShowAfterQuiz(() => {
-        router.replace(
-          `/(authenticated)/results?sessionId=${sessionId}&score=${res?.scorePercent ?? correctCount}`
-        );
-      });
+      // אין פרסומת אחרי מבחן/תרגול — לפי המפרט, ה-interstitial של מבחן
+      // מדמה מוצג *לפני* ההתחלה (ר' index.tsx/results.tsx), לא אחרי
+      router.replace(
+        `/(authenticated)/results?sessionId=${sessionId}&score=${res?.scorePercent ?? correctCount}`
+      );
     } catch {
       // לא נתקע כפתור מת לצמיתות — משחררים כדי שאפשר יהיה לנסות שוב
       finishingRef.current = false;
       setFinishing(false);
       Alert.alert('שגיאה בשליחת המבחן', 'בדוק את החיבור לאינטרנט ונסה שוב.');
     }
-  }, [
-    isPractice,
-    submitAll,
-    finish,
-    sessionId,
-    correctCount,
-    router,
-    maybeShowAfterQuiz,
-  ]);
+  }, [isPractice, submitAll, finish, sessionId, correctCount, router]);
 
   const hasQuestions = quiz.questions.length > 0;
 
@@ -264,6 +254,10 @@ export default function QuizScreen() {
         setConfirmExit(true);
       }
       return;
+    }
+    // תרגול/מחסן טעויות/שמורות — סופר תשובות שנענו, מציג פרסומת כל 15
+    if (isPractice && picked) {
+      onPracticeAnswered();
     }
     quiz.next();
   };
@@ -480,8 +474,8 @@ export default function QuizScreen() {
         ) : null}
       </ScrollView>
 
-      {/* באנר פרסומת — רק במבחן מדמה (לא בתרגול), קבוע לכל אורך השהייה במסך */}
-      {isPractice ? null : <AdBanner adsRemoved={adsRemoved} />}
+      {/* באנר פרסומת — קבוע בתחתית מסך המענה, בכל מצב (תרגול/מחסן טעויות/מבחן מדמה) */}
+      <AdBanner adsRemoved={adsRemoved} />
 
       {/* ניווט תחתון */}
       <View

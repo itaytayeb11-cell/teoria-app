@@ -26,7 +26,9 @@ import {
 } from '@/components/HomeWidgets';
 import { Card, ConfirmModal, Screen, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
+import { useRevenueCat } from '@/contexts/RevenueCatContext';
 import { api } from '@/convex/_generated/api';
+import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 import { rtl } from '@/lib/rtl';
 
 const TEST_DATE_REMINDER_KEY = 'testDateReminderShownOn';
@@ -73,6 +75,8 @@ export default function HomeScreen() {
   // המאגר) — חוסך סריקה כפולה של 1,800+ שאלות בכל טעינה של דף הבית
   const categories = home?.categories;
   const stats = useQuery(api.stats.getMyStats);
+  const { isPremium: adsRemoved } = useRevenueCat();
+  const { showBeforeSimulation } = useInterstitialAd(adsRemoved);
   const [showDateReminder, setShowDateReminder] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -264,7 +268,9 @@ export default function HomeScreen() {
             </T>
             <Pressable
               onPress={() =>
-                router.push('/(authenticated)/quiz?mode=simulation')
+                showBeforeSimulation(() =>
+                  router.push('/(authenticated)/quiz?mode=simulation')
+                )
               }
               style={{
                 backgroundColor: '#fff',

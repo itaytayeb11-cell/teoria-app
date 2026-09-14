@@ -1,7 +1,15 @@
 // ============================================================================
-// פרסומת interstitial בין sessions — לא בתוך תוכן לימוד עצמו.
-// מוצגת לכל היותר פעם בכל 3 מבחנים/תרגולים שהושלמו, ורק למי שלא רכש
-// "הסרת פרסומות" ורק כש-ADS_ENABLED דלוק. ב-Expo Go תמיד מדלגים (הספרייה
+// שני מנגנוני interstitial נפרדים, לפי מסך:
+//
+// 1. תרגול (לפי נושא) + מחסן טעויות — onPracticeAnswered(): סופר תשובות
+//    שנענו (משותף לשני המצבים) ומציג פרסומת כל 15 תשובות.
+// 2. מבחן מדמה — showBeforeSimulation(): מוצג ברגע שלוחצים "התחל מבחן",
+//    *לפני* שהמבחן נטען. אין הגבלת ספירה מהצד שלנו כאן — ה-Frequency Cap
+//    היחיד על ההצגה הזו הוא מה שמוגדר ב-AdMob Dashboard (עד 2 ל-30 דק').
+//    ⚠️ זו הצגה לפני תחילת סגמנט תוכן — מפורשות נוגדת את מדיניות ה-Better
+//    Ads של Google Play (ר' config/ads.ts). הוחלט במודע ליישם למרות זאת.
+//
+// בשני המקרים לא מציגים למי שרכש הסרת פרסומות, ולא ב-Expo Go (הספרייה
 // לא עובדת שם — צריך dev/prod build).
 // ============================================================================
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,8 +18,8 @@ import { useCallback } from 'react';
 import { getInterstitialAdUnitId } from '@/config/ads';
 import { ADS_ENABLED } from '@/config/appConfig';
 
-const SESSION_COUNT_KEY = 'adInterstitialSessionCount';
-const SHOW_EVERY_N_SESSIONS = 3;
+const PRACTICE_ANSWER_COUNT_KEY = 'adPracticeAnswerCount';
+const SHOW_EVERY_N_ANSWERS = 15;
 const LOAD_TIMEOUT_MS = 4000;
 
 function isExpoGo(): boolean {
@@ -22,79 +30,85 @@ function isExpoGo(): boolean {
   }
 }
 
+// מציג interstitial בפועל (טעינה + הצגה), ותמיד קורא ל-onDone בסוף —
+// בין אם הוצגה פרסומת, נכשלה, או פסק הזמן. אף פעם לא נתקע.
+async function showInterstitial(onDone: () => void): Promise<void> {
+  let finished = false;
+  let cleanup = () => {};
+  const finish = () => {
+    if (finished) {
+      return;
+    }
+    finished = true;
+    cleanup();
+    onDone();
+  };
+
+  try {
+    const { InterstitialAd, AdEventType } = await import(
+      'react-native-google-mobile-ads'
+    );
+    const interstitial = InterstitialAd.createForAdRequest(
+      getInterstitialAdUnitId()
+    );
+
+    const unsubLoaded = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => interstitial.show()
+    );
+    const unsubClosed = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      finish
+    );
+    const unsubError = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      finish
+    );
+    const timeout = setTimeout(finish, LOAD_TIMEOUT_MS);
+    cleanup = () => {
+      clearTimeout(timeout);
+      unsubLoaded();
+      unsubClosed();
+      unsubError();
+    };
+
+    interstitial.load();
+  } catch {
+    finish();
+  }
+}
+
 export function useInterstitialAd(adsRemoved: boolean) {
-  // מנסה להציג פרסומת (לא יותר מפעם ב-3 סשנים) ואז תמיד קורא ל-onDone —
-  // בין אם הוצגה פרסומת, נכשלה, פסקה זמן, או שלא היה מקום להציג בכלל.
-  // הקורא ממשיך לניווט הבא (מסך תוצאות) מתוך onDone, אף פעם לא נתקע.
-  const maybeShowAfterQuiz = useCallback(
-    async (onDone: () => void) => {
-      if (!ADS_ENABLED || adsRemoved || isExpoGo()) {
+  const canShowAds = ADS_ENABLED && !adsRemoved && !isExpoGo();
+
+  // תרגול / מחסן טעויות — לקרוא אחרי כל תשובה שנענתה. מציג כל 15 תשובות
+  const onPracticeAnswered = useCallback(async () => {
+    if (!canShowAds) {
+      return;
+    }
+    try {
+      const stored = await AsyncStorage.getItem(PRACTICE_ANSWER_COUNT_KEY);
+      const count = (stored ? Number(stored) : 0) + 1;
+      await AsyncStorage.setItem(PRACTICE_ANSWER_COUNT_KEY, String(count));
+      if (count % SHOW_EVERY_N_ANSWERS === 0) {
+        await showInterstitial(() => {});
+      }
+    } catch {
+      // AsyncStorage נכשל — פשוט מדלגים הפעם, לא קריטי
+    }
+  }, [canShowAds]);
+
+  // מבחן מדמה — לקרוא לפני ניווט למסך המבחן, בלחיצה על "התחל מבחן"
+  const showBeforeSimulation = useCallback(
+    (onDone: () => void) => {
+      if (!canShowAds) {
         onDone();
         return;
       }
-
-      let count = 1;
-      try {
-        const stored = await AsyncStorage.getItem(SESSION_COUNT_KEY);
-        count = (stored ? Number(stored) : 0) + 1;
-        await AsyncStorage.setItem(SESSION_COUNT_KEY, String(count));
-      } catch {
-        // אם AsyncStorage נכשל — פשוט לא מציגים פרסומת הפעם, לא נתקעים
-        onDone();
-        return;
-      }
-
-      if (count % SHOW_EVERY_N_SESSIONS !== 0) {
-        onDone();
-        return;
-      }
-
-      let finished = false;
-      let cleanup = () => {};
-      const finish = () => {
-        if (finished) {
-          return;
-        }
-        finished = true;
-        cleanup();
-        onDone();
-      };
-
-      try {
-        const { InterstitialAd, AdEventType } = await import(
-          'react-native-google-mobile-ads'
-        );
-        const interstitial = InterstitialAd.createForAdRequest(
-          getInterstitialAdUnitId()
-        );
-
-        const unsubLoaded = interstitial.addAdEventListener(
-          AdEventType.LOADED,
-          () => interstitial.show()
-        );
-        const unsubClosed = interstitial.addAdEventListener(
-          AdEventType.CLOSED,
-          finish
-        );
-        const unsubError = interstitial.addAdEventListener(
-          AdEventType.ERROR,
-          finish
-        );
-        const timeout = setTimeout(finish, LOAD_TIMEOUT_MS);
-        cleanup = () => {
-          clearTimeout(timeout);
-          unsubLoaded();
-          unsubClosed();
-          unsubError();
-        };
-
-        interstitial.load();
-      } catch {
-        finish();
-      }
+      showInterstitial(onDone);
     },
-    [adsRemoved]
+    [canShowAds]
   );
 
-  return { maybeShowAfterQuiz };
+  return { onPracticeAnswered, showBeforeSimulation };
 }
