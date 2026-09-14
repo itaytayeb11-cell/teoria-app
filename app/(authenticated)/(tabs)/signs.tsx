@@ -47,21 +47,23 @@ export default function SignsScreen() {
   const groups = useMemo(() => data ?? [], [data]);
   const active = groups[tab];
 
+  const isSearching = search.trim().length > 0;
+
   const visibleItems = useMemo(() => {
-    if (!active) {
-      return [];
-    }
     const q = search.trim();
     if (!q) {
-      return active.items;
+      return active?.items ?? [];
     }
-    return active.items.filter(
+    // בחיפוש — מחפשים בכל התמרורים, לא רק בקבוצה שנבחרה למעלה (אחרת
+    // חיפוש על מילה שקיימת בקבוצה אחרת נראה כאילו "לא עובד")
+    const all = groups.flatMap((g) => g.items);
+    return all.filter(
       (item) =>
         item.text.includes(q) ||
         item.answer.includes(q) ||
         item.officialId === q
     );
-  }, [active, search]);
+  }, [active, groups, search]);
 
   const savedSet = useMemo(
     () => new Set((savedIds ?? []).map(String)),
@@ -139,45 +141,47 @@ export default function SignsScreen() {
             ) : null}
           </View>
 
-          {/* בורר תת-נושא */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{
-              paddingHorizontal: 12,
-              gap: 8,
-              alignItems: 'center',
-            }}
-            style={{ flexGrow: 0, height: 56 }}
-          >
-            {groups.map((g, i) => (
-              <Pressable
-                key={g.group}
-                onPress={() => setTab(i)}
-                style={{
-                  minHeight: 36,
-                  paddingHorizontal: 14,
-                  paddingVertical: 8,
-                  borderRadius: 999,
-                  backgroundColor: i === tab ? palette.primary : '#EAECF2',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text
-                  numberOfLines={1}
+          {/* בורר תת-נושא — מוסתר בזמן חיפוש, כי החיפוש חוצה את כל הקבוצות */}
+          {isSearching ? null : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{
+                paddingHorizontal: 12,
+                gap: 8,
+                alignItems: 'center',
+              }}
+              style={{ flexGrow: 0, height: 56 }}
+            >
+              {groups.map((g, i) => (
+                <Pressable
+                  key={g.group}
+                  onPress={() => setTab(i)}
                   style={{
-                    fontSize: 13,
-                    fontWeight: i === tab ? '700' : '400',
-                    color: i === tab ? '#fff' : palette.muted,
+                    minHeight: 36,
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 999,
+                    backgroundColor: i === tab ? palette.primary : '#EAECF2',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
-                  {`${g.group} (${g.items.length})`}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontSize: 13,
+                      fontWeight: i === tab ? '700' : '400',
+                      color: i === tab ? '#fff' : palette.muted,
+                    }}
+                  >
+                    {`${g.group} (${g.items.length})`}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
 
           <ScrollView
             contentContainerStyle={{ padding: 12, paddingBottom: 12, gap: 10 }}
