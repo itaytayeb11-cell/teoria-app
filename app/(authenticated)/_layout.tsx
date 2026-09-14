@@ -1,47 +1,32 @@
 import { useConvexAuth, useQuery } from 'convex/react';
-import { BlurView } from 'expo-blur';
 import {
   Redirect,
-  Tabs,
+  Stack,
   useRootNavigationState,
   useSegments,
 } from 'expo-router';
-import {
-  AlertCircle,
-  Home,
-  ListChecks,
-  TrafficCone,
-} from 'lucide-react-native';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityIndicator, View } from 'react-native';
 import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
 import { api } from '@/convex/_generated/api';
 import { usePushRegistration } from '@/hooks/usePushRegistration';
-import { needsExplicitRTL } from '@/lib/rtl';
 
-// טאבים גלויים בסרגל התחתון (בסדר RTL: הראשון מימין)
-const TABS = [
-  { name: 'index', title: 'בית', icon: Home },
-  { name: 'practice', title: 'תרגול', icon: ListChecks },
-  { name: 'signs', title: 'תמרורים', icon: TrafficCone },
-  { name: 'mistakes', title: 'מחסן טעויות', icon: AlertCircle },
-];
-
-// מסכים נגישים דרך ניווט אך מוסתרים מסרגל הטאבים.
-// focus=true — גם מסתירים את סרגל הטאבים עצמו (מסכי מיקוד / כפתורים תחתונים)
-const HIDDEN: { name: string; focus?: boolean }[] = [
-  { name: 'quiz', focus: true },
-  { name: 'results', focus: true },
-  { name: 'license', focus: true },
-  { name: 'stats' },
-  { name: 'history' },
-  { name: 'settings' },
-  { name: 'saved' },
-  { name: 'streak' },
-  { name: 'leaderboard' },
-  { name: 'faq' },
+// כל המסכים שנפתחים "מעל" סרגל הטאבים (לא הטאבים עצמם — אלה חיים ב-(tabs)).
+// כאן זה Stack אמיתי, אז ניווט קדימה/אחורה עובד עם היסטוריה רגילה (LIFO)
+// ולא תלוי כלל במצב הפנימי של ניווט הטאבים — זה מה שתיקן את הבאג שבו
+// יציאה ממסך (יהלום/תפריט/כל דבר) הייתה מסיימת בטאב אקראי/לא נכון.
+const STACK_SCREENS = [
+  'quiz',
+  'results',
+  'license',
+  'stats',
+  'history',
+  'settings',
+  'saved',
+  'streak',
+  'leaderboard',
+  'faq',
 ];
 
 export default function AuthenticatedLayout() {
@@ -49,7 +34,6 @@ export default function AuthenticatedLayout() {
   const { isPremium, isLoading: isRevenueCatLoading } = useRevenueCat();
   const navigationState = useRootNavigationState();
   const segments = useSegments();
-  const insets = useSafeAreaInsets();
   const currentUser = useQuery(
     api.users.getCurrentUser,
     isAuthenticated ? {} : 'skip'
@@ -92,80 +76,12 @@ export default function AuthenticatedLayout() {
     return <Redirect href="/(authenticated)/license" />;
   }
 
-  // סרגל צף עם שוליים מכל הצדדים — Liquid Glass: רקע לבן-שקוף עם גוון כחול
-  // עדין, מטושטש. הטאב הפעיל מסומן רק בצבע (כחול) — בלי "כדור" רקע לבן,
-  // אחרי כמה סבבים שבהם ה"כדור" יצא ממורכז/חתוך/גבוה מדי. פשוט ועובד.
-  const barBottom = Math.max(insets.bottom, 14);
-
-  // הטאב-בר עצמו הוא 'row' רגיל שלא מתהפך אוטומטית ל-RTL (בניגוד לרוב
-  // הרכיבים באפליקציה) — ב-Expo Go זה גורם לטאבים להיראות בסדר הפוך
-  // (בית משמאל במקום מימין). באנדרואיד/iOS build עם RTL טבעי הסדר המקורי
-  // כבר נכון, אז הופכים את המערך רק כשצריך RTL מפורש.
-  const orderedTabs = needsExplicitRTL() ? [...TABS].reverse() : TABS;
-
   return (
-    <Tabs
-      // חשוב: מפורש, לא נגזר מסדר ה-Tabs.Screen — היפוך המערך ל-RTL למעלה
-      // הפך גם את סדר ה-registration, מה שגרם ל"מחסן טעויות" (עכשיו ראשון
-      // במערך ההפוך) להיהפך בטעות לטאב ברירת המחדל שחוזרים אליו מכל מסך
-      initialRouteName="index"
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: palette.primary,
-        tabBarInactiveTintColor: '#9AA3B2',
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        tabBarStyle: {
-          position: 'absolute',
-          left: 14,
-          right: 14,
-          bottom: barBottom,
-          height: 68,
-          paddingTop: 8,
-          paddingHorizontal: 8,
-          borderTopWidth: 0,
-          borderRadius: 31,
-          backgroundColor: 'transparent',
-          elevation: 0,
-          overflow: 'hidden',
-        },
-        tabBarBackground: () => (
-          <BlurView
-            intensity={35}
-            tint="light"
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                backgroundColor: 'rgba(234,241,254,0.45)',
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: 'rgba(29,78,216,0.12)',
-              },
-            ]}
-          />
-        ),
-      }}
-    >
-      {orderedTabs.map((t) => (
-        <Tabs.Screen
-          key={t.name}
-          name={t.name}
-          options={{
-            title: t.title,
-            tabBarIcon: ({ color, size }) => (
-              <t.icon color={color} size={size} />
-            ),
-          }}
-        />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+      {STACK_SCREENS.map((name) => (
+        <Stack.Screen key={name} name={name} />
       ))}
-      {HIDDEN.map((s) => (
-        <Tabs.Screen
-          key={s.name}
-          name={s.name}
-          options={{
-            href: null,
-            ...(s.focus ? { tabBarStyle: { display: 'none' } } : {}),
-          }}
-        />
-      ))}
-    </Tabs>
+    </Stack>
   );
 }
