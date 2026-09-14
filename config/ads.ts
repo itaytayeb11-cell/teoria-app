@@ -12,16 +12,32 @@ import { ADS_ENABLED } from './appConfig';
 // מזהי טסט רשמיים של גוגל (תמיד מציגים פרסומת דמה) — https://developers.google.com/admob/android/test-ads
 const TEST_INTERSTITIAL_ANDROID = 'ca-app-pub-3940256099942544/1033173712';
 const TEST_INTERSTITIAL_IOS = 'ca-app-pub-3940256099942544/4411468910';
+const TEST_BANNER_ANDROID = 'ca-app-pub-3940256099942544/6300978111';
+const TEST_BANNER_IOS = 'ca-app-pub-3940256099942544/2934735716';
 
 // 👤 נדרשת פעולת משתמש: להחליף למזהי היחידות האמיתיים שלך מ-AdMob לפני
 // שמדליקים ADS_ENABLED=true בפרודקשן. עד אז אלה placeholder בלבד.
 const PROD_INTERSTITIAL_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
 const PROD_INTERSTITIAL_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ';
+const PROD_BANNER_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/WWWWWWWWWW';
+const PROD_BANNER_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/VVVVVVVVVV';
 
+// 👤 נדרשת פעולת משתמש: ב-AdMob Dashboard, על יחידת ה-interstitial —
+// Frequency Capping: מקסימום 2 חשיפות כל 30 דקות. זו הגדרה שנקבעת בדשבורד
+// של גוגל, לא בקוד. בנוסף לזה, הקוד שלנו (hooks/useInterstitialAd.ts) מגביל
+// גם מצידו — לכל היותר פעם ב-3 מבחנים/תרגולים שהושלמו — כרשת ביטחון עצמאית.
 export function getInterstitialAdUnitId(): string {
   const useTestId = __DEV__ || !ADS_ENABLED;
   if (Platform.OS === 'ios') {
     return useTestId ? TEST_INTERSTITIAL_IOS : PROD_INTERSTITIAL_IOS;
   }
   return useTestId ? TEST_INTERSTITIAL_ANDROID : PROD_INTERSTITIAL_ANDROID;
+}
+
+export function getBannerAdUnitId(): string {
+  const useTestId = __DEV__ || !ADS_ENABLED;
+  if (Platform.OS === 'ios') {
+    return useTestId ? TEST_BANNER_IOS : PROD_BANNER_IOS;
+  }
+  return useTestId ? TEST_BANNER_ANDROID : PROD_BANNER_ANDROID;
 }

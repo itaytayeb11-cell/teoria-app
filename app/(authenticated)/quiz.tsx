@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AdBanner } from '@/components/AdBanner';
 import {
   AnswerOption,
   Button,
@@ -478,6 +479,9 @@ export default function QuizScreen() {
           </View>
         ) : null}
       </ScrollView>
+
+      {/* באנר פרסומת — רק במבחן מדמה (לא בתרגול), קבוע לכל אורך השהייה במסך */}
+      {isPractice ? null : <AdBanner adsRemoved={adsRemoved} />}
 
       {/* ניווט תחתון */}
       <View
