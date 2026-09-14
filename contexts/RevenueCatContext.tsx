@@ -195,8 +195,7 @@ export function RevenueCatProvider({
         // בדיקת סטטוס פרימיום
         const customerInfo = await Purchases.getCustomerInfo();
         const hasPremium =
-          customerInfo.entitlements.active.Pro !== undefined ||
-          customerInfo.entitlements.active.premium !== undefined;
+          customerInfo.entitlements.active.remove_ads !== undefined;
         setIsPremium(hasPremium);
 
         setIsInitialized(true);
@@ -258,8 +257,7 @@ export function RevenueCatProvider({
         const { customerInfo } =
           await Purchases.purchasePackage(packageToPurchase);
         const hasPremium =
-          customerInfo.entitlements.active.Pro !== undefined ||
-          customerInfo.entitlements.active.premium !== undefined;
+          customerInfo.entitlements.active.remove_ads !== undefined;
         setIsPremium(hasPremium);
 
         return hasPremium;
@@ -310,8 +308,7 @@ export function RevenueCatProvider({
       const Purchases = (await import('react-native-purchases')).default;
       const customerInfo = await Purchases.restorePurchases();
       const hasPremium =
-        customerInfo.entitlements.active.Pro !== undefined ||
-        customerInfo.entitlements.active.premium !== undefined;
+        customerInfo.entitlements.active.remove_ads !== undefined;
       setIsPremium(hasPremium);
 
       if (hasPremium) {
@@ -340,8 +337,7 @@ export function RevenueCatProvider({
       const Purchases = (await import('react-native-purchases')).default;
       const customerInfo = await Purchases.getCustomerInfo();
       const hasPremium =
-        customerInfo.entitlements.active.Pro !== undefined ||
-        customerInfo.entitlements.active.premium !== undefined;
+        customerInfo.entitlements.active.remove_ads !== undefined;
       setIsPremium(hasPremium);
     } catch (_error) {
       // שגיאה בשקט - לא צריך להציג למשתמש
