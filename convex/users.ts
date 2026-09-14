@@ -99,6 +99,46 @@ export const deleteMyAccount = mutation({
       deletedCount += 1;
     }
 
+    // מחיקת יומן הרצף (streakLog) — היה חסר קודם, המשתמש נשאר עם שאריות נתונים
+    const streakRows = await ctx.db
+      .query('streakLog')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    for (const r of streakRows) {
+      await ctx.db.delete(r._id);
+      deletedCount += 1;
+    }
+
+    // מחיקת סימוני "ידעתי" במחסן הטעויות
+    const dismissals = await ctx.db
+      .query('mistakeDismissals')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    for (const d of dismissals) {
+      await ctx.db.delete(d._id);
+      deletedCount += 1;
+    }
+
+    // מחיקת שאלות שמורות
+    const saved = await ctx.db
+      .query('savedQuestions')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    for (const s of saved) {
+      await ctx.db.delete(s._id);
+      deletedCount += 1;
+    }
+
+    // מחיקת טוקני Push
+    const pushTokens = await ctx.db
+      .query('pushTokens')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    for (const t of pushTokens) {
+      await ctx.db.delete(t._id);
+      deletedCount += 1;
+    }
+
     // מחיקת רשומת המשתמש עצמה
     const user = await ctx.db.get(userId);
     if (user) {
