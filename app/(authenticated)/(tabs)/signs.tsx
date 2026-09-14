@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from 'convex/react';
-import { useRouter } from 'expo-router';
 import { Bookmark, Search } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
@@ -12,14 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {
-  Button,
-  Card,
-  RingProgress,
-  Screen,
-  ScreenHeader,
-  T,
-} from '@/components/ui';
+import { Card, RingProgress, Screen, ScreenHeader, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { api } from '@/convex/_generated/api';
 import { rtl } from '@/lib/rtl';
@@ -34,7 +26,6 @@ type SignItem = {
 };
 
 export default function SignsScreen() {
-  const router = useRouter();
   const data = useQuery(api.questions.signDictionary);
   const progress = useQuery(api.questions.signProgress);
   const savedIds = useQuery(api.saved.listIds);
@@ -204,10 +195,7 @@ export default function SignsScreen() {
                   resizeMode="contain"
                 />
                 <View style={{ flex: 1, gap: 4 }}>
-                  <T weight="bold" size={14} numberOfLines={2}>
-                    {item.answer}
-                  </T>
-                  <T color={palette.muted} size={12} numberOfLines={2}>
+                  <T weight="bold" size={14} numberOfLines={3}>
                     {item.text}
                   </T>
                 </View>
@@ -235,18 +223,6 @@ export default function SignsScreen() {
               </T>
             ) : null}
           </ScrollView>
-
-          {/* מבחן תמרורים מהיר */}
-          <View style={{ padding: 16 }}>
-            <Button
-              label="התחל מבחן תמרורים מהיר (10 שאלות)"
-              onPress={() =>
-                router.push(
-                  '/(authenticated)/quiz?mode=practice&filter=תמרורים&count=10'
-                )
-              }
-            />
-          </View>
         </>
       )}
 

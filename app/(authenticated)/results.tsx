@@ -1,6 +1,8 @@
 import { useQuery } from 'convex/react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { ChevronDown, ChevronUp } from 'lucide-react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import {
   Button,
   Card,
@@ -19,6 +21,7 @@ const MAX_SIM_MISTAKES = 4; // עד 4 שגיאות = עובר במבחן המד�
 
 export default function ResultsScreen() {
   const router = useRouter();
+  const [showCorrect, setShowCorrect] = useState(false);
   const { isPremium: adsRemoved } = useRevenueCat();
   const { showBeforeSimulation } = useInterstitialAd(adsRemoved);
   const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
@@ -63,6 +66,7 @@ export default function ResultsScreen() {
 
   const isSim = session.mode === 'simulation';
   const wrong = session.review.filter((r) => !r.isCorrect);
+  const correct = session.review.filter((r) => r.isCorrect);
   const incorrectCount = session.totalQuestions - session.correctCount;
   const passed = isSim
     ? incorrectCount <= MAX_SIM_MISTAKES
@@ -140,6 +144,38 @@ export default function ResultsScreen() {
             </T>
           </Card>
         )}
+
+        {correct.length > 0 ? (
+          <View style={{ gap: 12 }}>
+            <Pressable
+              onPress={() => setShowCorrect((v) => !v)}
+              style={{
+                flexDirection: rtl.flexDirection,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <T weight="bold" size={17}>
+                תשובות נכונות ({correct.length})
+              </T>
+              {showCorrect ? (
+                <ChevronUp color={palette.black} size={20} />
+              ) : (
+                <ChevronDown color={palette.black} size={20} />
+              )}
+            </Pressable>
+            {showCorrect
+              ? correct.map((r) => (
+                  <Card key={r.questionId} style={{ gap: 6 }}>
+                    <T weight="medium">{r.text}</T>
+                    <T color={palette.success} size={14}>
+                      ✓ {r.answers[r.correctAnswer]}
+                    </T>
+                  </Card>
+                ))
+              : null}
+          </View>
+        ) : null}
 
         <View style={{ gap: 10, marginTop: 4 }}>
           {wrong.length > 0 ? (

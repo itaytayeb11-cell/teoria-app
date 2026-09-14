@@ -651,7 +651,12 @@ export function NavArrows(props: {
   };
   // RTL: "הבא" בצד שמאל (חץ ←), "הקודם" בצד ימין (חץ →)
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+    <View
+      style={{
+        flexDirection: rtl.flexDirection,
+        justifyContent: 'space-between',
+      }}
+    >
       <Pressable
         onPress={props.onNext}
         disabled={props.nextDisabled}
@@ -679,7 +684,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 28,
   },
   headerRow: {
-    flexDirection: 'row',
+    flexDirection: rtl.flexDirection,
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 32,

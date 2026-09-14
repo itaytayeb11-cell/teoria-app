@@ -39,8 +39,26 @@ export default function MistakesScreen() {
   const router = useRouter();
   const list = useQuery(api.mistakes.list);
   const stats = useQuery(api.stats.getMyStats);
-  const dismiss = useMutation(api.mistakes.dismiss);
-  const dismissAll = useMutation(api.mistakes.dismissAll);
+  // עדכון אופטימי — מסיר את השאלה מהרשימה מיד, בלי לחכות לתשובה מהשרת
+  // (בלעדיו ה"הוצא מהמחסן" מרגיש איטי כי mistakes.list סורק מחדש את כל
+  // יומן התשובות של המשתמש בכל refetch)
+  const dismiss = useMutation(api.mistakes.dismiss).withOptimisticUpdate(
+    (localStore, { questionId }) => {
+      const current = localStore.getQuery(api.mistakes.list, {});
+      if (current) {
+        localStore.setQuery(
+          api.mistakes.list,
+          {},
+          current.filter((q) => q._id !== questionId)
+        );
+      }
+    }
+  );
+  const dismissAll = useMutation(api.mistakes.dismissAll).withOptimisticUpdate(
+    (localStore) => {
+      localStore.setQuery(api.mistakes.list, {}, []);
+    }
+  );
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const accuracyBySub = useMemo(() => {

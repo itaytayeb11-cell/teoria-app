@@ -318,7 +318,7 @@ export function CategoryCarousel(props: {
       {props.categories.length > 1 ? (
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: rtl.flexDirection,
             justifyContent: 'center',
             gap: 5,
             marginTop: 10,

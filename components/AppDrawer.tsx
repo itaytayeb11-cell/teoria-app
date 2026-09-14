@@ -48,7 +48,7 @@ import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/config/legalUrls';
 import { SUPPORT_EMAIL } from '@/config/support';
 import { palette } from '@/constants/Colors';
 import { api } from '@/convex/_generated/api';
-import { rtl } from '@/lib/rtl';
+import { position, rtl } from '@/lib/rtl';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const PANEL_WIDTH = Math.min(SCREEN_WIDTH * 0.86, 380);
@@ -262,7 +262,7 @@ export function AppDrawer(props: { visible: boolean; onClose: () => void }) {
             position: 'absolute',
             top: 0,
             bottom: 0,
-            right: 0,
+            ...position.start(0),
             width: PANEL_WIDTH,
             transform: [{ translateX: slide }],
             overflow: 'hidden',
