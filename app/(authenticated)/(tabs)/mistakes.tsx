@@ -332,13 +332,18 @@ export default function MistakesScreen() {
                       style={{
                         flexDirection: rtl.flexDirection,
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: 6,
                         alignSelf:
                           rtl.textAlign === 'right' ? 'flex-end' : 'flex-start',
+                        backgroundColor: palette.successBg,
+                        borderRadius: 999,
+                        paddingHorizontal: 14,
+                        paddingVertical: 9,
                       }}
                     >
                       <CheckCheck color={palette.success} size={16} />
-                      <T size={12} color={palette.success} weight="medium">
+                      <T size={12} color={palette.success} weight="bold">
                         כבר יודע — הוצא מהמחסן
                       </T>
                     </Pressable>
