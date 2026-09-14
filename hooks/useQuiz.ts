@@ -187,15 +187,14 @@ export function useQuiz() {
     setIndex((i) => Math.max(i - 1, 0));
   }, []);
 
+  // לא בולעים שגיאה כאן — quiz.tsx.goToResults תופס אותה כדי להראות הודעת
+  // שגיאה ולשחרר את הכפתור לניסיון חוזר. סשן שלא הושלם בשרת (הקריאה
+  // נכשלה) לא אמור "להצליח" בשקט מול המשתמש.
   const finish = useCallback(async () => {
     if (!sessionId) {
       return null;
     }
-    try {
-      return await finishQuizMut({ sessionId: sessionId as never });
-    } catch {
-      return null;
-    }
+    return await finishQuizMut({ sessionId: sessionId as never });
   }, [sessionId, finishQuizMut]);
 
   const stats = useMemo(() => {

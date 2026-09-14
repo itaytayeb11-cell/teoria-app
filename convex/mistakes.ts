@@ -52,17 +52,17 @@ export const list = query({
     const userId = await requireUserId(ctx);
     const entries = await mistakeEntries(ctx, userId);
 
-    const questions = [];
-    for (const e of entries) {
-      const q = await ctx.db.get(e.questionId);
-      if (q) {
-        questions.push({
-          ...q,
-          wrongCount: e.wrongCount,
-          lastSelected: e.lastSelected,
-        });
-      }
-    }
+    const docs = await Promise.all(
+      entries.map((e) => ctx.db.get(e.questionId))
+    );
+    const questions = entries
+      .map((e, i) => {
+        const q = docs[i];
+        return q
+          ? { ...q, wrongCount: e.wrongCount, lastSelected: e.lastSelected }
+          : null;
+      })
+      .filter((q) => q !== null);
     // הכי חוזרות קודם
     return questions.sort((a, b) => b.wrongCount - a.wrongCount);
   },
@@ -95,13 +95,16 @@ export const dismissAll = mutation({
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
     const entries = await mistakeEntries(ctx, userId);
-    for (const e of entries) {
-      await ctx.db.insert('mistakeDismissals', {
-        userId,
-        questionId: e.questionId,
-        dismissedAt: Date.now(),
-      });
-    }
+    const now = Date.now();
+    await Promise.all(
+      entries.map((e) =>
+        ctx.db.insert('mistakeDismissals', {
+          userId,
+          questionId: e.questionId,
+          dismissedAt: now,
+        })
+      )
+    );
     return { dismissed: entries.length };
   },
 });

@@ -51,14 +51,10 @@ export const list = query({
       .order('desc')
       .collect();
 
-    const questions = [];
-    for (const row of rows) {
-      const q = await ctx.db.get(row.questionId);
-      if (q) {
-        questions.push(q);
-      }
-    }
-    return questions;
+    const docs = await Promise.all(
+      rows.map((row) => ctx.db.get(row.questionId))
+    );
+    return docs.filter((q) => q !== null);
   },
 });
 

@@ -1,5 +1,4 @@
 import { v } from 'convex/values';
-import type { Doc } from './_generated/dataModel';
 import { internalMutation, type QueryCtx, query } from './_generated/server';
 import { filterByLicense, getUserIdOrNull } from './model';
 
@@ -36,43 +35,6 @@ export const listCategories = query({
     return [...counts.entries()]
       .map(([category, count]) => ({ category, count }))
       .sort((a, b) => b.count - a.count);
-  },
-});
-
-// שליפת שאלות פעילות, עם סינון אופציונלי לפי נושא / דרגת קושי
-export const getQuestions = query({
-  args: {
-    category: v.optional(v.string()),
-    difficulty: v.optional(v.number()),
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, { category, difficulty, limit }) => {
-    let results: Doc<'questions'>[];
-
-    if (category !== undefined) {
-      results = await ctx.db
-        .query('questions')
-        .withIndex('by_category', (q) => q.eq('category', category))
-        .collect();
-    } else if (difficulty !== undefined) {
-      results = await ctx.db
-        .query('questions')
-        .withIndex('by_difficulty', (q) => q.eq('difficulty', difficulty))
-        .collect();
-    } else {
-      results = await ctx.db
-        .query('questions')
-        .withIndex('by_active', (q) => q.eq('isActive', true))
-        .collect();
-    }
-
-    let filtered = results.filter((q) => q.isActive);
-    if (category !== undefined && difficulty !== undefined) {
-      filtered = filtered.filter((q) => q.difficulty === difficulty);
-    }
-    filtered = filterByLicense(filtered, await currentLicenseType(ctx));
-
-    return limit ? filtered.slice(0, limit) : filtered;
   },
 });
 
@@ -159,26 +121,6 @@ export const signProgress = query({
     }
 
     return { seen: seenUrls.size, total: uniqueUrls.size };
-  },
-});
-
-// שליפת שאלה בודדת לפי מזהה
-export const getById = query({
-  args: { questionId: v.id('questions') },
-  handler: async (ctx, { questionId }) => {
-    return await ctx.db.get(questionId);
-  },
-});
-
-// כמות השאלות הכוללת במאגר
-export const count = query({
-  args: {},
-  handler: async (ctx) => {
-    const all = await ctx.db.query('questions').collect();
-    return {
-      total: all.length,
-      active: all.filter((q) => q.isActive).length,
-    };
   },
 });
 
