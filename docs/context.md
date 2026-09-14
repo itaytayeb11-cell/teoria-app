@@ -104,3 +104,5 @@ remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה ד
 - [ ] התחברות Google — ממתין ל-OAuth client מהמשתמש
 - [ ] Push notifications — קוד מוכן ופרוס (cron+רישום מכשיר), טרם נבדק בפועל על מכשיר (ממתין ל-dev build מותקן)
 - [ ] Android dev build — build חדש רץ אחרי שתי סדרות תיקונים (git-path + Kotlin + AdMob App ID אמיתי + EAS env vars), ממתין לסיום
+- [x] ביקורת אבטחה (2026-09-14, בעקבות בדיקת "עורך דין צד שני"): נבדקו כל ה-query/mutation ב-convex — כולם דורשים זהות מהשרת (ctx.auth), אין IDOR. `deleteMyAccount` תוקן (היה חסר streakLog/mistakeDismissals/savedQuestions/pushTokens). מדיניות הפרטיות עודכנה (קטינים במפורש, Advertising ID, כל ספק בשם)
+- [ ] **ידוע ולא מתוקן במכוון**: `startQuiz`/`getResumable` שולחים ל-קליינט את כל ה-`correctAnswer` מראש (לפני שעונים) — מאפשר "רמאות עצמית" למי שבודק תעבורת רשת. לא דליפת מידע של משתמשים אחרים, רק self-cheating בתרגול. המשתמש בחר במפורש לא לתקן (ידרוש שינוי ארכיטקטורה + פגיעה במהירות המשוב)
