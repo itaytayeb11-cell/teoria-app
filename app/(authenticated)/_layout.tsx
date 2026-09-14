@@ -6,9 +6,7 @@ import {
   useSegments,
 } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
-import { PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
-import { useRevenueCat } from '@/contexts/RevenueCatContext';
 import { api } from '@/convex/_generated/api';
 import { usePushRegistration } from '@/hooks/usePushRegistration';
 
@@ -27,11 +25,11 @@ const STACK_SCREENS = [
   'streak',
   'leaderboard',
   'faq',
+  'remove-ads',
 ];
 
 export default function AuthenticatedLayout() {
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const { isPremium, isLoading: isRevenueCatLoading } = useRevenueCat();
   const navigationState = useRootNavigationState();
   const segments = useSegments();
   const currentUser = useQuery(
@@ -57,15 +55,14 @@ export default function AuthenticatedLayout() {
   if (!navigationState?.key) {
     return loadingView;
   }
-  if (isLoading || isRevenueCatLoading) {
+  if (isLoading) {
     return loadingView;
   }
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/sign-in" />;
   }
-  if (PAYMENT_SYSTEM_ENABLED && !isPremium) {
-    return <Redirect href="/(auth)/paywall" />;
-  }
+  // אפליקציה חינמית — אין חסימת תוכן מאחורי תשלום. "הסרת פרסומות" היא
+  // רכישה אופציונלית שנגישה דרך התפריט, לא גייט שחוסם כניסה.
   // אונבורדינג: משתמש בלי שם או בלי סוג רישיון — להשלים פרופיל לפני כניסה
   const onLicenseScreen = segments[segments.length - 1] === 'license';
   if (

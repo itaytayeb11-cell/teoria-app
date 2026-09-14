@@ -22,7 +22,9 @@ import {
   T,
 } from '@/components/ui';
 import { palette } from '@/constants/Colors';
+import { useRevenueCat } from '@/contexts/RevenueCatContext';
 import { api } from '@/convex/_generated/api';
+import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 import { useQuiz } from '@/hooks/useQuiz';
 import { rtl } from '@/lib/rtl';
 
@@ -54,6 +56,8 @@ export default function QuizScreen() {
     : (params.mode ?? 'simulation');
   const isPractice = mode !== 'simulation';
   const quiz = useQuiz();
+  const { isPremium: adsRemoved } = useRevenueCat();
+  const { maybeShowAfterQuiz } = useInterstitialAd(adsRemoved);
   const toggleSave = useMutation(api.saved.toggle);
   const savedIds = useQuery(api.saved.listIds);
   const [showExplain, setShowExplain] = useState(false);
@@ -132,16 +136,28 @@ export default function QuizScreen() {
         await submitAll(); // מבחן מדמה — שולח את כל התשובות לפני הסיום
       }
       const res = await finish();
-      router.replace(
-        `/(authenticated)/results?sessionId=${sessionId}&score=${res?.scorePercent ?? correctCount}`
-      );
+      // פרסומת (אם רלוונטי) מוצגת כאן — בין הסשן שהסתיים למסך התוצאות,
+      // לא בתוך תוכן הלימוד עצמו. תמיד ממשיך לתוצאות בסוף, עם/בלי פרסומת
+      maybeShowAfterQuiz(() => {
+        router.replace(
+          `/(authenticated)/results?sessionId=${sessionId}&score=${res?.scorePercent ?? correctCount}`
+        );
+      });
     } catch {
       // לא נתקע כפתור מת לצמיתות — משחררים כדי שאפשר יהיה לנסות שוב
       finishingRef.current = false;
       setFinishing(false);
       Alert.alert('שגיאה בשליחת המבחן', 'בדוק את החיבור לאינטרנט ונסה שוב.');
     }
-  }, [isPractice, submitAll, finish, sessionId, correctCount, router]);
+  }, [
+    isPractice,
+    submitAll,
+    finish,
+    sessionId,
+    correctCount,
+    router,
+    maybeShowAfterQuiz,
+  ]);
 
   const hasQuestions = quiz.questions.length > 0;
 

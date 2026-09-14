@@ -61,16 +61,17 @@ type RevenueCatContextType = {
 // ============================================================================
 
 // חבילת ברירת מחדל לתצוגה מקדימה (כשאין מפתחות או ב-Expo Go) — רכישה
-// חד-פעמית (lifetime), לא מנוי. המחיר האמיתי מגיע מ-RevenueCat/החנות
-// בפועל; זה רק placeholder לתצוגה כשאין חיבור אמיתי.
+// חד-פעמית (lifetime) שמסירה פרסומות בלבד, לא מנוי ולא פתיחת תוכן (האפליקציה
+// כולה חינמית ופתוחה ממילא). המחיר האמיתי מגיע מ-RevenueCat/החנות בפועל;
+// זה רק placeholder לתצוגה כשאין חיבור אמיתי.
 const PREVIEW_PACKAGES: PackageInfo[] = [
   {
-    identifier: 'lifetime_access',
-    priceString: '₪14.99',
-    price: 14.99,
+    identifier: 'remove_ads',
+    priceString: '₪14.90',
+    price: 14.9,
     currencyCode: 'ILS',
-    title: 'גישה מלאה',
-    description: 'תשלום חד-פעמי — גישה לכל המאגר, ללא מנוי',
+    title: 'הסרת פרסומות',
+    description: 'תשלום חד-פעמי — מסיר פרסומות לצמיתות',
     packageType: 'lifetime',
   },
 ];

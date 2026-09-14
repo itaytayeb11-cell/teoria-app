@@ -1,17 +1,17 @@
 import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { internalMutation, query } from './_generated/server';
-import { requireUserId, userHasPremium } from './model';
+import { requireUserId, userHasRemovedAds } from './model';
 
 // ==========================================================================
-// בדיקת גישה בתשלום
+// בדיקה האם המשתמש רכש "הסרת פרסומות" — לא קשור לגישה לתוכן (הכל פתוח)
 // ==========================================================================
-export const getMyAccess = query({
+export const getAdStatus = query({
   args: {},
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
-    const hasPremium = await userHasPremium(ctx, userId);
-    return { hasPremium };
+    const adsRemoved = await userHasRemovedAds(ctx, userId);
+    return { adsRemoved };
   },
 });
 
@@ -73,7 +73,7 @@ export const applyWebhookEvent = internalMutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         productId,
-        entitlement: 'premium',
+        entitlement: 'remove_ads',
         platform: store,
         isActive,
         updatedAt: now,
@@ -82,7 +82,7 @@ export const applyWebhookEvent = internalMutation({
       await ctx.db.insert('purchases', {
         userId,
         productId,
-        entitlement: 'premium',
+        entitlement: 'remove_ads',
         platform: store,
         isActive,
         purchasedAt: now,

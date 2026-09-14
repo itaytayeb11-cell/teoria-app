@@ -1,0 +1,27 @@
+// ============================================================================
+// קונפיגורציית AdMob — מזהי יחידות פרסומת
+// ============================================================================
+// ⚠️ react-native-google-mobile-ads לא עובד ב-Expo Go — רק ב-dev/prod build
+// (ר' ADS_ENABLED ב-config/appConfig.ts). בזמן פיתוח תמיד משתמשים במזהי
+// הטסט הרשמיים של גוגל (למטה) כדי לא להסתכן בהפרות מדיניות מלחיצות אמיתיות
+// על פרסומות בזמן טסטים.
+
+import { Platform } from 'react-native';
+import { ADS_ENABLED } from './appConfig';
+
+// מזהי טסט רשמיים של גוגל (תמיד מציגים פרסומת דמה) — https://developers.google.com/admob/android/test-ads
+const TEST_INTERSTITIAL_ANDROID = 'ca-app-pub-3940256099942544/1033173712';
+const TEST_INTERSTITIAL_IOS = 'ca-app-pub-3940256099942544/4411468910';
+
+// 👤 נדרשת פעולת משתמש: להחליף למזהי היחידות האמיתיים שלך מ-AdMob לפני
+// שמדליקים ADS_ENABLED=true בפרודקשן. עד אז אלה placeholder בלבד.
+const PROD_INTERSTITIAL_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
+const PROD_INTERSTITIAL_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ';
+
+export function getInterstitialAdUnitId(): string {
+  const useTestId = __DEV__ || !ADS_ENABLED;
+  if (Platform.OS === 'ios') {
+    return useTestId ? TEST_INTERSTITIAL_IOS : PROD_INTERSTITIAL_IOS;
+  }
+  return useTestId ? TEST_INTERSTITIAL_ANDROID : PROD_INTERSTITIAL_ANDROID;
+}

@@ -8,6 +8,7 @@ import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import {
   AlertCircle,
+  Ban,
   BarChart3,
   Bookmark,
   ChevronLeft,
@@ -208,6 +209,11 @@ export function AppDrawer(props: { visible: boolean; onClose: () => void }) {
       label: 'שאלות נפוצות',
       icon: HelpCircle,
       onPress: () => go('/(authenticated)/faq'),
+    },
+    {
+      label: 'הסרת פרסומות',
+      icon: Ban,
+      onPress: () => go('/(authenticated)/remove-ads'),
     },
     { label: 'צור קשר', icon: Mail, onPress: contact },
     {

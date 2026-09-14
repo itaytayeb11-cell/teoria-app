@@ -23,8 +23,9 @@ export async function getUserIdOrNull(
   return (userId as Id<'users'> | null) ?? null;
 }
 
-// בודק אם למשתמש יש גישה בתשלום פעילה
-export async function userHasPremium(
+// בודק אם המשתמש רכש "הסרת פרסומות" (רכישה פעילה) — לא קשור לפתיחת תוכן,
+// כל התוכן פתוח לכולם. משמש רק כדי להחליט אם להציג פרסומות.
+export async function userHasRemovedAds(
   ctx: QueryCtx | MutationCtx,
   userId: Id<'users'>
 ): Promise<boolean> {
