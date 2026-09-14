@@ -1,10 +1,10 @@
 # Context — Teoria App
 
-עודכן לאחרונה: 2026-09-09
+עודכן לאחרונה: 2026-09-14
 
 ## מה האפליקציה עושה
 
-אפליקציית תרגול תאוריה נהיגה בישראל (iOS + Android). אפליקציה בתשלום (~$3.99), 1,200+ שאלות ממאגר משרד התחבורה. קהל: בני 16–24 שלומדים רישיון.
+אפליקציית תרגול תאוריה נהיגה בישראל (iOS + Android). **חינמית לגמרי** — כל 1,802 השאלות ממאגר משרד התחבורה וכל הפיצ'רים פתוחים לכולם. מונטיזציה: פרסומות (AdMob) בין sessions + רכישת "הסרת פרסומות" אופציונלית (לא פותחת תוכן). קהל: בני 16–24 שלומדים רישיון. פירוט מלא: docs/design.md § מודל עסקי.
 
 ## סטאק
 
@@ -20,12 +20,14 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 | 3. Auth Keys | ✅ | Password provider, מפתחות נוצרו |
 | 4. Backend (schema + functions) | ✅ | schema: questions, quizSessions, answerLog, purchases. functions: questions/quiz/stats/purchases + model.ts helpers. deployed, typecheck+lint נקי |
 | 5. הורדת + טביעת שאלות | ✅ | 1,802 שאלות מ-data.gov.il API (CKAN datastore) → scripts/convert-questions.mjs → questions.jsonl → convex import. נושאים: חוקי התנועה 901, בטיחות 400, תמרורים 391, הכרת הרכב 110. 598 עם תמונה (imageUrl מ-gov.il) |
-| 6. הרצה ראשונה | ⬜ | |
-| 7. Auth Frontend | 🟡 | קיים בתבנית (sign-in/sign-up/paywall) — צריך התאמה |
-| 8. Quiz Screen | ⬜ | קיימים placeholders page1/page2 |
-| 9. Stats/Dashboard | ⬜ | |
-| 10. Settings | 🟡 | קיים מסך בתבנית — צריך התאמה |
-| 11–17 | ⬜ | Git/GitHub, RevenueCat, חנויות, build, listing, submit, launch |
+| 6. הרצה ראשונה | ✅ | `bun dev` + Expo Go, נבדק על מכשיר לאורך כל הפרויקט |
+| 7. Auth Frontend | ✅ | sign-in/sign-up + אונבורדינג (שם+רישיון+תאריך מבחן) |
+| 8. Quiz Screen | ✅ | מבחן מדמה + תרגול, מחסן טעויות, שמורות, לוח תמרורים |
+| 9. Stats/Dashboard | ✅ | דף בית (ווידג'טים+נושאים), מסך סטטיסטיקה, היסטוריה, טבלת דירוג, פירוט רצף |
+| 10. Settings | ✅ | הוחלף בתפריט צד (drawer) — עריכת פרופיל, FAQ, צור קשר, תנאי שימוש/פרטיות, התנתק, מחיקה |
+| 11. Git/GitHub | ✅ | מתמשך — כל שינוי בקומיט נפרד |
+| 12. RevenueCat + AdMob | 🟡 | קוד מוכן (webhook מאומת, IAP הסרת-פרסומות, interstitial), ממתין לחשבונות/מפתחות מהמשתמש |
+| 13–17 | ⬜ | חנויות (+ Apple Small Business Program בשלב 13א), build, listing, submit, launch |
 
 ## מפתחות ומשתני סביבה
 
@@ -33,15 +35,18 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 |---|---|---|
 | CONVEX_DEPLOYMENT | .env.local | ✅ (נוצר ע"י convex) |
 | EXPO_PUBLIC_CONVEX_URL | .env.local | ✅ |
-| EXPO_PUBLIC_REVENUECAT_* | .env | ⬜ (אופציונלי, שלב 12) |
+| EXPO_PUBLIC_REVENUECAT_* | .env | ⬜ ממתין למפתח מהמשתמש |
+| REVENUECAT_WEBHOOK_SECRET | Convex dashboard env vars | ⬜ ממתין למשתמש (ר' הוראות בצ'אט) |
+| EXPO_PUBLIC_SUPPORT_EMAIL | .env | ⬜ אופציונלי (אחרת placeholder ב-config/support.ts) |
 
-## מבנה קיים (מהתבנית)
+## מבנה נוכחי
 
-- `app/(auth)/` — sign-in, sign-up, paywall
-- `app/(authenticated)/` — index, settings, page1, page2 (placeholders)
-- `convex/` — schema (users בלבד), auth, users, http
-- `components/` — Themed, WebViewModal, SetupScreen, PreviewModeBanner
-- `contexts/RevenueCatContext.tsx`
+- `app/(auth)/` — sign-in, sign-up (paywall עבר ל-authenticated/remove-ads)
+- `app/(authenticated)/(tabs)/` — בית, תרגול, תמרורים, מחסן טעויות (4 הטאבים האמיתיים, Tabs נפרד)
+- `app/(authenticated)/` — quiz, results, license, stats, history, settings, saved, streak, leaderboard, faq, remove-ads (כולם Stack.Screen אמיתי, לא עוד Tabs.Screen)
+- `convex/` — schema (users/questions/quizSessions/answerLog/streakLog/mistakeDismissals/savedQuestions/pushTokens/purchases), quiz, stats, questions, users, mistakes, saved, purchases, notifications, crons, auth, http, model (helpers)
+- `components/` — ui.tsx (ערכת קומפוננטות), HomeWidgets.tsx, AppDrawer.tsx, WebViewModal.tsx
+- `contexts/RevenueCatContext.tsx`, `hooks/useQuiz.ts`, `hooks/useInterstitialAd.ts`
 
 ## עדכון אחרון (session 2, המשך)
 
@@ -55,8 +60,9 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 ✅ עריכת פרופיל: license.tsx הורחב לשם+רישיון+תאריך מבחן (date picker), גם באונבורדינג וגם דרך הגדרות. ✅ תזכורת יומית לקביעת תאריך (מודל, פעם ביום, כל עוד אין תאריך). ✅ יהלום→מסך פירוט רצף (streakLog table חדש). ✅ טרופי→טבלת דירוג כלל-משתמשים (leaderboardScore מחושב ב-finishQuiz).
 ✅ צור קשר, שאלות נפוצות (2 חלקים: אפליקציה + מבחן אמיתי, מאומת מול מקורות), אתגר חברים (Share) — הכל בתפריט (components/AppDrawer.tsx, app/(authenticated)/faq.tsx).
 ✅ ארכיטקטורת ניווט תוקנה: 4 הטאבים עברו ל-app/(authenticated)/(tabs)/, כל שאר המסכים הם Stack.Screen אמיתי (לא עוד Tabs.Screen עם href:null) — תיקן באג "יציאה ממסך מנווטת לטאב הלא נכון".
-✅ שלב 12 (RevenueCat) — בתחילת עבודה: convex/http.ts webhook מאומת (REVENUECAT_WEBHOOK_SECRET), convex/purchases.ts מקור-אמת מה-webhook בלבד (לא עוד client-callable), RevenueCatContext מוגדר עם appUserID = Convex userId, מודל רכישה חד-פעמית (lifetime) לא מנוי, paywall עוצב מחדש. **ממתין למשתמש:** חשבון RevenueCat + מוצר/entitlement/webhook (ר' הודעת הצ'אט להוראות מדויקות).
+✅ **שינוי מודל עסקי (2026-09-14):** paid-only ($3.99 חוסם תוכן) → freemium+ads. האפליקציה חינמית לגמרי, שום תוכן לא נעול. שולב `react-native-google-mobile-ads` (לא עובד ב-Expo Go — צריך dev/prod build; מזהי טסט רשמיים של גוגל בינתיים). interstitial בין sessions בלבד, לכל היותר פעם ב-3 מבחנים/תרגולים (hooks/useInterstitialAd.ts), לא למי שרכש הסרת פרסומות. gate התוכן הישן (`PAYMENT_SYSTEM_ENABLED && !isPremium` → redirect לpaywall) **הוסר לגמרי**. מסך paywall עבר מ-`app/(auth)/paywall` ל-`app/(authenticated)/remove-ads.tsx` (מסך רגיל בתפריט, לא גייט). RevenueCat webhook מאומת (`convex/http.ts`, `REVENUECAT_WEBHOOK_SECRET`) הוא מקור האמת היחיד לרכישות — לא client-callable. שמות עודכנו: `userHasPremium`→`userHasRemovedAds`, `getMyAccess`→`getAdStatus`, entitlement `'premium'`→`'remove_ads'`. **ממתין למשתמש:** (1) חשבון RevenueCat + מוצר `remove_ads` (non-consumable) + entitlement `remove_ads` + webhook — הוראות מדויקות נשלחו בצ'אט. (2) מזהי AdMob אמיתיים (androidAppId/iosAppId ב-app.json + יחידות פרסומת ב-config/ads.ts) לפני `ADS_ENABLED=true`.
 נותר כללי: (א) התחברות Google — ממתין ל-OAuth client מהמשתמש. (ב) Push notifications — נדחה ל-dev build. (ג) חנויות (Apple/Google).
+⚠️ **תזכורת קריטית לשלב 13א (App Store Connect):** להירשם ל-Apple Small Business Program (מוריד עמלה מ-30% ל-15%, לא אוטומטי, לוקח כמה שבועות, מתחדש כל שנה). Google Play — עמלה מופחתת אוטומטית, אין פעולה נדרשת.
 המשתמש בודק ב-Expo Go (`bun dev`). לחיצה על `r` = reload.
 קומפוננטות: components/ui.tsx, components/HomeWidgets.tsx. hook: hooks/useQuiz.ts.
 
@@ -75,7 +81,10 @@ remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה ד
 
 ## בעיות פתוחות
 
-- [ ] Convex לא מחובר (אין .env)
-- [ ] schema חסר טבלאות questions + userStats
-- [ ] אין שאלות ב-DB
-- [ ] מסכי quiz/stats לא נבנו
+- [ ] מודל תשלומים שונה מ-paid-only לfreemium+ads — קוד מוכן, ממתין לחשבון RevenueCat + מזהי AdMob אמיתיים מהמשתמש
+- [ ] שילוב AdMob טרם נבדק בפועל (צריך dev/prod build, לא Expo Go)
+- [ ] הרשמה ל-Apple Small Business Program — ממתינה לשלב 13א (App Store Connect), לא לשכוח
+- [ ] כתובת מייל אמיתית ל"צור קשר" (config/support.ts עדיין placeholder)
+- [ ] Convex Free plan מתקרב למגבלה — הודעה מ-Convex CLI, לבדוק בדשבורד אם צריך לשדרג
+- [ ] התחברות Google — ממתין ל-OAuth client מהמשתמש
+- [ ] Push notifications אמיתיות — נדחה ל-dev build (לא עובד ב-Expo Go)
