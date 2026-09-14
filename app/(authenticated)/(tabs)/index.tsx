@@ -16,7 +16,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Polygon } from 'react-native-svg';
+import Svg, { Rect } from 'react-native-svg';
 import { AppDrawer } from '@/components/AppDrawer';
 import {
   CategoryCarousel,
@@ -31,32 +31,32 @@ import { rtl } from '@/lib/rtl';
 
 const TEST_DATE_REMINDER_KEY = 'testDateReminderShownOn';
 
-// לוגו האפליקציה — תמרור משולש עם האות "ל" (רמז ל"לומד נהיגה"), ליד השם בכותרת
+// לוגו האפליקציה — תמרור "לומד נהיגה" הרשמי: ריבוע לבן עם מסגרת אדומה
+// והאות "ל" באדום במרכז, ליד השם בכותרת
 function LogoMark() {
+  const size = 24;
   return (
     <View
       style={{
-        width: 26,
-        height: 24,
+        width: size,
+        height: size,
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Svg
-        width={26}
-        height={24}
-        viewBox="0 0 26 24"
-        style={{ position: 'absolute' }}
-      >
-        <Polygon
-          points="13,1 25,22 1,22"
-          fill={palette.primary}
-          stroke="#fff"
-          strokeWidth={2}
-          strokeLinejoin="round"
+      <Svg width={size} height={size} style={{ position: 'absolute' }}>
+        <Rect
+          x={1.5}
+          y={1.5}
+          width={size - 3}
+          height={size - 3}
+          rx={3}
+          fill="#fff"
+          stroke="#D62828"
+          strokeWidth={2.5}
         />
       </Svg>
-      <T color="#fff" weight="bold" size={13} style={{ marginTop: 4 }}>
+      <T color="#D62828" weight="bold" size={13}>
         ל
       </T>
     </View>
