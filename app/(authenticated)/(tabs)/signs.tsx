@@ -289,16 +289,9 @@ export default function SignsScreen() {
                   weight="bold"
                   size={16}
                   color={palette.primary}
-                  style={{ textAlign: rtl.textAlign, marginBottom: 12 }}
-                >
-                  {zoomed.answer}
-                </T>
-                <T
-                  color={palette.muted}
-                  size={13}
                   style={{ textAlign: rtl.textAlign }}
                 >
-                  {zoomed.text}
+                  {zoomed.answer}
                 </T>
               </>
             ) : null}
