@@ -7,6 +7,7 @@
 // - מצב רכישות מדומות (mock)
 // - ייצור עם מפתחות אמיתיים
 
+import { useQuery } from 'convex/react';
 import Constants from 'expo-constants';
 import {
   createContext,
@@ -17,6 +18,7 @@ import {
 } from 'react';
 import { Alert } from 'react-native';
 import { MOCK_PAYMENTS, PAYMENT_SYSTEM_ENABLED } from '@/config/appConfig';
+import { api } from '@/convex/_generated/api';
 import {
   getCurrentPlatformRevenueCatApiKey,
   isRevenueCatConfigured,
@@ -58,25 +60,18 @@ type RevenueCatContextType = {
 // חבילות ברירת מחדל לתצוגה מקדימה
 // ============================================================================
 
-// חבילות ברירת מחדל לתצוגה מקדימה (כשאין מפתחות או ב-Expo Go)
+// חבילת ברירת מחדל לתצוגה מקדימה (כשאין מפתחות או ב-Expo Go) — רכישה
+// חד-פעמית (lifetime), לא מנוי. המחיר האמיתי מגיע מ-RevenueCat/החנות
+// בפועל; זה רק placeholder לתצוגה כשאין חיבור אמיתי.
 const PREVIEW_PACKAGES: PackageInfo[] = [
   {
-    identifier: '$rc_monthly',
-    priceString: '₪9.99/חודש',
-    price: 9.99,
+    identifier: 'lifetime_access',
+    priceString: '₪14.99',
+    price: 14.99,
     currencyCode: 'ILS',
-    title: 'מנוי חודשי',
-    description: 'גישה מלאה לכל התכונות',
-    packageType: 'monthly',
-  },
-  {
-    identifier: '$rc_annual',
-    priceString: '₪69.99/שנה',
-    price: 69.99,
-    currencyCode: 'ILS',
-    title: 'מנוי שנתי',
-    description: 'חסכון של 40% לעומת מנוי חודשי',
-    packageType: 'annual',
+    title: 'גישה מלאה',
+    description: 'תשלום חד-פעמי — גישה לכל המאגר, ללא מנוי',
+    packageType: 'lifetime',
   },
 ];
 
@@ -119,6 +114,13 @@ export function RevenueCatProvider({
 
   const isExpoGo = isRunningInExpoGo();
   const isConfigured = isRevenueCatConfigured();
+  // ה-appUserID שמזהה אותנו מול RevenueCat — חייב להיות בדיוק ה-userId
+  // שלנו ב-Convex, כי ה-webhook (convex/purchases.applyWebhookEvent)
+  // משתמש בו כדי לדעת איזה משתמש שלנו ביצע את הרכישה
+  const currentUser = useQuery(
+    api.users.getCurrentUser,
+    PAYMENT_SYSTEM_ENABLED ? {} : 'skip'
+  );
 
   // ============================================================================
   // אתחול
@@ -151,6 +153,12 @@ export function RevenueCatProvider({
         return;
       }
 
+      // ממתינים שהמשתמש המחובר ב-Convex ייטען, כדי לקשר את הרכישה אליו
+      // מהרגע הראשון (ולא ל-ID אנונימי של RevenueCat)
+      if (currentUser === undefined) {
+        return;
+      }
+
       // ניסיון לאתחל את RevenueCat SDK
       try {
         const apiKey = getCurrentPlatformRevenueCatApiKey();
@@ -162,7 +170,10 @@ export function RevenueCatProvider({
         const Purchases = (await import('react-native-purchases')).default;
 
         Purchases.setLogLevel(Purchases.LOG_LEVEL.VERBOSE);
-        await Purchases.configure({ apiKey });
+        await Purchases.configure({
+          apiKey,
+          appUserID: currentUser?._id,
+        });
 
         // טעינת ההצעות
         const offerings = await Purchases.getOfferings();
@@ -198,7 +209,7 @@ export function RevenueCatProvider({
     }
 
     initialize();
-  }, [isExpoGo, isConfigured]);
+  }, [isExpoGo, isConfigured, currentUser]);
 
   // ============================================================================
   // רכישת חבילה
