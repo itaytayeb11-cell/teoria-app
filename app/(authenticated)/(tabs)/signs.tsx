@@ -28,6 +28,7 @@ type SignItem = {
   id: string;
   url: string;
   text: string;
+  answer: string;
   category: string;
   officialId?: string;
 };
@@ -55,7 +56,10 @@ export default function SignsScreen() {
       return active.items;
     }
     return active.items.filter(
-      (item) => item.text.includes(q) || item.officialId === q
+      (item) =>
+        item.text.includes(q) ||
+        item.answer.includes(q) ||
+        item.officialId === q
     );
   }, [active, search]);
 
@@ -196,7 +200,10 @@ export default function SignsScreen() {
                   resizeMode="contain"
                 />
                 <View style={{ flex: 1, gap: 4 }}>
-                  <T weight="medium" size={14} numberOfLines={3}>
+                  <T weight="bold" size={14} numberOfLines={2}>
+                    {item.answer}
+                  </T>
+                  <T color={palette.muted} size={12} numberOfLines={2}>
                     {item.text}
                   </T>
                 </View>
@@ -270,7 +277,27 @@ export default function SignsScreen() {
                   style={{ width: '100%', height: 180, marginBottom: 12 }}
                   resizeMode="contain"
                 />
-                <T weight="medium" style={{ textAlign: rtl.textAlign }}>
+                <T
+                  color={palette.muted}
+                  size={12}
+                  weight="medium"
+                  style={{ textAlign: rtl.textAlign, marginBottom: 4 }}
+                >
+                  פירוש התמרור
+                </T>
+                <T
+                  weight="bold"
+                  size={16}
+                  color={palette.primary}
+                  style={{ textAlign: rtl.textAlign, marginBottom: 12 }}
+                >
+                  {zoomed.answer}
+                </T>
+                <T
+                  color={palette.muted}
+                  size={13}
+                  style={{ textAlign: rtl.textAlign }}
+                >
                   {zoomed.text}
                 </T>
               </>

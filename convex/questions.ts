@@ -92,6 +92,7 @@ export const signDictionary = query({
         id: string;
         url: string;
         text: string;
+        answer: string; // התשובה הנכונה לשאלה — משמשת כ"פירוש" התמרור בפועל
         category: string;
         officialId?: string;
       }[]
@@ -108,6 +109,7 @@ export const signDictionary = query({
         id: q._id,
         url: q.imageUrl,
         text: q.text,
+        answer: q.answers[q.correctAnswer] ?? '',
         category: q.category,
         officialId: q.officialId,
       });
