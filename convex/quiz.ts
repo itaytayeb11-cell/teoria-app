@@ -220,6 +220,97 @@ export const submitAnswer = mutation({
 });
 
 // ==========================================================================
+// שולח את כל התשובות של מבחן מדמה בבת אחת (במקום קריאה נפרדת לכל שאלה).
+// חשוב: submitAnswer נקרא N פעמים במקביל היה גורם ל-N כתיבות מתחרות על
+// אותו מסמך session (כל אחת קוראת session.answers הישן ורק מוסיפה תשובה
+// אחת) — לפעמים תשובות "נבלעות", ולפעמים Convex מנסה שוב כתיבות שהתנגשו
+// וזה יוצא איטי יותר מהלולאה הרציפה המקורית. כאן יש כתיבה אחת בלבד לסשן.
+// ==========================================================================
+export const submitAllAnswers = mutation({
+  args: {
+    sessionId: v.id('quizSessions'),
+    answers: v.array(
+      v.object({
+        questionId: v.id('questions'),
+        selected: v.number(),
+      })
+    ),
+  },
+  handler: async (ctx, { sessionId, answers: incoming }) => {
+    const userId = await requireUserId(ctx);
+    const session = await ctx.db.get(sessionId);
+    if (!session || session.userId !== userId) {
+      throw new Error('מבחן לא נמצא');
+    }
+    if (session.status === 'completed' || incoming.length === 0) {
+      return { saved: 0 };
+    }
+
+    const already = new Set(session.answers.map((a) => a.questionId));
+    const toSave = incoming.filter((a) => !already.has(a.questionId));
+    if (toSave.length === 0) {
+      return { saved: 0 };
+    }
+
+    // שליפת כל השאלות במקביל — קריאות בלבד, כל אחת על מסמך אחר, אין תחרות
+    const questionDocs = await Promise.all(
+      toSave.map((a) => ctx.db.get(a.questionId))
+    );
+
+    const now = Date.now();
+    const newAnswers: (typeof session.answers)[number][] = [];
+    const dismissalsToClear: Id<'questions'>[] = [];
+
+    for (let i = 0; i < toSave.length; i += 1) {
+      const question = questionDocs[i];
+      if (!question) {
+        continue;
+      }
+      const { questionId, selected } = toSave[i];
+      const isCorrect = selected === question.correctAnswer;
+      newAnswers.push({ questionId, selected, isCorrect });
+      await ctx.db.insert('answerLog', {
+        userId,
+        questionId,
+        category: question.category,
+        subCategory: question.subCategory,
+        isCorrect,
+        selected,
+        answeredAt: now,
+      });
+      if (!isCorrect) {
+        dismissalsToClear.push(questionId);
+      }
+    }
+
+    const answers = [...session.answers, ...newAnswers];
+    const correctCount = answers.filter((a) => a.isCorrect).length;
+    await ctx.db.patch(sessionId, {
+      answers,
+      correctCount,
+      incorrectCount: answers.length - correctCount,
+    });
+
+    // מוציאים שאלות שטעינו בהן שוב מ"ידעתי" — כתיבות על מסמכים נפרדים, בלי תחרות
+    await Promise.all(
+      dismissalsToClear.map(async (questionId) => {
+        const dismissal = await ctx.db
+          .query('mistakeDismissals')
+          .withIndex('by_user_question', (q) =>
+            q.eq('userId', userId).eq('questionId', questionId)
+          )
+          .first();
+        if (dismissal) {
+          await ctx.db.delete(dismissal._id);
+        }
+      })
+    );
+
+    return { saved: newAnswers.length };
+  },
+});
+
+// ==========================================================================
 // סיום מבחן — חישוב ציון סופי
 // ==========================================================================
 export const finishQuiz = mutation({

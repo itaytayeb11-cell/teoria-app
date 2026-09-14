@@ -22,6 +22,7 @@ type AnswerRecord = { selected: number; isCorrect: boolean };
 export function useQuiz() {
   const startQuizMut = useMutation(api.quiz.startQuiz);
   const submitAnswerMut = useMutation(api.quiz.submitAnswer);
+  const submitAllAnswersMut = useMutation(api.quiz.submitAllAnswers);
   const finishQuizMut = useMutation(api.quiz.finishQuiz);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -156,31 +157,27 @@ export function useQuiz() {
     [questions, index, sessionId, answers, submitAnswerMut]
   );
 
-  // שולח את כל התשובות המקומיות לשרת (מבחן מדמה, לפני סיום).
-  // כל הקריאות יוצאות במקביל (לא await בלולאה) — עד 30 שאלות בהמתנה
-  // עוקבת = כמה שניות טעינה, בעוד שבמקביל זה בערך זמן קריאה בודדת.
+  // שולח את כל התשובות המקומיות לשרת בקריאה אחת (מבחן מדמה, לפני סיום).
+  // לא N קריאות submitAnswer בלולאה/במקביל — אלה כולן היו כותבות לאותו
+  // מסמך session ומתנגשות זו בזו. submitAllAnswers עושה זאת בכתיבה אחת.
   const submitAll = useCallback(async () => {
     if (!sessionId) {
       return;
     }
-    await Promise.all(
-      Object.entries(answers).map(async ([i, rec]) => {
+    const entries = Object.entries(answers)
+      .map(([i, rec]) => {
         const q = questions[Number(i)];
-        if (!q) {
-          return;
-        }
-        try {
-          await submitAnswerMut({
-            sessionId: sessionId as never,
-            questionId: q._id as never,
-            selected: rec.selected,
-          });
-        } catch {
-          // ממשיכים גם אם תשובה אחת נכשלה
-        }
+        return q ? { questionId: q._id, selected: rec.selected } : null;
       })
-    );
-  }, [sessionId, answers, questions, submitAnswerMut]);
+      .filter((v): v is { questionId: string; selected: number } => v !== null);
+    if (entries.length === 0) {
+      return;
+    }
+    await submitAllAnswersMut({
+      sessionId: sessionId as never,
+      answers: entries as never,
+    });
+  }, [sessionId, answers, questions, submitAllAnswersMut]);
 
   const next = useCallback(() => {
     setIndex((i) => Math.min(i + 1, questions.length - 1));
