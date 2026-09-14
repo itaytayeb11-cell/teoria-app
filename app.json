@@ -17,7 +17,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "ExpoLocalization_supportsRTL": true,
-        "ExpoLocalization_forcesRTL": true
+        "ExpoLocalization_forcesRTL": true,
+        "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.teoria.app"
     },
