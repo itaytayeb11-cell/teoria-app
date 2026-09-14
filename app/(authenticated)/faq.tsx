@@ -4,9 +4,10 @@ import { Card, Screen, ScreenHeader, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { rtl } from '@/lib/rtl';
 
-// שאלות נפוצות על האפליקציה עצמה בלבד (איך היא עובדת) — לא על חוקי התנועה,
-// כדי לא להציג פרשנות משפטית שאינה מהמקור הרשמי
-const FAQ: { q: string; a: string }[] = [
+type FaqItem = { q: string; a: string };
+
+// שאלות על האפליקציה עצמה — איך היא עובדת, בשליטתנו המלאה
+const APP_FAQ: FaqItem[] = [
   {
     q: 'מאיפה השאלות באפליקציה?',
     a: 'השאלות מיובאות ממאגר השאלות הרשמי של משרד התחבורה שמפורסם ב-data.gov.il. לא כתבנו שאלות בעצמנו.',
@@ -20,12 +21,20 @@ const FAQ: { q: string; a: string }[] = [
     a: 'בתרגול מקבלים משוב והסבר מיד אחרי כל שאלה. במבחן מדמה רואים את התוצאה רק בסוף, ואפשר לשנות תשובות עד הסיום.',
   },
   {
+    q: 'מה ההבדל בין "תרגול מעורב" ל"תרגול לפי נושא"?',
+    a: 'תרגול מעורב לוקח שאלות אקראיות מכל המאגר. תרגול לפי נושא מתמקד רק בנושא אחד (למשל תמרורים), כדי לחזק נקודת חולשה ספציפית.',
+  },
+  {
     q: 'איך עובד הרצף (היהלומים)?',
     a: 'כל יום שבו סיימת מבחן או תרגול שלם מוסיף יהלום לרצף. יום שלא תרגלת בו מאפס את הרצף.',
   },
   {
     q: 'מה נכנס למחסן הטעויות?',
-    a: 'כל שאלה שענית עליה לא נכון נשמרת שם עד שתענה עליה נכון, או עד שתסמן "ידעתי".',
+    a: 'כל שאלה שענית עליה לא נכון נשמרת שם עד שתענה עליה נכון, או עד שתסמן "כבר יודע".',
+  },
+  {
+    q: 'אפשר להשתמש באפליקציה בלי אינטרנט?',
+    a: 'לא כרגע — הנתונים (שאלות, התקדמות, תוצאות) נשמרים בשרת בזמן אמת, אז צריך חיבור לאינטרנט.',
   },
   {
     q: 'אפשר להחליף סוג רישיון?',
@@ -36,51 +45,96 @@ const FAQ: { q: string; a: string }[] = [
     a: 'משילוב של דיוק התשובות שלך, אחוז ההצלחה במבחני המדמה, וכמות התרגול. הדירוג מציג שמות בלבד.',
   },
   {
+    q: 'מצאתי טעות בשאלה, מה עושים?',
+    a: 'תשמח לדעת! תפתח "צור קשר" בתפריט ותכתוב לנו — נבדוק מול המאגר הרשמי.',
+  },
+  {
+    q: 'האפליקציה בתשלום?',
+    a: 'רכישה חד-פעמית, לא מנוי חודשי — משלמים פעם אחת ומקבלים גישה לכל התוכן.',
+  },
+  {
     q: 'איך מוחקים את החשבון?',
     a: 'בתפריט, "מחיקת חשבון". הפעולה מוחקת לצמיתות את כל הנתונים ואי אפשר לשחזר.',
   },
 ];
 
-export default function FaqScreen() {
-  const [open, setOpen] = useState<number | null>(null);
+// שאלות על מבחן התיאוריה הרשמי עצמו — רק נתונים שנבדקו מול מקורות רשמיים/
+// מוסמכים (משרד התחבורה, כל-זכות), לא ניחוש. הפורמט זהה למה שכבר מוצג
+// באפליקציה (30 שאלות / 40 דקות / עד 4 טעויות) כי זה בדיוק המבחן האמיתי.
+const TEST_FAQ: FaqItem[] = [
+  {
+    q: 'כמה שאלות יש במבחן התיאוריה האמיתי, וכמה זמן נותנים?',
+    a: '30 שאלות אמריקאיות, ו-40 דקות למענה. המבחן ממוחשב.',
+  },
+  {
+    q: 'כמה תשובות נכונות צריך כדי לעבור?',
+    a: 'לפחות 26 מתוך 30 — כלומר מותר לטעות בעד 4 שאלות.',
+  },
+  {
+    q: 'מתי מקבלים את התוצאה?',
+    a: 'מיד עם סיום המבחן, כי הוא ממוחשב ולא נבדק ידנית.',
+  },
+  {
+    q: 'מגיל כמה אפשר לגשת למבחן התיאוריה?',
+    a: 'מגיל 15 וחצי, עבור רישיון רכב פרטי (B), אופנוע, או טרקטור.',
+  },
+  {
+    q: 'איפה נרשמים למבחן?',
+    a: 'דרך אתר משרד התחבורה (gov.il) — ממלאים בקשה לרישיון נהיגה, ולאחר אישור הפרטים מקבלים הזמנה (בדרך כלל ב-SMS) לקבוע תור למבחן.',
+  },
+];
 
+function FaqSection({ title, items }: { title: string; items: FaqItem[] }) {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <View style={{ gap: 10 }}>
+      <T weight="bold" size={16}>
+        {title}
+      </T>
+      {items.map((item, i) => {
+        const isOpen = open === i;
+        return (
+          <Card key={item.q} onPress={() => setOpen(isOpen ? null : i)}>
+            <View
+              style={{
+                flexDirection: rtl.flexDirection,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10,
+              }}
+            >
+              <T weight="bold" size={15} style={{ flex: 1 }}>
+                {item.q}
+              </T>
+              <T color={palette.primary} weight="bold" size={16}>
+                {isOpen ? '−' : '+'}
+              </T>
+            </View>
+            {isOpen ? (
+              <T
+                color={palette.muted}
+                size={14}
+                style={{ marginTop: 10, lineHeight: 21 }}
+              >
+                {item.a}
+              </T>
+            ) : null}
+          </Card>
+        );
+      })}
+    </View>
+  );
+}
+
+export default function FaqScreen() {
   return (
     <Screen edges={[]}>
       <ScreenHeader title="שאלות" highlight="נפוצות" />
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 10 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 24 }}
       >
-        {FAQ.map((item, i) => {
-          const isOpen = open === i;
-          return (
-            <Card key={item.q} onPress={() => setOpen(isOpen ? null : i)}>
-              <View
-                style={{
-                  flexDirection: rtl.flexDirection,
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 10,
-                }}
-              >
-                <T weight="bold" size={15} style={{ flex: 1 }}>
-                  {item.q}
-                </T>
-                <T color={palette.primary} weight="bold" size={16}>
-                  {isOpen ? '−' : '+'}
-                </T>
-              </View>
-              {isOpen ? (
-                <T
-                  color={palette.muted}
-                  size={14}
-                  style={{ marginTop: 10, lineHeight: 21 }}
-                >
-                  {item.a}
-                </T>
-              ) : null}
-            </Card>
-          );
-        })}
+        <FaqSection title="על האפליקציה" items={APP_FAQ} />
+        <FaqSection title="על מבחן התיאוריה" items={TEST_FAQ} />
       </ScrollView>
     </Screen>
   );
