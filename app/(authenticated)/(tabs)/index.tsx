@@ -24,11 +24,13 @@ import {
   MetricRingCarousel,
   StatBadge,
 } from '@/components/HomeWidgets';
+import { RemoveAdsPromoModal } from '@/components/RemoveAdsPromoModal';
 import { Card, ConfirmModal, Screen, T } from '@/components/ui';
 import { palette } from '@/constants/Colors';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
 import { api } from '@/convex/_generated/api';
 import { useInterstitialAd } from '@/hooks/useInterstitialAd';
+import { useRemoveAdsPromo } from '@/hooks/useRemoveAdsPromo';
 import { rtl } from '@/lib/rtl';
 
 const TEST_DATE_REMINDER_KEY = 'testDateReminderShownOn';
@@ -77,6 +79,7 @@ export default function HomeScreen() {
   const stats = useQuery(api.stats.getMyStats);
   const { isPremium: adsRemoved } = useRevenueCat();
   const { showBeforeSimulation } = useInterstitialAd(adsRemoved);
+  const removeAdsPromo = useRemoveAdsPromo(!adsRemoved);
   const [showDateReminder, setShowDateReminder] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -386,6 +389,10 @@ export default function HomeScreen() {
         />
 
         <AppDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
+        <RemoveAdsPromoModal
+          visible={removeAdsPromo.visible}
+          onDismiss={removeAdsPromo.dismiss}
+        />
       </LinearGradient>
     </Screen>
   );
