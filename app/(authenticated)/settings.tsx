@@ -102,7 +102,6 @@ function Row(props: { label: string; onPress: () => void; danger?: boolean }) {
         justifyContent: 'space-between',
       }}
     >
-      <ChevronLeft color="#C7CBD4" size={20} />
       <T
         weight="medium"
         color={props.danger ? palette.danger : undefined}
@@ -110,6 +109,7 @@ function Row(props: { label: string; onPress: () => void; danger?: boolean }) {
       >
         {props.label}
       </T>
+      <ChevronLeft color="#C7CBD4" size={20} />
     </Card>
   );
 }
