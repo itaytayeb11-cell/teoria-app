@@ -1,6 +1,6 @@
 # Context — Teoria App
 
-עודכן לאחרונה: 2026-09-14
+עודכן לאחרונה: 2026-09-14 (session 3)
 
 ## מה האפליקציה עושה
 
@@ -26,7 +26,7 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 | 9. Stats/Dashboard | ✅ | דף בית (ווידג'טים+נושאים), מסך סטטיסטיקה, היסטוריה, טבלת דירוג, פירוט רצף |
 | 10. Settings | ✅ | הוחלף בתפריט צד (drawer) — עריכת פרופיל, FAQ, צור קשר, תנאי שימוש/פרטיות, התנתק, מחיקה |
 | 11. Git/GitHub | ✅ | מתמשך — כל שינוי בקומיט נפרד |
-| 12. RevenueCat + AdMob | 🟡 | קוד מוכן (webhook מאומת, IAP הסרת-פרסומות, interstitial), ממתין לחשבונות/מפתחות מהמשתמש |
+| 12. RevenueCat + AdMob | 🟡 | RevenueCat Android מוגדר במלואו (Product/Entitlement/Offering/Webhook + API key). RevenueCat iOS ממתין לחשבון Apple Developer (P8/Key ID/Issuer ID). AdMob: שתי האפליקציות + 4 יחידות פרסומת נוצרו, מזהים אמיתיים בקוד (`config/ads.ts`, `app.json`) — ממתינות לאישור חשבון חדש מגוגל (עד 24ש', לא חוסם). `ADS_ENABLED` עדיין כבוי עד שנבדוק על מכשיר אמיתי |
 | 13–17 | ⬜ | חנויות (+ Apple Small Business Program בשלב 13א), build, listing, submit, launch |
 
 ## מפתחות ומשתני סביבה
@@ -34,10 +34,13 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 | משתנה | קובץ | סטטוס |
 |---|---|---|
 | CONVEX_DEPLOYMENT | .env.local | ✅ (נוצר ע"י convex) |
-| EXPO_PUBLIC_CONVEX_URL | .env.local | ✅ |
-| EXPO_PUBLIC_REVENUECAT_* | .env | ⬜ ממתין למפתח מהמשתמש |
-| REVENUECAT_WEBHOOK_SECRET | Convex dashboard env vars | ⬜ ממתין למשתמש (ר' הוראות בצ'אט) |
+| EXPO_PUBLIC_CONVEX_URL | .env.local **+ EAS env vars** (development/preview/production) | ✅ |
+| EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY | .env.local **+ EAS env vars** | ✅ (`goog_...`) |
+| EXPO_PUBLIC_REVENUECAT_IOS_API_KEY | — | ⬜ ממתין ליצירת אפליקציית iOS ב-RevenueCat (ממתין לחשבון Apple Developer) |
+| REVENUECAT_WEBHOOK_SECRET | Convex dashboard env vars | ✅ הוזן ב-Convex (`npx convex env set`) — **נמצא חסר בפועל ב-2026-09-14 למרות שנשלח למשתמש קודם, תוקן** |
 | EXPO_PUBLIC_SUPPORT_EMAIL | .env | ⬜ אופציונלי (אחרת placeholder ב-config/support.ts) |
+
+⚠️ **לקח חשוב (2026-09-14):** `.env.local` הוא local בלבד — EAS build בענן לא קורא אותו (מעלה tarball דרך `git archive`, שמדלג על קבצים ב-`.gitignore`). כל `EXPO_PUBLIC_*` שהאפליקציה צריכה ב-build אמיתי (לא Expo Go) **חייב** גם `eas env:set --environment <dev/preview/production> --name ... --value ...` — אחרת ה-build עולה בהצלחה אבל האפליקציה לא מתחברת ל-Convex/RevenueCat בפועל. נמצא ותוקן אחרי שגילינו ש-`EXPO_PUBLIC_CONVEX_URL` לא היה מוגדר ב-EAS בכלל.
 
 ## מבנה נוכחי
 
@@ -52,7 +55,17 @@ Expo (SDK 54 / expo-router 6) · React Native 0.81 · TypeScript · Convex · Co
 
 מסך מבחן/תרגול עוצב מחדש לפי Stitch. תוקן: תשובות ניתנות לשינוי במבחן מדמה, חצי ניווט RTL, סרגל טאבים Liquid Glass (expo-blur) לא חתוך. מסכי תוצאות + תרגול עוצבו. מבחן מדמה: עובר = עד 4 שגיאות. תת-נושאים חודדו (28+ נושאים). useQuiz.retry לשגיאות רשת.
 
-## משימה נוכחית
+## עדכון אחרון (session 3)
+
+**EAS build תוקן** (שני באגים נפרדים מנעו כל build): (1) רווח בסוף שם תיקיית הפרויקט גרם ל-`spawn git ENOENT` — תוקן ע"י הסרת הרווח משם התיקייה. (2) `react-native-google-mobile-ads@16.5.0` דרש Kotlin 2.3.0 שה-KSP plugin לא תומך בו — תוקן ע"י downgrade ל-`16.0.0` (Play Services Ads 24.6.0, תואם Kotlin קיים). פרויקט EAS חדש קושר לחשבון הנכון של המשתמש (`itayitayeb885/teoria`, היה מקושר בטעות לחשבון זר). Bundle ID קבוע: `com.teoria.app`.
+
+**RTL — סבב באגים מ-real-device testing:** נמצא ותוקן bug class שלם — קוד שהניח ש-`flexDirection:'row'` הופך אוטומטית ל-row-reverse ב-RTL אבל בפועל (על המכשיר שנבדק) ההיפוך כן קורה עקבי, והבאג האמיתי היה **סדר הרכיבים ב-JSX** לא מתחשב בכך (למשל: חצי ניווט במבחן, כפתור חזרה ב-ScreenHeader, שורת הגדרות) — תוקן ב-`components/ui.tsx`, `app/(authenticated)/settings.tsx`. נקודות ההתקדמות בקרוסלת הנושאים הוסרו לגמרי לפי בקשה. נוסף פופ-אפ פנימי (לא AdMob) שמפרסם את רכישת "הסרת פרסומות" פעם ב-48 שעות (`hooks/useRemoveAdsPromo.ts`, `components/RemoveAdsPromoModal.tsx`).
+
+**RevenueCat + AdMob הוגדרו בפועל** (ר' טבלת שלבים למעלה + מפתחות/env). **התגלה ותוקן**: `EXPO_PUBLIC_CONVEX_URL` ומפתחות אחרים לא היו מוגדרים ב-EAS env vars כלל (רק ב-`.env.local` המקומי, שלא מגיע ל-build בענן) — תוקן, ר' הערה בטבלת המפתחות למעלה. גם `REVENUECAT_WEBHOOK_SECRET` נמצא חסר בפועל ב-Convex ותוקן.
+
+**הודעות Push** — כל הקוד קיים ומוכן (הרשמת מכשיר, cron פעמיים ביום 09:00/17:00 שעון ישראל, תזכורת רק למי שלא תרגל 2+ ימים) — עדיין לא נבדק בפועל על מכשיר אמיתי (לא עובד ב-Expo Go).
+
+## משימה נוכחית (session 2)
 
 עיצוב מחדש של דף הבית לפי רפרנס "פק"ל הכסף" (צבעים שונו לכחול):
 - Backend: users.testDate + setTestDate/updateMyProfile, רצף (streak) עולה רק בסיום מבחן שלם (לא לכל תשובה), getHome מחזיר testDate/daysToTest/passedSimCount/failedSimCount.
@@ -81,11 +94,13 @@ remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה ד
 
 ## בעיות פתוחות
 
-- [ ] מודל תשלומים שונה מ-paid-only לfreemium+ads (interstitial מוגבל + banner במסך מבחן מדמה) — קוד מוכן, ממתין לחשבון RevenueCat + מזהי AdMob אמיתיים מהמשתמש
-- [ ] שילוב AdMob טרם בוצע בפועל על מכשיר (צריך dev/prod build, לא Expo Go) + Frequency Cap צריך הגדרה ידנית בדשבורד AdMob
+- [ ] RevenueCat iOS — צריך אפליקציית iOS ב-RevenueCat + Product `lifetime_access` מקביל בצד iOS, ממתין לחשבון Apple Developer (P8/Key ID/Issuer ID מ-App Store Connect)
+- [ ] AdMob: שתי האפליקציות "נדרשת בדיקה" אצל גוגל (עד 24ש' מ-2026-09-14) — לא חוסם, אבל אין הכנסה אמיתית עד אישור. Frequency Cap (2/30 דק') עדיין לא הוגדר ידנית בדשבורד AdMob
+- [ ] `ADS_ENABLED`/`PAYMENT_SYSTEM_ENABLED`/`MOCK_PAYMENTS` עדיין כבויים — להדליק אחרי שנבדק בפועל על ה-dev build
 - [ ] ⚠️ סיכון מדיניות ידוע: ה-interstitial לפני מבחן מדמה נוגד Better Ads policy (ר' config/ads.ts) — לזכור כמקור אפשרי אם תהיה בעיית ad serving disabled בעתיד
 - [ ] הרשמה ל-Apple Small Business Program — ממתינה לשלב 13א (App Store Connect), לא לשכוח
 - [ ] כתובת מייל אמיתית ל"צור קשר" (config/support.ts עדיין placeholder)
 - [ ] Convex Free plan מתקרב למגבלה — הודעה מ-Convex CLI, לבדוק בדשבורד אם צריך לשדרג
 - [ ] התחברות Google — ממתין ל-OAuth client מהמשתמש
-- [ ] Push notifications אמיתיות — נדחה ל-dev build (לא עובד ב-Expo Go)
+- [ ] Push notifications — קוד מוכן ופרוס (cron+רישום מכשיר), טרם נבדק בפועל על מכשיר (ממתין ל-dev build מותקן)
+- [ ] Android dev build — build חדש רץ אחרי שתי סדרות תיקונים (git-path + Kotlin + AdMob App ID אמיתי + EAS env vars), ממתין לסיום
