@@ -10,15 +10,31 @@ import {
   View,
 } from 'react-native';
 import { Button, Screen, T } from '@/components/ui';
+import { WebViewModal } from '@/components/WebViewModal';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/config/legalUrls';
 import { palette } from '@/constants/Colors';
+import { useGoogleSignIn } from '@/hooks/useGoogleSignIn';
 import { rtl } from '@/lib/rtl';
 
 export default function SignInScreen() {
   const { signIn } = useAuthActions();
+  const { signInWithGoogle, loading: googleLoading } = useGoogleSignIn();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [web, setWeb] = useState<{ url: string; title: string } | null>(null);
+
+  const onGoogleSubmit = async () => {
+    try {
+      const success = await signInWithGoogle();
+      if (success) {
+        router.replace('/(authenticated)');
+      }
+    } catch {
+      Alert.alert('שגיאה', 'ההתחברות עם Google נכשלה. נסה שוב');
+    }
+  };
 
   const onSubmit = async () => {
     if (!email || !password) {
@@ -78,6 +94,63 @@ export default function SignInScreen() {
         <View
           style={{
             flexDirection: rtl.flexDirection,
+            alignItems: 'center',
+            gap: 10,
+            marginVertical: 18,
+          }}
+        >
+          <View style={{ flex: 1, height: 1, backgroundColor: '#E5E7EB' }} />
+          <T color={palette.muted} size={13}>
+            או
+          </T>
+          <View style={{ flex: 1, height: 1, backgroundColor: '#E5E7EB' }} />
+        </View>
+
+        <Button
+          label="המשך עם Google"
+          variant="outline"
+          loading={googleLoading}
+          onPress={onGoogleSubmit}
+        />
+
+        <View
+          style={{
+            flexDirection: rtl.flexDirection,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            marginTop: 12,
+          }}
+        >
+          <T size={12} color={palette.muted}>
+            בהמשך עם Google אתה מאשר את{' '}
+          </T>
+          <Pressable
+            onPress={() =>
+              setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
+            }
+          >
+            <T size={12} color={palette.primary}>
+              תנאי השימוש
+            </T>
+          </Pressable>
+          <T size={12} color={palette.muted}>
+            {' '}
+            ו
+          </T>
+          <Pressable
+            onPress={() =>
+              setWeb({ url: PRIVACY_POLICY_URL, title: 'מדיניות פרטיות' })
+            }
+          >
+            <T size={12} color={palette.primary}>
+              מדיניות הפרטיות
+            </T>
+          </Pressable>
+        </View>
+
+        <View
+          style={{
+            flexDirection: rtl.flexDirection,
             justifyContent: 'center',
             gap: 6,
             marginTop: 20,
@@ -93,6 +166,13 @@ export default function SignInScreen() {
           <T color={palette.muted}>אין לך חשבון?</T>
         </View>
       </KeyboardAvoidingView>
+
+      <WebViewModal
+        visible={web !== null}
+        url={web?.url ?? ''}
+        title={web?.title ?? ''}
+        onClose={() => setWeb(null)}
+      />
     </Screen>
   );
 }

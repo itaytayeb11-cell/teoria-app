@@ -1,10 +1,11 @@
+import Google from '@auth/core/providers/google';
 import { Password } from '@convex-dev/auth/providers/Password';
 import { convexAuth } from '@convex-dev/auth/server';
 
 // הגדרת מערכת האימות (Authentication)
 // קובץ זה מגדיר את ספקי ההזדהות והלוגיקה של יצירת משתמשים
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Password], // שימוש בסיסמה (אימייל וסיסמה) כספק הזדהות
+  providers: [Password, Google], // סיסמה + התחברות עם Google
   session: {
     totalDurationMs: 30 * 24 * 60 * 60 * 1000, // משך זמן ה-Session (30 ימים)
   },
