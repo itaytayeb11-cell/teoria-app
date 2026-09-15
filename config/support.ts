@@ -4,4 +4,4 @@
 // ⚠️ חובה לפני פרסום בחנויות: להחליף לכתובת מייל אמיתית שאתה קורא.
 // אפשר גם להגדיר דרך משתנה סביבה במקום לערוך כאן.
 export const SUPPORT_EMAIL =
-  process.env.EXPO_PUBLIC_SUPPORT_EMAIL || 'support@example.com';
+  process.env.EXPO_PUBLIC_SUPPORT_EMAIL || 'itaytayeb11@gmail.com';

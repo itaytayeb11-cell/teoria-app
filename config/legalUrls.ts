@@ -11,7 +11,7 @@
  */
 export const PRIVACY_POLICY_URL =
   process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL ||
-  'https://yourdomain.com/privacy-policy';
+  'https://itaytayeb11-cell.github.io/teoria-app/#privacy';
 
 /**
  * קישור לתנאי השימוש
@@ -20,4 +20,4 @@ export const PRIVACY_POLICY_URL =
  */
 export const TERMS_OF_SERVICE_URL =
   process.env.EXPO_PUBLIC_TERMS_OF_SERVICE_URL ||
-  'https://yourdomain.com/terms-of-service';
+  'https://itaytayeb11-cell.github.io/teoria-app/#terms';
