@@ -1,10 +1,6 @@
 import { query } from './_generated/server';
-import {
-  filterByLicense,
-  israelDay,
-  latestAnswerByQuestion,
-  requireUserId,
-} from './model';
+import { israelDay, latestAnswerByQuestion, requireUserId } from './model';
+import { getBankStats } from './questions';
 
 const RECENT_WINDOW = 5; // כמה מבחנים אחרונים לחישוב ממוצע
 const READINESS_TARGET = 400; // כמה שאלות "מספיק" לכיסוי מלא
@@ -32,26 +28,13 @@ export const getHome = query({
       )
       .collect();
 
-    // גודל המאגר הרלוונטי לסוג הרישיון — וגם ספירת נושאים, כדי שדף הבית
-    // לא יצטרך שאילתה נפרדת (questions.listCategories) שסורקת שוב את כל
-    // המאגר; זה היה שני סריקות מלאות זהות על אותו מסך
-    const activeQuestions = await ctx.db
-      .query('questions')
-      .withIndex('by_active', (q) => q.eq('isActive', true))
-      .collect();
-    const licensedQuestions = filterByLicense(
-      activeQuestions,
+    // גודל המאגר הרלוונטי לסוג הרישיון + פילוח נושאים — מהקאש
+    // (questionBankStats), לא סריקה מלאה של המאגר. ר' הערה ב-schema.ts:
+    // זה מה שגרם בפועל לחריגה ממכסת ה-bandwidth של Convex Free plan.
+    const { bankSize, categories } = await getBankStats(
+      ctx,
       user?.licenseType ?? undefined
     );
-    const bankSize = licensedQuestions.length;
-
-    const categoryCounts = new Map<string, number>();
-    for (const q of licensedQuestions) {
-      categoryCounts.set(q.category, (categoryCounts.get(q.category) ?? 0) + 1);
-    }
-    const categories = [...categoryCounts.entries()]
-      .map(([category, count]) => ({ category, count }))
-      .sort((a, b) => b.count - a.count);
 
     // כיסוי: כמה שאלות שונות נענו מתוך היעד
     const latest = latestAnswerByQuestion(answers);

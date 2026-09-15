@@ -2,6 +2,10 @@ import { v } from 'convex/values';
 import { internalMutation, type QueryCtx, query } from './_generated/server';
 import { filterByLicense, getUserIdOrNull } from './model';
 
+// כל סוגי הרישיון האפשריים בפועל (ר' הערה ב-convex/schema.ts users.licenseType)
+const LICENSE_TYPES = ['B', 'A', 'C1', 'C', 'D', '1'] as const;
+const ALL_LICENSE_KEY = 'all';
+
 // שולף את סוג הרישיון של המשתמש המחובר (או undefined)
 async function currentLicenseType(ctx: QueryCtx): Promise<string | undefined> {
   const userId = await getUserIdOrNull(ctx);
@@ -16,27 +20,42 @@ async function currentLicenseType(ctx: QueryCtx): Promise<string | undefined> {
 // שליפת שאלות מהמאגר
 // ==========================================================================
 
-// רשימת כל הנושאים + כמות שאלות בכל נושא
+// רשימת כל הנושאים + כמות שאלות בכל נושא — מהקאש (questionBankStats),
+// לא סריקה מלאה של מאגר השאלות. ר' הערה ב-schema.ts.
 export const listCategories = query({
   args: {},
   handler: async (ctx) => {
     const licenseType = await currentLicenseType(ctx);
-    const all = await ctx.db
-      .query('questions')
-      .withIndex('by_active', (q) => q.eq('isActive', true))
-      .collect();
-    const questions = filterByLicense(all, licenseType);
-
-    const counts = new Map<string, number>();
-    for (const q of questions) {
-      counts.set(q.category, (counts.get(q.category) ?? 0) + 1);
-    }
-
-    return [...counts.entries()]
-      .map(([category, count]) => ({ category, count }))
-      .sort((a, b) => b.count - a.count);
+    const stats = await getBankStats(ctx, licenseType);
+    return stats.categories;
   },
 });
+
+// שולף מהקאש את סטטיסטיקות המאגר לסוג רישיון נתון (עם fallback ל"all"
+// אם עדיין לא רץ recomputeBankStats עבור סוג רישיון ספציפי זה)
+export async function getBankStats(
+  ctx: QueryCtx,
+  licenseType: string | undefined
+): Promise<{
+  bankSize: number;
+  categories: { category: string; count: number }[];
+}> {
+  const key = licenseType ?? ALL_LICENSE_KEY;
+  const cached = await ctx.db
+    .query('questionBankStats')
+    .withIndex('by_licenseKey', (q) => q.eq('licenseKey', key))
+    .unique();
+  if (cached) {
+    return { bankSize: cached.bankSize, categories: cached.categories };
+  }
+  const fallback = await ctx.db
+    .query('questionBankStats')
+    .withIndex('by_licenseKey', (q) => q.eq('licenseKey', ALL_LICENSE_KEY))
+    .unique();
+  return fallback
+    ? { bankSize: fallback.bankSize, categories: fallback.categories }
+    : { bankSize: 0, categories: [] };
+}
 
 // מילון תמרורים — שאלות עם תמונה, מקובצות לפי תת-נושא, בלי כפילות תמונה
 export const signDictionary = query({
@@ -182,5 +201,51 @@ export const clearAll = internalMutation({
       await ctx.db.delete(q._id);
     }
     return { deleted: all.length };
+  },
+});
+
+// ==========================================================================
+// מחשב מחדש את קאש הסטטיסטיקות (questionBankStats) לכל סוגי הרישיון.
+// חובה להריץ פעם אחת אחרי כל ייבוא/שינוי של מאגר השאלות:
+//   bunx convex run questions:recomputeBankStats
+// ==========================================================================
+export const recomputeBankStats = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const active = await ctx.db
+      .query('questions')
+      .withIndex('by_active', (q) => q.eq('isActive', true))
+      .collect();
+
+    const keys: string[] = [ALL_LICENSE_KEY, ...LICENSE_TYPES];
+    for (const key of keys) {
+      const filtered =
+        key === ALL_LICENSE_KEY ? active : filterByLicense(active, key);
+      const counts = new Map<string, number>();
+      for (const q of filtered) {
+        counts.set(q.category, (counts.get(q.category) ?? 0) + 1);
+      }
+      const categories = [...counts.entries()]
+        .map(([category, count]) => ({ category, count }))
+        .sort((a, b) => b.count - a.count);
+
+      const existing = await ctx.db
+        .query('questionBankStats')
+        .withIndex('by_licenseKey', (q) => q.eq('licenseKey', key))
+        .unique();
+      const doc = {
+        licenseKey: key,
+        bankSize: filtered.length,
+        categories,
+        updatedAt: Date.now(),
+      };
+      if (existing) {
+        await ctx.db.patch(existing._id, doc);
+      } else {
+        await ctx.db.insert('questionBankStats', doc);
+      }
+    }
+
+    return { licenseKeys: keys, totalActive: active.length };
   },
 });
