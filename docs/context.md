@@ -121,3 +121,6 @@ remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה ד
   2. הפעל GitHub Pages: https://github.com/itaytayeb11-cell/teoria-app/settings/pages → Source: Deploy from a branch → Branch: `gh-pages` / `(root)` → Save
   לאחר מכן העמוד יהיה זמין ב: `https://itaytayeb11-cell.github.io/teoria-app/` (לוקח כמה דקות עד שמופעל בפועל)
 - ⬜ לא נבדק: מגבלת Convex Free plan (אין API נגיש דרך CLI, דורש בדיקה ידנית בדשבורד).
+- ✅ נוצרה טיוטת App Store listing מלאה — `docs/app-store-listing.md` (שם, תיאור, מילות מפתח, Age Rating, App Privacy טיוטה).
+- ✅ **אומת בפועל על iOS Simulator** (iPhone 17 Pro Max, iOS 26.5): הותקן ה-development-simulator build, הורץ `bun dev`, ונפתח מסך ההתחברות בהצלחה — מאמת חיבור תקין ל-Convex על iOS (לא רק Android). נדרשה הרשאת macOS Accessibility כדי לשלוט בסימולטור מהטרמינל/Cursor — ניתנה בפועל ל-Cursor אך עדיין נכשלת (TCC כנראה קשור לבינארי מדויק, לא לבאנדל) — **המשך צילומי מסך (מסכי בית/מבחן/תוצאות שדורשים login + ניווט) נדחה** לשלב קרוב יותר ל-submit בפועל, כי ממילא חסום עד אקטיבציית Apple. אם רוצים להמשיך בלי לפתור את הרשאת ה-Accessibility — אפשר בשיטת "משתמש לוחץ, אני מצלם עם `xcrun simctl io ... screenshot`" (עבד טוב).
+- 👤 **טרם אושר**: שם "מפעיל האפליקציה" (הוצע "איתי טייב", כבר בעמוד ה-HTML) ועיר לסמכות שיפוט בתנאי השימוש — עדיין `[שם]`/`[עיר]` ב-`docs/legal/terms.md`.
