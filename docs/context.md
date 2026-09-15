@@ -124,3 +124,11 @@ remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה ד
 - ✅ נוצרה טיוטת App Store listing מלאה — `docs/app-store-listing.md` (שם, תיאור, מילות מפתח, Age Rating, App Privacy טיוטה).
 - ✅ **אומת בפועל על iOS Simulator** (iPhone 17 Pro Max, iOS 26.5): הותקן ה-development-simulator build, הורץ `bun dev`, ונפתח מסך ההתחברות בהצלחה — מאמת חיבור תקין ל-Convex על iOS (לא רק Android). נדרשה הרשאת macOS Accessibility כדי לשלוט בסימולטור מהטרמינל/Cursor — ניתנה בפועל ל-Cursor אך עדיין נכשלת (TCC כנראה קשור לבינארי מדויק, לא לבאנדל) — **המשך צילומי מסך (מסכי בית/מבחן/תוצאות שדורשים login + ניווט) נדחה** לשלב קרוב יותר ל-submit בפועל, כי ממילא חסום עד אקטיבציית Apple. אם רוצים להמשיך בלי לפתור את הרשאת ה-Accessibility — אפשר בשיטת "משתמש לוחץ, אני מצלם עם `xcrun simctl io ... screenshot`" (עבד טוב).
 - 👤 **טרם אושר**: שם "מפעיל האפליקציה" (הוצע "איתי טייב", כבר בעמוד ה-HTML) ועיר לסמכות שיפוט בתנאי השימוש — עדיין `[שם]`/`[עיר]` ב-`docs/legal/terms.md`.
+
+## עדכון (session 4 המשך, 2026-09-15) — Apple Developer account פעיל, SBP חסום זמנית
+
+- ✅ **חשבון Apple Developer אומת כפעיל** — נכנס ל-App Store Connect בהצלחה (`itay tayeb`).
+- 🔴 **Small Business Program עדיין לא נגיש** — נבדק (ע"י Claude-in-Chrome עם גישה לדפדפן של המשתמש, בהרשאתו): הוא לא מופיע בשום תפריט. הסיבה שאותרה: **Paid Apps Agreement** עדיין בסטטוס "New" (לא נחתם), וכדי לחתום צריך קודם למלא **Legal Entity** (פרטי ישות משפטית) + פרטי מס ובנק ב-App Store Connect → Business. ה-SBP כנראה ייפתח רק אחרי זה. Free Apps Agreement כן פעיל.
+- 👤 **צעד הבא (חובה, המשתמש בעצמו — לא AI)**: למלא Legal Entity + לחתום Paid Apps Agreement + להזין פרטי בנק/מס תחת App Store Connect → Business → Edit Legal Entity. **הומלץ למשתמש לא להעביר את זה ל-AI** כי זה כולל ת.ז/מספר מס וחשבון בנק. זה גם תנאי סף נדרש בכל מקרה לפני IAP (RevenueCat iOS), אז לא סטייה מהתוכנית.
+- לאחר השלמת זה: לבדוק שוב זמינות SBP, ואז גם API Key (App Store Connect API) ורישום Bundle ID ייפתחו (כולם תלויים באותו Paid Apps Agreement פעיל).
+- תועד גם ב-Notion (דף פרטי "Teoria App - Dev Accounts", נוצר ע"י Claude-in-Google/Chrome של המשתמש).
