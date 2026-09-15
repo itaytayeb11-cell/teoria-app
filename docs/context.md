@@ -103,6 +103,17 @@ remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה ד
 - [ ] Convex Free plan מתקרב למגבלה — הודעה מ-Convex CLI, לבדוק בדשבורד אם צריך לשדרג
 - [ ] התחברות Google — ממתין ל-OAuth client מהמשתמש
 - [ ] Push notifications — קוד מוכן ופרוס (cron+רישום מכשיר), טרם נבדק בפועל על מכשיר (ממתין ל-dev build מותקן)
-- [ ] Android dev build — build חדש רץ אחרי שתי סדרות תיקונים (git-path + Kotlin + AdMob App ID אמיתי + EAS env vars), ממתין לסיום
+- [ ] Android dev build — **הסתיים בהצלחה** (2026-09-14 21:37, build 65a02558). APK: https://expo.dev/artifacts/eas/NIEVUbhTSIq2jQPq26t6nfoV2R1H8_JIbJxfiJ0DXlo.apk — ממתין שהמשתמש יתקין ויבדוק על מכשיר אמיתי (Convex, מבחנים, RevenueCat, ואז ads+push)
 - [x] ביקורת אבטחה (2026-09-14, בעקבות בדיקת "עורך דין צד שני"): נבדקו כל ה-query/mutation ב-convex — כולם דורשים זהות מהשרת (ctx.auth), אין IDOR. `deleteMyAccount` תוקן (היה חסר streakLog/mistakeDismissals/savedQuestions/pushTokens). מדיניות הפרטיות עודכנה (קטינים במפורש, Advertising ID, כל ספק בשם)
 - [ ] **ידוע ולא מתוקן במכוון**: `startQuiz`/`getResumable` שולחים ל-קליינט את כל ה-`correctAnswer` מראש (לפני שעונים) — מאפשר "רמאות עצמית" למי שבודק תעבורת רשת. לא דליפת מידע של משתמשים אחרים, רק self-cheating בתרגול. המשתמש בחר במפורש לא לתקן (ידרוש שינוי ארכיטקטורה + פגיעה במהירות המשוב)
+
+## עדכון (session 4, 2026-09-15) — התקדמות עצמאית לקראת iOS
+
+המשתמש בחר להתמקד קודם ב-App Store (לא Google Play), ולתת לי להתקדם לבד בכל מה שלא דורש אותו:
+
+- ✅ אומת: Android dev build (65a02558) **הסתיים בהצלחה** ב-2026-09-14 21:37.
+- ✅ lint + typecheck נקיים (`bun run lint:full`).
+- ✅ הופעל **iOS simulator build** (`development-simulator` profile, לא דורש חשבון Apple Developer בתשלום כי אין code signing לסימולטור) — build `051be844-42e4-43a1-8a0e-66a1627fc32c`, רץ ברקע.
+- 🔴 **נמצאה ותוקנה בעיית תוכן משפטי**: `docs/legal/privacy.md` הצהיר "איננו משתמשים ברשתות פרסום... של צד שלישי" — הצהרה **שקרית בפועל**, כי `react-native-google-mobile-ads` (AdMob) כן מותקן ופעיל (banner+interstitial). תוקן: נוסף סעיף Advertising ID + שורת AdMob בטבלת הספקים. גם `docs/legal/terms.md` סעיף 4 תואר מודל עסקי ישן (רכישה חוסמת תוכן) — תוקן לתאר freemium+ads+הסרת פרסומות בהתאם למודל הנוכחי.
+- 🔴 **בעיה פעילה שטרם נפתרה**: `config/legalUrls.ts` מצביע כרגע ל-placeholder (`https://yourdomain.com/privacy-policy`) ואין `EXPO_PUBLIC_PRIVACY_POLICY_URL`/`EXPO_PUBLIC_TERMS_OF_SERVICE_URL` מוגדרים באף EAS environment. `components/WebViewModal.tsx` טוען את זה כ-WebView חי — כלומר **כרגע כל משתמש שלוחץ "מדיניות פרטיות"/"תנאי שימוש" רואה עמוד שבור**, וזה גם דרישת חובה (App Privacy, App Review) לפני הגשה ל-App Store. **דורש החלטת המשתמש** — צריך לארח את שני המסמכים בכתובת פומבית אמיתית (למשל GitHub Pages — דורש שהריפו יהפוך לציבורי, או Notion public page, או אחסון חינמי אחר) — לא ביצעתי לבד כי זו פעולה שחושפת תוכן/ריפו החוצה.
+- ⬜ לא נבדק: מגבלת Convex Free plan (אין API נגיש דרך CLI, דורש בדיקה ידנית בדשבורד).
