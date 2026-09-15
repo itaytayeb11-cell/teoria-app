@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>תיאוריה — מסמכים משפטיים</title>
+<style>
+  :root {
+    --bg: #F4F5F7;
+    --surface: #FFFFFF;
+    --surface-alt: #EAF1FE;
+    --text: #1B2338;
+    --text-muted: #5B6472;
+    --border: #E1E5EC;
+    --accent: #1D4ED8;
+    --accent-dark: #142F8C;
+    --accent-soft: #DCE7FD;
+    --danger: #C0392B;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10151F;
+      --surface: #171E2B;
+      --surface-alt: #1B2540;
+      --text: #E7EAF2;
+      --text-muted: #9AA3B5;
+      --border: #2A3245;
+      --accent: #7FA6F2;
+      --accent-dark: #B7CDF8;
+      --accent-soft: #1E2C4D;
+      --danger: #F0847A;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Heebo", "Noto Sans Hebrew", "Arial Hebrew", sans-serif;
+    direction: rtl;
+    line-height: 1.7;
+  }
+  img{max-width:100%}
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 28px 64px;
+  }
+  h1, h2, h3, .display {
+    font-family: "Rubik", "Heebo", sans-serif;
+    text-wrap: balance;
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg);
+    padding-block: 14px 10px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .mark { width: 30px; height: 28px; flex-shrink: 0; }
+  .brand-name { font-family: "Rubik", sans-serif; font-weight: 800; font-size: 19px; }
+  .tabs { display: flex; gap: 8px; }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .doc { display: none; }
+  .doc.active { display: block; }
+  .doc-head { margin-block: 6px 22px; }
+  .doc-head h1 { font-size: 26px; font-weight: 800; margin: 0 0 8px; }
+  .updated {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--surface-alt);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .intro { color: var(--text-muted); font-size: 15px; margin-top: 14px; max-width: 62ch; }
+  section.sec { margin-block: 26px; padding-top: 22px; border-top: 1px solid var(--border); }
+  section.sec:first-of-type { border-top: none; padding-top: 0; }
+  .sec h2 { font-size: 18.5px; font-weight: 700; display: flex; align-items: baseline; gap: 8px; margin: 0 0 10px; }
+  .sec h2 .num { font-family: "Rubik", sans-serif; color: var(--accent); font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .sec p { margin: 0 0 10px; font-size: 15px; }
+  .sec ul { margin: 8px 0; padding-inline-start: 22px; font-size: 15px; }
+  .sec li { margin-block: 5px; }
+  .sec strong { color: var(--text); }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; margin-block: 14px; }
+  table { width: 100%; border-collapse: collapse; min-width: 560px; font-size: 14px; }
+  thead th { background: var(--surface-alt); color: var(--accent-dark); text-align: start; font-weight: 700; padding: 10px 14px; font-size: 13px; }
+  tbody td { padding: 12px 14px; border-top: 1px solid var(--border); vertical-align: top; background: var(--surface); }
+  tbody td:first-child { font-weight: 600; white-space: nowrap; }
+  .callout { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; font-size: 14px; color: var(--text-muted); margin-block: 12px; }
+  .callout strong { color: var(--text); }
+  a { color: var(--accent-dark); text-decoration-thickness: 1px; }
+  a:hover { text-decoration-thickness: 2px; }
+  footer {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  footer a { color: var(--text-muted); }
+  @media (max-width: 480px) {
+    .doc-head h1 { font-size: 22px; }
+    .tab { font-size: 13px; padding: 9px 8px; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=Heebo:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 26 28" aria-hidden="true">
+        <polygon points="13,1 25,26 1,26" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" stroke-linejoin="round"/>
+        <text x="13" y="21" text-anchor="middle" font-family="Rubik, sans-serif" font-weight="800" font-size="12" fill="var(--surface)">ל</text>
+      </svg>
+      <span class="brand-name">תיאוריה</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="בחירת מסמך">
+      <button class="tab" id="tab-privacy" role="tab" onclick="showDoc('privacy')">מדיניות פרטיות</button>
+      <button class="tab" id="tab-terms" role="tab" onclick="showDoc('terms')">תנאי שימוש</button>
+      <button class="tab" id="tab-accessibility" role="tab" onclick="showDoc('accessibility')">נגישות</button>
+    </div>
+  </div>
+
+  <article class="doc" id="doc-privacy">
+    <div class="doc-head">
+      <h1>מדיניות פרטיות</h1>
+      <span class="updated">עודכן לאחרונה: 15 בספטמבר 2026</span>
+      <p class="intro">
+        "תיאוריה" היא אפליקציה לתרגול לקראת מבחן התיאוריה של משרד התחבורה.
+        המסמך הזה מסביר איזה מידע האפליקציה אוספת, למה, ועם מי הוא משותף.
+        מפעיל האפליקציה: איתי טייב.
+      </p>
+    </div>
+
+    <section class="sec">
+      <h2><span class="num">01</span> איזה מידע אנחנו אוספים</h2>
+      <p>כדי להשתמש באפליקציה נדרש חשבון. הטבלה מפרטת מה נאסף ולמה:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>סוג מידע</th><th>מה זה כולל</th><th>למה אוספים</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>פרטי חשבון</td>
+              <td>כתובת אימייל, סיסמה (מאוחסנת מוצפנת — אנחנו לא רואים אותה בטקסט גלוי)</td>
+              <td>התחברות וזיהוי החשבון שלך</td>
+            </tr>
+            <tr>
+              <td>פרופיל (רשות)</td>
+              <td>שם מלא, סוג רישיון נהיגה שנבחר, תאריך מבחן מתוכנן</td>
+              <td>התאמה אישית של התרגול, תזכורות, הצגה בטבלת דירוג</td>
+            </tr>
+            <tr>
+              <td>נתוני תרגול</td>
+              <td>תשובות למבחנים/תרגולים, ציונים, שאלות שנשמרו או סומנו במחסן הטעויות, רצף ימי תרגול</td>
+              <td>מעקב התקדמות, סטטיסטיקות, "נושא חלש", חישוב הרצף</td>
+            </tr>
+            <tr>
+              <td>התראות</td>
+              <td>מזהה מכשיר להתראות Push (Expo) — רק אם אישרת הרשאת התראות</td>
+              <td>תזכורות תרגול (עד פעמיים ביום)</td>
+            </tr>
+            <tr>
+              <td>רכישה (אופציונלי)</td>
+              <td>אם רכשת "הסרת פרסומות": מזהה מוצר, פלטפורמה וסטטוס הרכישה — מגיעים אלינו מ-RevenueCat</td>
+              <td>הפעלת ההטבה (הסרת פרסומות) בחשבון שלך</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        אנחנו <strong>לא</strong> רואים ולא שומרים פרטי כרטיס אשראי — התשלום עצמו מתבצע
+        מול App Store / Google Play, לא אצלנו.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">02</span> טבלת הדירוג — מידע שגלוי למשתמשים אחרים</h2>
+      <p>
+        אם אתה מופיע בטבלת הדירוג (הנגישה דרך "הישגים" בדף הבית), <strong>השם המלא שהזנת
+        (או "משתמש" אם לא הוזן שם) והניקוד שלך גלויים לכל משתמשי האפליקציה</strong>. שום
+        מידע אחר (אימייל, תשובות, סטטיסטיקות מפורטות) לא נחשף שם.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">03</span> עם מי המידע משותף</h2>
+      <p>אנחנו לא מוכרים מידע לאף גורם. המידע עובר לספקי שירות שמפעילים חלקים באפליקציה, רק לצורך התפעול:</p>
+      <ul>
+        <li><strong>Convex</strong> — מסד הנתונים והשרת שמריצים את האפליקציה</li>
+        <li><strong>RevenueCat</strong> — ניהול הרכישה החד-פעמית "הסרת פרסומות"</li>
+        <li><strong>Expo</strong> — שירות שליחת ההתראות (Push)</li>
+        <li><strong>Google AdMob</strong> — הצגת פרסומות למשתמשים שלא רכשו הסרת פרסומות.
+          כדי להציג ולמדוד פרסומות, גוגל אוספת מהמכשיר שלך <strong>מזהה פרסומות
+          (Advertising ID)</strong> ומידע דומה, ועשויה להשתמש בו להתאמת פרסומות —
+          זו דרישה של גוגל עצמה, לא בחירה שלנו, והיא כפופה למדיניות הפרטיות של גוגל
+          (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>)
+          ולהגדרות הפרסום במכשיר שלך (ניתן לאפס/להגביל את מזהה הפרסומות בהגדרות המכשיר)</li>
+      </ul>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">04</span> אבטחה</h2>
+      <p>
+        התקשורת בין האפליקציה לשרת מוצפנת (HTTPS). הסיסמה שלך מנוהלת ומאוחסנת על ידי
+        מערכת האימות (Convex Auth) באופן מוצפן — אף אחד אצלנו לא רואה אותה בטקסט גלוי.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">05</span> הזכויות שלך</h2>
+      <p>אתה יכול בכל שלב, דרך התפריט בתוך האפליקציה (☰ ← הגדרות):</p>
+      <ul>
+        <li>לעדכן את פרטי הפרופיל שלך (שם, סוג רישיון, תאריך מבחן)</li>
+        <li>ללחוץ על <strong>"מחיקת חשבון"</strong> כדי למחוק לצמיתות ובאופן מיידי את
+          כל הנתונים שלך — פרופיל, היסטוריית תשובות ומבחנים, רצף, שאלות שמורות,
+          סימוני מחסן טעויות, וטוקן ההתראות</li>
+      </ul>
+      <p>לכל בקשה נוספת (למשל עיון או ייצוא מידע), אפשר לפנות אלינו במייל בתחתית העמוד.</p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">06</span> גילאים — כולל קטינים</h2>
+      <div class="callout">
+        <strong>חלק ממשתמשי האפליקציה הם קטינים (בני 16–17)</strong> — זה קהל היעד
+        הטבעי של מי שלומד לקראת מבחן תיאוריה (בישראל ניתן לגשת למבחן מגיל 15 וחצי).
+        אנחנו מודעים לכך ומתייחסים למידע שלהם באותה רמת זהירות כמו לכל משתמש אחר.
+        האפליקציה לא מיועדת לילדים מתחת לגיל 13, ואיננו אוספים ביודעין מידע מילדים
+        כאלה — אם נגלה שנאסף בטעות מידע כזה, הוא יימחק. הורה שמזהה שילדו הצעיר
+        השתמש באפליקציה מוזמן לפנות אלינו במייל בתחתית העמוד לבקשת מחיקה.
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">07</span> בסיס חוקי ושמירת מידע</h2>
+      <p>
+        אנחנו אוספים ומעבדים את המידע בהתאם לחוק הגנת הפרטיות, תשמ"א-1981, על בסיס
+        הסכמתך (בעת ההרשמה לאפליקציה) והצורך התפעולי בו כדי לספק לך את השירות. המידע
+        נשמר כל עוד החשבון שלך פעיל, ונמחק (או מאבד זיהוי) בתוך זמן סביר לאחר בקשת
+        מחיקת חשבון.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">08</span> הסכמה למדיניות זו</h2>
+      <div class="callout">
+        <strong>יצירת חשבון או המשך שימוש באפליקציה מהווים הסכמה מלאה ומודעת לאיסוף
+        ולשימוש במידע כמתואר במדיניות זו.</strong> אם אינך מסכים — נא לא להשתמש
+        באפליקציה ולא למסור את המידע.
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">09</span> שינויים במדיניות זו</h2>
+      <p>
+        ייתכן שנעדכן את המדיניות מעת לעת — למשל עם הוספת פיצ'רים חדשים. תאריך העדכון
+        האחרון תמיד מופיע בראש העמוד. המשך שימוש באפליקציה אחרי עדכון מהווה הסכמה לנוסח החדש.
+      </p>
+    </section>
+
+    <footer>
+      <span>© 2026 תיאוריה · איתי טייב</span>
+      <a href="mailto:itaytayeb11@gmail.com">itaytayeb11@gmail.com</a>
+    </footer>
+  </article>
+
+  <article class="doc" id="doc-terms">
+    <div class="doc-head">
+      <h1>תנאי שימוש</h1>
+      <span class="updated">עודכן לאחרונה: 15 בספטמבר 2026</span>
+      <p class="intro">
+        השימוש באפליקציית "תיאוריה" כפוף לתנאים הבאים. שימוש באפליקציה מהווה הסכמה לתנאים.
+      </p>
+    </div>
+
+    <section class="sec">
+      <h2><span class="num">00</span> הסכמה לתנאים</h2>
+      <div class="callout">
+        <strong>ברגע שאתה יוצר חשבון, ממשיך להשתמש באפליקציה, או לוחץ "אני מסכים/ה"
+        במסך ההרשמה — זו הסכמה מלאה ומחייבת לכל התנאים במסמך הזה ובמדיניות הפרטיות</strong>,
+        כולל סעיף הגבלת האחריות (סעיף 8). אם אינך מסכים לתנאי מהתנאים — אל תשתמש באפליקציה.
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">01</span> מה האפליקציה</h2>
+      <p>
+        "תיאוריה" היא כלי תרגול חינמי למבחן התיאוריה של משרד התחבורה, מבוסס על מאגר
+        השאלות הרשמי והפתוח (data.gov.il). <strong>האפליקציה אינה גוף רשמי של משרד
+        התחבורה</strong>, אינה תחליף ללימוד עם מורה נהיגה מוסמך, ואינה מבטיחה הצלחה
+        במבחן האמיתי. ייתכנו אי-דיוקים במאגר השאלות או בהסברים.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">02</span> חשבון משתמש והצהרות</h2>
+      <ul>
+        <li>אתה אחראי לשמירת פרטי ההתחברות שלך ולכל פעילות שמתבצעת דרך החשבון שלך</li>
+        <li>הפרטים שאתה מזין (שם, אימייל וכו') צריכים להיות נכונים ולא מטעים</li>
+        <li>אתה יכול למחוק את חשבונך בכל עת דרך התפריט באפליקציה</li>
+        <li>בהרשמה לאפליקציה אתה מצהיר שיש לך כשירות משפטית להסכים לתנאים אלה (או
+          שקיבלת את אישור ההורה/האפוטרופוס שלך, אם אתה קטין)</li>
+        <li>אנחנו רשאים להשעות או לסגור חשבון שמפר את התנאים האלה, לפי שיקול דעתנו</li>
+      </ul>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">03</span> שימוש הוגן</h2>
+      <p>חל איסור:</p>
+      <ul>
+        <li>לנסות לגרד, להעתיק או להפיץ מסחרית את מאגר השאלות או קוד האפליקציה</li>
+        <li>לנסות לעקוף, לפרוץ או להפריע לפעולה התקינה של האפליקציה או השרתים שלה</li>
+        <li>ליצור חשבונות כוזבים או להתחזות למשתמש אחר</li>
+      </ul>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">04</span> תוכן ומידע חינם</h2>
+      <p>
+        כל שאלות התרגול, הנושאים והפיצ'רים באפליקציה פתוחים לשימוש חינם — אין תוכן
+        נעול מאחורי תשלום. האפליקציה עשויה להציג פרסומות (ר' סעיף 6).
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">05</span> רכישת "הסרת פרסומות"</h2>
+      <ul>
+        <li>זו רכישה <strong>חד-פעמית</strong> (לא מנוי, לא חיוב חוזר) שמסירה פרסומות מהאפליקציה בלבד — היא לא פותחת תוכן נוסף, כי הכל כבר חינם</li>
+        <li>התשלום מתבצע ומנוהל על ידי App Store / Google Play — לא על ידינו ישירות</li>
+        <li>מדיניות ביטולים/החזרים נקבעת על ידי App Store / Google Play, לפי התנאים שלהם</li>
+      </ul>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">06</span> פרסומות</h2>
+      <p>
+        משתמשים שלא רכשו "הסרת פרסומות" עשויים לראות פרסומות המוצגות דרך Google AdMob,
+        בין מסכי תרגול ובתחתית מסך השאלות. הפרסומות מנוהלות ומוצגות על ידי גוגל.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">07</span> קניין רוחני</h2>
+      <p>
+        עיצוב האפליקציה, הקוד והמותג "תיאוריה" שייכים למפעיל האפליקציה. מאגר השאלות
+        מבוסס על מידע ציבורי-פתוח ממשרד התחבורה (data.gov.il).
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">08</span> הגבלת אחריות ושיפוי</h2>
+      <p>
+        האפליקציה מסופקת <strong>"as is" וללא כל התחייבות</strong> — לרבות התחייבות
+        לתוצאה במבחן התיאוריה הרשמי, לדיוק מלא של מאגר השאלות, או לזמינות רציפה של
+        השירות. השימוש באפליקציה הוא על אחריותך בלבד.
+      </p>
+      <p>
+        <strong>ככל שהדין מתיר זאת</strong>, מפעיל האפליקציה לא יהיה אחראי לכל נזק —
+        ישיר, עקיף, תוצאתי, מקרי או מיוחד — הנובע משימוש או מאי-יכולת להשתמש
+        באפליקציה, לרבות (אך לא רק) טעות במאגר השאלות, אובדן נתונים, הפסקת שירות,
+        או תוצאה במבחן התיאוריה האמיתי. ככל שבכל זאת תיקבע אחריות כלשהי על אף האמור
+        לעיל, היא תוגבל לסכום ששולם בפועל בעד השימוש באפליקציה (ובמקרה של שימוש
+        חינמי — לסכום של 0 ₪).
+      </p>
+      <p>
+        אתה מסכים לשפות את מפעיל האפליקציה בגין כל תביעה, נזק או הוצאה (לרבות
+        שכר טרחת עורך דין) שנובעים משימוש שלך באפליקציה בניגוד לתנאים אלה.
+      </p>
+      <p class="intro" style="margin-top:14px">
+        <em>הערה: אין בסעיף זה כדי לשלול זכויות שאינן ניתנות לשלילה על פי חוק הגנת
+        הצרכן או כל דין קוגנטי אחר שחל בישראל.</em>
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">09</span> זמינות ושינוי השירות</h2>
+      <p>
+        אנחנו עשויים להוסיף, לשנות, להשעות זמנית או להפסיק כל חלק מהשירות (כולל
+        פיצ'רים, מאגר השאלות או האפליקציה כולה) בכל עת וללא הודעה מוקדמת, ולא נהיה
+        אחראים כלפיך או כלפי צד שלישי בשל כך. איננו מתחייבים לזמינות רציפה או
+        נטולת תקלות.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">10</span> כוח עליון</h2>
+      <p>
+        לא נהיה אחראים לאי-עמידה בהתחייבות כלשהי הנובעת מנסיבות שאינן בשליטתנו
+        הסבירה — לרבות תקלות אינטרנט/חשמל, כשל של ספקי צד ג' (Convex, RevenueCat,
+        Google, Expo), אירועי טבע, מלחמה או מצב חירום.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">11</span> שינויים בתנאים</h2>
+      <p>
+        אנחנו עשויים לעדכן את התנאים מעת לעת. תאריך העדכון האחרון מופיע בראש העמוד.
+        המשך שימוש לאחר עדכון מהווה הסכמה לנוסח החדש.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">12</span> הפרדת סעיפים והסכם שלם</h2>
+      <p>
+        אם ייקבע שסעיף מסוים בתנאים אלה אינו תקף או אינו ניתן לאכיפה — שאר הסעיפים
+        יישארו בתוקף מלא. תנאים אלה, יחד עם מדיניות הפרטיות, מהווים את ההסכם המלא
+        בינך לבין מפעיל האפליקציה בנוגע לשימוש בה, ומחליפים כל הסכמה קודמת בעל-פה
+        או בכתב.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">13</span> דין חל וסמכות שיפוט</h2>
+      <p>
+        תנאים אלה כפופים לדיני מדינת ישראל בלבד, והסמכות הבלעדית לדון בכל מחלוקת
+        הנוגעת אליהם נתונה לבתי המשפט המוסמכים במדינת ישראל.
+      </p>
+    </section>
+
+    <footer>
+      <span>© 2026 תיאוריה · איתי טייב</span>
+      <a href="mailto:itaytayeb11@gmail.com">itaytayeb11@gmail.com</a>
+    </footer>
+  </article>
+
+  <article class="doc" id="doc-accessibility">
+    <div class="doc-head">
+      <h1>הצהרת נגישות</h1>
+      <span class="updated">עודכן לאחרונה: 15 בספטמבר 2026</span>
+      <p class="intro">
+        הצהרה כנה על מצב הנגישות של אפליקציית "תיאוריה" נכון להיום — כולל מה שעוד לא מוכן.
+      </p>
+    </div>
+
+    <section class="sec">
+      <h2><span class="num">01</span> המצב היום</h2>
+      <p>
+        אנחנו בתהליך פיתוח מתמשך, ונגישות היא חלק ממנו — אבל בכנות: <strong>האפליקציה
+        עדיין לא נבדקה ואינה מותאמת באופן מלא</strong> למשתמשים עם מוגבלות (למשל שימוש
+        בקוראי מסך כמו VoiceOver או TalkBack). אנחנו מעדיפים לומר זאת בפירוש במקום
+        להצהיר על עמידה בתקן שעוד לא הגענו אליו.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">02</span> מה כן קיים כרגע</h2>
+      <ul>
+        <li>האפליקציה תומכת בכיוון כתיבה מימין-לשמאל (RTL) באופן מלא</li>
+        <li>גודל הטקסט באפליקציה מגיב להגדרות הנגישות של המכשיר (הגדלת טקסט מערכתית)</li>
+        <li>ניגודיות צבעים סבירה בין טקסט לרקע ברוב המסכים (לא נבדקה פורמלית מול תקן 5568/WCAG)</li>
+      </ul>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">03</span> לאן אנחנו שואפים</h2>
+      <p>
+        המטרה שלנו היא להתאים בהדרגה לתקן הישראלי 5568 (המבוסס על WCAG 2.0 ברמה AA) —
+        תיוג נכון לקוראי מסך בכל הכפתורים והשדות, ניווט מלא במקלדת/מתג, ובדיקה בפועל
+        עם משתמשים שמשתמשים בטכנולוגיות מסייעות.
+      </p>
+    </section>
+
+    <section class="sec">
+      <h2><span class="num">04</span> נתקלת בבעיית נגישות?</h2>
+      <p>
+        נשמח לדעת — זה עוזר לנו לתעדף נכון. אפשר לכתוב לנו למייל בתחתית העמוד, עם
+        תיאור הבעיה, איזה מכשיר/טכנולוגיה מסייעת השתמשת בהם, ובאיזה מסך זה קרה.
+      </p>
+    </section>
+
+    <footer>
+      <span>© 2026 תיאוריה · איתי טייב</span>
+      <a href="mailto:itaytayeb11@gmail.com">itaytayeb11@gmail.com</a>
+    </footer>
+  </article>
+</div>
+
+<script>
+  function showDoc(name) {
+    for (const id of ['privacy', 'terms', 'accessibility']) {
+      document.getElementById('doc-' + id).classList.toggle('active', id === name);
+      document.getElementById('tab-' + id).setAttribute('aria-selected', String(id === name));
+    }
+    try { history.replaceState(null, '', '#' + name); } catch (e) {}
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  }
+  const initial = (location.hash || '').replace('#', '');
+  const valid = ['privacy', 'terms', 'accessibility'].includes(initial) ? initial : 'privacy';
+  showDoc(valid);
+</script>
+</body>
+</html>
