@@ -1,4 +1,5 @@
 import { v } from 'convex/values';
+import { internal } from './_generated/api';
 import { internalMutation, type QueryCtx, query } from './_generated/server';
 import { filterByLicense, getUserIdOrNull } from './model';
 
@@ -188,6 +189,17 @@ export const importQuestions = internalMutation({
       inserted += 1;
     }
 
+    // מחשב מחדש את קאש הסטטיסטיקות אוטומטית בסוף הייבוא — כדי שאף אחד
+    // לא יצטרך לזכור להריץ את זה ידנית (וגם בלי cron מיותר שרץ סתם כל
+    // הזמן על מאגר שכמעט אף פעם לא משתנה)
+    if (inserted > 0) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.questions.recomputeBankStats,
+        {}
+      );
+    }
+
     return { inserted, skipped };
   },
 });
@@ -206,7 +218,8 @@ export const clearAll = internalMutation({
 
 // ==========================================================================
 // מחשב מחדש את קאש הסטטיסטיקות (questionBankStats) לכל סוגי הרישיון.
-// חובה להריץ פעם אחת אחרי כל ייבוא/שינוי של מאגר השאלות:
+// רץ אוטומטית בסוף importQuestions — אין צורך להריץ ידנית אחרי ייבוא רגיל.
+// להרצה ידנית (למשל אחרי clearAll, או אם צריך רענון יזום):
 //   bunx convex run questions:recomputeBankStats
 // ==========================================================================
 export const recomputeBankStats = internalMutation({
