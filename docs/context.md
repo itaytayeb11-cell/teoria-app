@@ -100,8 +100,8 @@ remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה ד
 - [ ] ⚠️ סיכון מדיניות ידוע: ה-interstitial לפני מבחן מדמה נוגד Better Ads policy (ר' config/ads.ts) — לזכור כמקור אפשרי אם תהיה בעיית ad serving disabled בעתיד
 - [ ] הרשמה ל-Apple Small Business Program — ממתינה לשלב 13א (App Store Connect), לא לשכוח
 - [ ] כתובת מייל אמיתית ל"צור קשר" (config/support.ts עדיין placeholder)
-- [ ] Convex Free plan מתקרב למגבלה — הודעה מ-Convex CLI, לבדוק בדשבורד אם צריך לשדרג
-- [ ] התחברות Google — ממתין ל-OAuth client מהמשתמש
+- [ ] 🔴 **Convex Free plan — כבר מעל המגבלה, לא רק מתקרב** (אומת 2026-09-15 ב-`bunx convex dev --once`: "Your projects are above the Free plan limits. Decrease your usage or upgrade to avoid service interruption."). דורש בדיקה בדשבורד (https://dashboard.convex.dev/t/itaytayeb11) — אילו מגבלות בדיוק, והאם לשדרג לפני שיש הפרעת שירות בפועל
+- ✅ **התחברות Google — הקוד מוכן** (2026-09-15): `convex/auth.ts` מוסיף Google provider (`@auth/core/providers/google`), `hooks/useGoogleSignIn.ts` מיישם את זרימת ה-OAuth ל-React Native (expo-web-browser + `teoria://` scheme), כפתור "המשך עם Google" נוסף למסך ההתחברות. `bunx convex dev --once` רץ בהצלחה. **חסום עד שהמשתמש ייצור Google Cloud OAuth Client** (Web application) ויספק Client ID + Secret → להגדיר כ-`AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` ב-Convex dashboard. Redirect URI לרישום ב-Google Console: `https://glad-mule-854.convex.site/api/auth/callback/google`
 - [ ] Push notifications — קוד מוכן ופרוס (cron+רישום מכשיר), טרם נבדק בפועל על מכשיר (ממתין ל-dev build מותקן)
 - [ ] Android dev build — **הסתיים בהצלחה** (2026-09-14 21:37, build 65a02558). APK: https://expo.dev/artifacts/eas/NIEVUbhTSIq2jQPq26t6nfoV2R1H8_JIbJxfiJ0DXlo.apk — ממתין שהמשתמש יתקין ויבדוק על מכשיר אמיתי (Convex, מבחנים, RevenueCat, ואז ads+push)
 - [x] ביקורת אבטחה (2026-09-14, בעקבות בדיקת "עורך דין צד שני"): נבדקו כל ה-query/mutation ב-convex — כולם דורשים זהות מהשרת (ctx.auth), אין IDOR. `deleteMyAccount` תוקן (היה חסר streakLog/mistakeDismissals/savedQuestions/pushTokens). מדיניות הפרטיות עודכנה (קטינים במפורש, Advertising ID, כל ספק בשם)
