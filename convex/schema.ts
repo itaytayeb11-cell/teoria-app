@@ -148,8 +148,8 @@ export default defineSchema({
   // ==========================================================================
   purchases: defineTable({
     userId: v.id('users'),
-    productId: v.string(), // מזהה המוצר בחנות (למשל "lifetime_access")
-    entitlement: v.string(), // שם ההרשאה ב-RevenueCat (למשל "premium")
+    productId: v.string(), // מזהה המוצר בחנות (למשל "remove_ads")
+    entitlement: v.string(), // שם ההרשאה ב-RevenueCat (למשל "remove_ads")
     platform: v.optional(v.string()), // "ios" | "android"
     revenueCatCustomerId: v.optional(v.string()),
     isActive: v.boolean(), // האם הגישה פעילה כרגע
