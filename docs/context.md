@@ -126,8 +126,14 @@ remote: GitHub private `teoria-app` (חשבון itaytayeb11-cell). העלאה ד
 - ✅ **חשבון Apple Developer אומת כפעיל** — נכנס ל-App Store Connect בהצלחה (`itay tayeb`).
 - 🔴 **Small Business Program עדיין לא נגיש** — נבדק (ע"י Claude-in-Chrome עם גישה לדפדפן של המשתמש, בהרשאתו): הוא לא מופיע בשום תפריט. הסיבה שאותרה: **Paid Apps Agreement** עדיין בסטטוס "New" (לא נחתם), וכדי לחתום צריך קודם למלא **Legal Entity** (פרטי ישות משפטית) + פרטי מס ובנק ב-App Store Connect → Business. ה-SBP כנראה ייפתח רק אחרי זה. Free Apps Agreement כן פעיל.
 - 👤 **צעד הבא (חובה, המשתמש בעצמו — לא AI)**: למלא Legal Entity + לחתום Paid Apps Agreement + להזין פרטי בנק/מס תחת App Store Connect → Business → Edit Legal Entity. **הומלץ למשתמש לא להעביר את זה ל-AI** כי זה כולל ת.ז/מספר מס וחשבון בנק. זה גם תנאי סף נדרש בכל מקרה לפני IAP (RevenueCat iOS), אז לא סטייה מהתוכנית.
-- לאחר השלמת זה: לבדוק שוב זמינות SBP, ואז גם API Key (App Store Connect API) ורישום Bundle ID ייפתחו (כולם תלויים באותו Paid Apps Agreement פעיל).
 - תועד גם ב-Notion (דף פרטי "Teoria App - Dev Accounts", נוצר ע"י Claude-in-Google/Chrome של המשתמש).
+
+## עדכון (session 4 המשך, 2026-09-15) — Paid Apps Agreement Active, SBP הוגש
+
+- ✅ **הבנק אושר, Paid Apps Agreement עבר ל-Active.**
+- ✅ **Small Business Program הוגש בהצלחה.** נמצא בפועל ב-`developer.apple.com/app-store/small-business-program` (לא בתוך App Store Connect עצמו). Team ID: `RGFW68X3V2`. תשובות המשתמש לשאלון Associated Developer Accounts: No לכל 4 השאלות (אין בעלות/שליטה הדדית עם חשבונות Apple Developer אחרים). התקבל אישור הגשה, אפל תעדכן במייל. **תזכורת שנתית לחידוש נקבעה ל-16.9.2027.**
+- ✅ **עזיבת team זר** — התגלה team נוסף בשם "itamar marciano" (שותף עסקי לשעבר, תפקיד Customer Support בלבד) שהיה מחובר לחשבון Apple של המשתמש. המשתמש עזב את ה-team הזה לגמרי (Leave Team) — כרגע רק "itay tayeb" team קיים. **המשתמש יצטרך להתחבר מחדש ל-Apple ID בדפדפן** (ההתנתקות הכריחה session חדש).
+- 👤 **הבא בתור**: יצירת App Store Connect API Key (P8/Key ID/Issuer ID) לחיבור RevenueCat+EAS, ורישום Bundle ID (`com.teoria.app`) תחת App IDs — שניהם היו חסומים עד עכשיו, עכשיו פתוחים כי Paid Apps Agreement פעיל.
 - ✅ **המשתמש השלים בעצמו (2026-09-15), עם הנחיה חיה בצ'אט**: Legal Entity מאומת, U.S. Form W-8BEN (Active — כולל Foreign TIN = ת.ז ישראלית, לפי טיפים רשמיים של אפל שצורפו ע"י המשתמש: שדה 10 באמת לא נדרש, "not normally applicable"), U.S. Certificate of Foreign Status (Active), חשבון בנק ישראלי נשלח (**Processing — עד 24 שעות**).
 - ⏳ **חוסם נוכחי**: Paid Apps Agreement יעבור ל-Active רק אחרי שהבנק יאושר (עד 24 שעות מ-2026-09-15). עד אז אי אפשר לעדכן עוד פרטי בנק/מס. **הצעד הבא אחרי ה-24 שעות**: לבדוק שוב את Business tab ב-App Store Connect — אם Paid Apps Agreement Active, לבדוק אם Small Business Program נפתח.
 - לא דחוף: באנר "EU trader status" (Digital Services Act) מופיע בעמוד Business — לא חוסם, אפשר לטפל בנפרד.
