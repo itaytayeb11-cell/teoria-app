@@ -1,4 +1,6 @@
 import { useAuthActions } from '@convex-dev/auth/react';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -6,6 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
+  StyleSheet,
   TextInput,
   View,
 } from 'react-native';
@@ -82,177 +86,203 @@ export default function SignUpScreen() {
   };
 
   return (
-    <Screen>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1, justifyContent: 'center', padding: 24 }}
-      >
-        <T weight="bold" size={30} style={{ marginBottom: 6 }}>
-          הרשמה
-        </T>
-        <T color={palette.muted} style={{ marginBottom: 28 }}>
-          פותחים חשבון ומתחילים לתרגל.
-        </T>
-
-        <Field
-          label="אימייל"
-          value={email}
-          onChangeText={setEmail}
-          placeholder="example@gmail.com"
-          keyboardType="email-address"
-        />
-        <Field
-          label="סיסמה"
-          value={password}
-          onChangeText={setPassword}
-          placeholder="לפחות 8 תווים"
-          secureTextEntry
-        />
-
-        <Pressable
-          onPress={() => setConsent((v) => !v)}
-          style={{
-            flexDirection: rtl.flexDirection,
-            alignItems: 'center',
-            gap: 8,
-            marginVertical: 12,
-          }}
+    <Screen edges={[]} style={{ backgroundColor: 'transparent' }}>
+      <LinearGradient colors={['#FFFFFF', '#87A9EE']} style={{ flex: 1 }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
         >
-          <View
-            style={{
-              width: 22,
-              height: 22,
-              borderRadius: 6,
-              borderWidth: 2,
-              borderColor: consent ? palette.primary : '#C7CBD4',
-              backgroundColor: consent ? palette.primary : 'transparent',
-              alignItems: 'center',
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
               justifyContent: 'center',
+              padding: 24,
             }}
           >
-            {consent && (
-              <T color="#fff" weight="bold" size={12}>
-                ✓
-              </T>
-            )}
-          </View>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: rtl.flexDirection,
-              flexWrap: 'wrap',
-            }}
-          >
-            <T size={13}>קראתי ואני מאשר את </T>
-            <Pressable
-              onPress={() =>
-                setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
-              }
+            <BlurView
+              intensity={40}
+              tint="light"
+              style={[
+                styles.glassCard,
+                { borderRadius: 28, padding: 24, overflow: 'hidden' },
+              ]}
             >
-              <T size={13} color={palette.primary}>
-                תנאי השימוש
+              <T weight="bold" size={30} style={{ marginBottom: 6 }}>
+                הרשמה
               </T>
-            </Pressable>
-            <T size={13}> ו</T>
-            <Pressable
-              onPress={() =>
-                setWeb({ url: PRIVACY_POLICY_URL, title: 'מדיניות פרטיות' })
-              }
-            >
-              <T size={13} color={palette.primary}>
-                מדיניות הפרטיות
+              <T color={palette.muted} style={{ marginBottom: 28 }}>
+                פותחים חשבון ומתחילים לתרגל.
               </T>
-            </Pressable>
-          </View>
-        </Pressable>
 
-        <Button label="הירשם" loading={loading} onPress={onSubmit} />
+              <Field
+                label="אימייל"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="example@gmail.com"
+                keyboardType="email-address"
+              />
+              <Field
+                label="סיסמה"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="לפחות 8 תווים"
+                secureTextEntry
+              />
 
-        <View
-          style={{
-            flexDirection: rtl.flexDirection,
-            alignItems: 'center',
-            gap: 10,
-            marginVertical: 18,
-          }}
-        >
-          <View style={{ flex: 1, height: 1, backgroundColor: '#E5E7EB' }} />
-          <T color={palette.muted} size={13}>
-            או
-          </T>
-          <View style={{ flex: 1, height: 1, backgroundColor: '#E5E7EB' }} />
-        </View>
+              <Pressable
+                onPress={() => setConsent((v) => !v)}
+                style={{
+                  flexDirection: rtl.flexDirection,
+                  alignItems: 'center',
+                  gap: 8,
+                  marginVertical: 12,
+                }}
+              >
+                <View
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    borderWidth: 2,
+                    borderColor: consent ? palette.primary : '#C7CBD4',
+                    backgroundColor: consent ? palette.primary : 'transparent',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {consent && (
+                    <T color="#fff" weight="bold" size={12}>
+                      ✓
+                    </T>
+                  )}
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: rtl.flexDirection,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <T size={13}>קראתי ואני מאשר את </T>
+                  <Pressable
+                    onPress={() =>
+                      setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
+                    }
+                  >
+                    <T size={13} color={palette.primary}>
+                      תנאי השימוש
+                    </T>
+                  </Pressable>
+                  <T size={13}> ו</T>
+                  <Pressable
+                    onPress={() =>
+                      setWeb({
+                        url: PRIVACY_POLICY_URL,
+                        title: 'מדיניות פרטיות',
+                      })
+                    }
+                  >
+                    <T size={13} color={palette.primary}>
+                      מדיניות הפרטיות
+                    </T>
+                  </Pressable>
+                </View>
+              </Pressable>
 
-        <View style={{ gap: 10 }}>
-          {Platform.OS === 'ios' ? (
-            <Button
-              label="המשך עם Apple"
-              variant="outline"
-              loading={appleLoading}
-              onPress={onAppleSubmit}
-            />
-          ) : null}
-          <Button
-            label="המשך עם Google"
-            variant="outline"
-            loading={googleLoading}
-            onPress={onGoogleSubmit}
-          />
-        </View>
+              <Button label="הירשם" loading={loading} onPress={onSubmit} />
 
-        <View
-          style={{
-            flexDirection: rtl.flexDirection,
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            marginTop: 12,
-          }}
-        >
-          <T size={12} color={palette.muted}>
-            בהמשך עם Google/Apple אתה מאשר את{' '}
-          </T>
-          <Pressable
-            onPress={() =>
-              setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
-            }
-          >
-            <T size={12} color={palette.primary}>
-              תנאי השימוש
-            </T>
-          </Pressable>
-          <T size={12} color={palette.muted}>
-            {' '}
-            ו
-          </T>
-          <Pressable
-            onPress={() =>
-              setWeb({ url: PRIVACY_POLICY_URL, title: 'מדיניות פרטיות' })
-            }
-          >
-            <T size={12} color={palette.primary}>
-              מדיניות הפרטיות
-            </T>
-          </Pressable>
-        </View>
+              <View
+                style={{
+                  flexDirection: rtl.flexDirection,
+                  alignItems: 'center',
+                  gap: 10,
+                  marginVertical: 18,
+                }}
+              >
+                <View
+                  style={{ flex: 1, height: 1, backgroundColor: '#E5E7EB' }}
+                />
+                <T color={palette.muted} size={13}>
+                  או
+                </T>
+                <View
+                  style={{ flex: 1, height: 1, backgroundColor: '#E5E7EB' }}
+                />
+              </View>
 
-        <View
-          style={{
-            flexDirection: rtl.flexDirection,
-            justifyContent: 'center',
-            gap: 6,
-            marginTop: 20,
-          }}
-        >
-          <Link href="/(auth)/sign-in" asChild>
-            <Pressable>
-              <T color={palette.primary} weight="medium">
-                התחבר
-              </T>
-            </Pressable>
-          </Link>
-          <T color={palette.muted}>כבר יש לך חשבון?</T>
-        </View>
-      </KeyboardAvoidingView>
+              <View style={{ gap: 10 }}>
+                {Platform.OS === 'ios' ? (
+                  <Button
+                    label="המשך עם Apple"
+                    variant="outline"
+                    loading={appleLoading}
+                    onPress={onAppleSubmit}
+                  />
+                ) : null}
+                <Button
+                  label="המשך עם Google"
+                  variant="outline"
+                  loading={googleLoading}
+                  onPress={onGoogleSubmit}
+                />
+              </View>
+
+              <View
+                style={{
+                  flexDirection: rtl.flexDirection,
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  marginTop: 12,
+                }}
+              >
+                <T size={12} color={palette.muted}>
+                  בהמשך עם Google/Apple אתה מאשר את{' '}
+                </T>
+                <Pressable
+                  onPress={() =>
+                    setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
+                  }
+                >
+                  <T size={12} color={palette.primary}>
+                    תנאי השימוש
+                  </T>
+                </Pressable>
+                <T size={12} color={palette.muted}>
+                  {' '}
+                  ו
+                </T>
+                <Pressable
+                  onPress={() =>
+                    setWeb({ url: PRIVACY_POLICY_URL, title: 'מדיניות פרטיות' })
+                  }
+                >
+                  <T size={12} color={palette.primary}>
+                    מדיניות הפרטיות
+                  </T>
+                </Pressable>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: rtl.flexDirection,
+                  justifyContent: 'center',
+                  gap: 6,
+                  marginTop: 20,
+                }}
+              >
+                <Link href="/(auth)/sign-in" asChild>
+                  <Pressable>
+                    <T color={palette.primary} weight="medium">
+                      התחבר
+                    </T>
+                  </Pressable>
+                </Link>
+                <T color={palette.muted}>כבר יש לך חשבון?</T>
+              </View>
+            </BlurView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </LinearGradient>
 
       <WebViewModal
         visible={web !== null}
@@ -263,6 +293,14 @@ export default function SignUpScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  glassCard: {
+    backgroundColor: 'rgba(255,255,255,0.35)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(29,78,216,0.18)',
+  },
+});
 
 function Field(props: {
   label: string;
@@ -287,9 +325,9 @@ function Field(props: {
         autoCapitalize="none"
         autoCorrect={false}
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'rgba(255,255,255,0.7)',
           borderWidth: 1,
-          borderColor: '#E5E7EB',
+          borderColor: 'rgba(29,78,216,0.15)',
           borderRadius: 12,
           paddingHorizontal: 14,
           paddingVertical: 14,
