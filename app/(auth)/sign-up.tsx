@@ -88,6 +88,7 @@ export default function SignUpScreen() {
   return (
     <Screen edges={[]} style={{ backgroundColor: 'transparent' }}>
       <LinearGradient colors={['#FFFFFF', '#87A9EE']} style={{ flex: 1 }}>
+        <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill} />
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{ flex: 1 }}
@@ -99,14 +100,7 @@ export default function SignUpScreen() {
               padding: 24,
             }}
           >
-            <BlurView
-              intensity={40}
-              tint="light"
-              style={[
-                styles.glassCard,
-                { borderRadius: 28, padding: 24, overflow: 'hidden' },
-              ]}
-            >
+            <View>
               <T weight="bold" size={30} style={{ marginBottom: 6 }}>
                 הרשמה
               </T>
@@ -279,7 +273,7 @@ export default function SignUpScreen() {
                 </Link>
                 <T color={palette.muted}>כבר יש לך חשבון?</T>
               </View>
-            </BlurView>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </LinearGradient>
@@ -293,14 +287,6 @@ export default function SignUpScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  glassCard: {
-    backgroundColor: 'rgba(255,255,255,0.35)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(29,78,216,0.18)',
-  },
-});
 
 function Field(props: {
   label: string;
