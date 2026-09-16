@@ -1,3 +1,4 @@
+import Apple from '@auth/core/providers/apple';
 import Google from '@auth/core/providers/google';
 import { Password } from '@convex-dev/auth/providers/Password';
 import { convexAuth } from '@convex-dev/auth/server';
@@ -5,7 +6,9 @@ import { convexAuth } from '@convex-dev/auth/server';
 // הגדרת מערכת האימות (Authentication)
 // קובץ זה מגדיר את ספקי ההזדהות והלוגיקה של יצירת משתמשים
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Password, Google], // סיסמה + התחברות עם Google
+  // Apple חובה (לא רק נחמד) — Guideline 4.8 של אפל: אפליקציה עם כניסה
+  // חברתית (Google וכו') חייבת גם Sign in with Apple כאופציה שווה-ערך
+  providers: [Password, Google, Apple],
   session: {
     totalDurationMs: 30 * 24 * 60 * 60 * 1000, // משך זמן ה-Session (30 ימים)
   },

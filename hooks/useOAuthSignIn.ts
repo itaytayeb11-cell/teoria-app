@@ -3,18 +3,19 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 
-// זרימת התחברות עם Google ב-React Native: פותחים דפדפן פנימי לכתובת ה-OAuth
-// שמחזיר signIn("google"), ומחכים שהוא יחזור לאפליקציה (דרך ה-scheme "teoria")
-// עם קוד. את הקוד מעבירים שוב ל-signIn("google") כדי להשלים את ההתחברות.
-export function useGoogleSignIn() {
+// זרימת התחברות עם ספק OAuth (Google/Apple) ב-React Native: פותחים דפדפן
+// פנימי לכתובת ה-OAuth שמחזיר signIn(provider), ומחכים שהוא יחזור לאפליקציה
+// (דרך ה-scheme "teoria") עם קוד. את הקוד מעבירים שוב ל-signIn(provider)
+// כדי להשלים את ההתחברות.
+export function useOAuthSignIn(provider: 'google' | 'apple') {
   const { signIn } = useAuthActions();
   const [loading, setLoading] = useState(false);
 
-  const signInWithGoogle = async () => {
+  const signInWithProvider = async () => {
     setLoading(true);
     try {
       const redirectTo = Linking.createURL('/');
-      const { redirect } = await signIn('google', { redirectTo });
+      const { redirect } = await signIn(provider, { redirectTo });
       if (!redirect) {
         return false;
       }
@@ -28,7 +29,7 @@ export function useGoogleSignIn() {
         const { queryParams } = Linking.parse(result.url);
         const code = queryParams?.code;
         if (typeof code === 'string') {
-          await signIn('google', { code });
+          await signIn(provider, { code });
           return true;
         }
       }
@@ -38,5 +39,5 @@ export function useGoogleSignIn() {
     }
   };
 
-  return { signInWithGoogle, loading };
+  return { signInWithProvider, loading };
 }

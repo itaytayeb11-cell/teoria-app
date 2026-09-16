@@ -13,12 +13,15 @@ import { Button, Screen, T } from '@/components/ui';
 import { WebViewModal } from '@/components/WebViewModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/config/legalUrls';
 import { palette } from '@/constants/Colors';
-import { useGoogleSignIn } from '@/hooks/useGoogleSignIn';
+import { useOAuthSignIn } from '@/hooks/useOAuthSignIn';
 import { rtl } from '@/lib/rtl';
 
 export default function SignInScreen() {
   const { signIn } = useAuthActions();
-  const { signInWithGoogle, loading: googleLoading } = useGoogleSignIn();
+  const { signInWithProvider: signInWithGoogle, loading: googleLoading } =
+    useOAuthSignIn('google');
+  const { signInWithProvider: signInWithApple, loading: appleLoading } =
+    useOAuthSignIn('apple');
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,6 +36,17 @@ export default function SignInScreen() {
       }
     } catch {
       Alert.alert('שגיאה', 'ההתחברות עם Google נכשלה. נסה שוב');
+    }
+  };
+
+  const onAppleSubmit = async () => {
+    try {
+      const success = await signInWithApple();
+      if (success) {
+        router.replace('/(authenticated)');
+      }
+    } catch {
+      Alert.alert('שגיאה', 'ההתחברות עם Apple נכשלה. נסה שוב');
     }
   };
 
@@ -106,12 +120,22 @@ export default function SignInScreen() {
           <View style={{ flex: 1, height: 1, backgroundColor: '#E5E7EB' }} />
         </View>
 
-        <Button
-          label="המשך עם Google"
-          variant="outline"
-          loading={googleLoading}
-          onPress={onGoogleSubmit}
-        />
+        <View style={{ gap: 10 }}>
+          {Platform.OS === 'ios' ? (
+            <Button
+              label="המשך עם Apple"
+              variant="outline"
+              loading={appleLoading}
+              onPress={onAppleSubmit}
+            />
+          ) : null}
+          <Button
+            label="המשך עם Google"
+            variant="outline"
+            loading={googleLoading}
+            onPress={onGoogleSubmit}
+          />
+        </View>
 
         <View
           style={{
@@ -122,7 +146,7 @@ export default function SignInScreen() {
           }}
         >
           <T size={12} color={palette.muted}>
-            בהמשך עם Google אתה מאשר את{' '}
+            בהמשך עם Google/Apple אתה מאשר את{' '}
           </T>
           <Pressable
             onPress={() =>
