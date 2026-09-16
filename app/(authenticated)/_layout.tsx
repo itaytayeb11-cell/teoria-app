@@ -9,6 +9,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { palette } from '@/constants/Colors';
 import { api } from '@/convex/_generated/api';
 import { usePushRegistration } from '@/hooks/usePushRegistration';
+import { useTrackingPermission } from '@/hooks/useTrackingPermission';
 
 // כל המסכים שנפתחים "מעל" סרגל הטאבים (לא הטאבים עצמם — אלה חיים ב-(tabs)).
 // כאן זה Stack אמיתי, אז ניווט קדימה/אחורה עובד עם היסטוריה רגילה (LIFO)
@@ -38,6 +39,7 @@ export default function AuthenticatedLayout() {
   );
 
   usePushRegistration(isAuthenticated);
+  useTrackingPermission(isAuthenticated);
 
   const loadingView = (
     <View

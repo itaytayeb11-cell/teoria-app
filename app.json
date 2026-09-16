@@ -55,7 +55,14 @@
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-3979305920257836~7346081431",
-          "iosAppId": "ca-app-pub-3979305920257836~7372545322"
+          "iosAppId": "ca-app-pub-3979305920257836~7372545322",
+          "userTrackingUsageDescription": "נשתמש במידע הזה כדי להציג לך פרסומות מותאמות יותר. תוכל לשנות את בחירתך בכל עת בהגדרות המכשיר."
+        }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "נשתמש במידע הזה כדי להציג לך פרסומות מותאמות יותר. תוכל לשנות את בחירתך בכל עת בהגדרות המכשיר."
         }
       ]
     ],
