@@ -23,6 +23,13 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleTeamId": "RGFW68X3V2",
+        "ascApiKeyPath": "./secrets/AuthKey_J2ATC693QR.p8",
+        "ascApiKeyId": "J2ATC693QR",
+        "ascApiKeyIssuerId": "46bf9b16-80cb-442c-aef5-f39d44a4f41d"
+      }
+    }
   }
 }
