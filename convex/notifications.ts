@@ -75,6 +75,13 @@ export const usersNeedingReminder = internalQuery({
       if (!user) {
         continue;
       }
+      // אם המשתמש קבע תאריך מבחן והתאריך הזה כבר עבר — מפסיקים לשלוח
+      // תזכורות תרגול, כי המבחן כבר קרה (עבר/נכשל) והתזכורת כבר לא
+      // רלוונטית. אם הוא יזין תאריך מבחן חדש (עתידי) — התזכורות יחזרו
+      // אוטומטית, כי התנאי הזה כבר לא יתקיים.
+      if (user.testDate && user.testDate < Date.now()) {
+        continue;
+      }
       // לא פעיל היום ולא אתמול, ולא נשלחה תזכורת עדיין היום
       const last = user.lastActiveDay ?? '2000-01-01';
       if (

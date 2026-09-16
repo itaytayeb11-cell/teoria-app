@@ -1,7 +1,8 @@
 import { useQuery } from 'convex/react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as StoreReview from 'expo-store-review';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import {
   Button,
@@ -29,6 +30,25 @@ export default function ResultsScreen() {
     api.quiz.getSession,
     sessionId ? { sessionId: sessionId as never } : 'skip'
   );
+
+  // רגע הכי חיובי אפשרי לבקש דירוג — מיד אחרי מבחן מדמה שעבר. מפעיל את
+  // חלון הדירוג הרשמי של אפל/גוגל (לא מסך שלנו) — הוא מנוהל ע"י המערכת
+  // (עד 3 פעמים בשנה), אין לנו שליטה/ידיעה אם הוא בפועל הוצג
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+    const incorrect = session.totalQuestions - session.correctCount;
+    const passedSim =
+      session.mode === 'simulation' && incorrect <= MAX_SIM_MISTAKES;
+    if (passedSim) {
+      StoreReview.isAvailableAsync().then((available) => {
+        if (available) {
+          StoreReview.requestReview();
+        }
+      });
+    }
+  }, [session]);
 
   if (session === undefined) {
     return (
