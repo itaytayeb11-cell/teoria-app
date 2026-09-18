@@ -65,7 +65,8 @@
         {
           "userTrackingPermission": "נשתמש במידע הזה כדי להציג לך פרסומות מותאמות יותר. תוכל לשנות את בחירתך בכל עת בהגדרות המכשיר."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
