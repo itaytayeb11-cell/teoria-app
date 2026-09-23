@@ -111,11 +111,14 @@ export function AppDrawer(props: { visible: boolean; onClose: () => void }) {
   };
 
   const openWeb = (url: string, title: string) => {
-    // סוגרים קודם את מגירת התפריט — שני Modal של RN פתוחים בו-זמנית
-    // (המגירה + חלון הדפדפן) גורמים למסך לתקוע ב-iOS
+    // סוגרים קודם את מגירת התפריט, וממתינים שאנימציית הסגירה (220ms)
+    // תסתיים ממש (לא רק תתחיל) לפני שפותחים Modal שני — שני Modal של RN
+    // פתוחים בו-זמנית, ולו לרגע, גורמים למסך לתקוע ב-iOS
     onClose();
-    setWebTitle(title);
-    setWebUrl(url);
+    setTimeout(() => {
+      setWebTitle(title);
+      setWebUrl(url);
+    }, 260);
   };
 
   const inviteFriends = async () => {
