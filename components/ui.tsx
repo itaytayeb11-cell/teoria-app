@@ -340,6 +340,7 @@ export function Button(props: {
   loading?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  icon?: ReactNode;
 }) {
   const variant = props.variant ?? 'primary';
   const bg =
@@ -378,16 +379,26 @@ export function Button(props: {
       {props.loading ? (
         <ActivityIndicator color={fg} />
       ) : (
-        <Text
+        <View
           style={{
-            color: fg,
-            fontSize: 17,
-            fontWeight: '700',
-            textAlign: 'center',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
           }}
         >
-          {props.label}
-        </Text>
+          {props.icon}
+          <Text
+            style={{
+              color: fg,
+              fontSize: 17,
+              fontWeight: '700',
+              textAlign: 'center',
+            }}
+          >
+            {props.label}
+          </Text>
+        </View>
       )}
     </Pressable>
   );

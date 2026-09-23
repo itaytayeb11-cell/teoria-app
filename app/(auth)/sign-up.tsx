@@ -13,6 +13,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { OAuthButtons } from '@/components/OAuthButtons';
 import { Button, Screen, T } from '@/components/ui';
 import { WebViewModal } from '@/components/WebViewModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/config/legalUrls';
@@ -204,22 +205,12 @@ export default function SignUpScreen() {
                 />
               </View>
 
-              <View style={{ gap: 10 }}>
-                {Platform.OS === 'ios' ? (
-                  <Button
-                    label="המשך עם Apple"
-                    variant="outline"
-                    loading={appleLoading}
-                    onPress={onAppleSubmit}
-                  />
-                ) : null}
-                <Button
-                  label="המשך עם Google"
-                  variant="outline"
-                  loading={googleLoading}
-                  onPress={onGoogleSubmit}
-                />
-              </View>
+              <OAuthButtons
+                onApple={onAppleSubmit}
+                onGoogle={onGoogleSubmit}
+                appleLoading={appleLoading}
+                googleLoading={googleLoading}
+              />
 
               <View
                 style={{
