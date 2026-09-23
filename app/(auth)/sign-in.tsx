@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { OAuthButtons } from '@/components/OAuthButtons';
 import { Button, Screen, T } from '@/components/ui';
-import { WebViewModal } from '@/components/WebViewModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/config/legalUrls';
 import { palette } from '@/constants/Colors';
 import { useOAuthSignIn } from '@/hooks/useOAuthSignIn';
@@ -30,7 +29,6 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [web, setWeb] = useState<{ url: string; title: string } | null>(null);
 
   const onGoogleSubmit = async () => {
     try {
@@ -151,7 +149,10 @@ export default function SignInScreen() {
               </T>
               <Pressable
                 onPress={() =>
-                  setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
+                  router.push({
+                    pathname: '/legal',
+                    params: { url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' },
+                  } as never)
                 }
               >
                 <T size={12} color={palette.primary}>
@@ -164,7 +165,13 @@ export default function SignInScreen() {
               </T>
               <Pressable
                 onPress={() =>
-                  setWeb({ url: PRIVACY_POLICY_URL, title: 'מדיניות פרטיות' })
+                  router.push({
+                    pathname: '/legal',
+                    params: {
+                      url: PRIVACY_POLICY_URL,
+                      title: 'מדיניות פרטיות',
+                    },
+                  } as never)
                 }
               >
                 <T size={12} color={palette.primary}>
@@ -193,13 +200,6 @@ export default function SignInScreen() {
           </View>
         </KeyboardAvoidingView>
       </LinearGradient>
-
-      <WebViewModal
-        visible={web !== null}
-        url={web?.url ?? ''}
-        title={web?.title ?? ''}
-        onClose={() => setWeb(null)}
-      />
     </Screen>
   );
 }

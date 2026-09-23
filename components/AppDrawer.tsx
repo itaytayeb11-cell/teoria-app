@@ -43,7 +43,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T } from '@/components/ui';
-import { WebViewModal } from '@/components/WebViewModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/config/legalUrls';
 import { SUPPORT_EMAIL } from '@/config/support';
 import { palette } from '@/constants/Colors';
@@ -77,8 +76,6 @@ export function AppDrawer(props: { visible: boolean; onClose: () => void }) {
   const { signOut } = useAuthActions();
   const user = useQuery(api.users.getCurrentUser);
   const deleteMyAccount = useMutation(api.users.deleteMyAccount);
-  const [webUrl, setWebUrl] = useState<string | null>(null);
-  const [webTitle, setWebTitle] = useState('');
   const [search, setSearch] = useState('');
   // מוצג כל עוד האנימציה רצה — כדי שההחלקה החוצה תיראה לפני שה-Modal נעלם
   const [mounted, setMounted] = useState(visible);
@@ -111,14 +108,10 @@ export function AppDrawer(props: { visible: boolean; onClose: () => void }) {
   };
 
   const openWeb = (url: string, title: string) => {
-    // סוגרים קודם את מגירת התפריט, וממתינים שאנימציית הסגירה (220ms)
-    // תסתיים ממש (לא רק תתחיל) לפני שפותחים Modal שני — שני Modal של RN
-    // פתוחים בו-זמנית, ולו לרגע, גורמים למסך לתקוע ב-iOS
+    // דף מלא (push), לא Modal — פתיחת Modal שני מעל Modal התפריט תקעה
+    // את המסך ב-iOS (שני Modal של RN בו-זמנית)
     onClose();
-    setTimeout(() => {
-      setWebTitle(title);
-      setWebUrl(url);
-    }, 260);
+    router.push({ pathname: '/legal', params: { url, title } } as never);
   };
 
   const inviteFriends = async () => {
@@ -454,13 +447,6 @@ export function AppDrawer(props: { visible: boolean; onClose: () => void }) {
           </ScrollView>
         </Animated.View>
       </Modal>
-
-      <WebViewModal
-        visible={webUrl !== null}
-        url={webUrl ?? ''}
-        title={webTitle}
-        onClose={() => setWebUrl(null)}
-      />
     </>
   );
 }

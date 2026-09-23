@@ -2,10 +2,8 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { useState } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
 import { Card, Screen, ScreenHeader, T } from '@/components/ui';
-import { WebViewModal } from '@/components/WebViewModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/config/legalUrls';
 import { palette } from '@/constants/Colors';
 import { licenseLabel } from '@/constants/licenses';
@@ -17,7 +15,6 @@ export default function SettingsScreen() {
   const { signOut } = useAuthActions();
   const user = useQuery(api.users.getCurrentUser);
   const deleteMyAccount = useMutation(api.users.deleteMyAccount);
-  const [webUrl, setWebUrl] = useState<string | null>(null);
 
   const confirmSignOut = () => {
     Alert.alert('התנתקות', 'להתנתק מהחשבון?', [
@@ -71,23 +68,26 @@ export default function SettingsScreen() {
         />
         <Row
           label="תנאי שימוש"
-          onPress={() => setWebUrl(TERMS_OF_SERVICE_URL)}
+          onPress={() =>
+            router.push({
+              pathname: '/legal',
+              params: { url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' },
+            } as never)
+          }
         />
         <Row
           label="מדיניות פרטיות"
-          onPress={() => setWebUrl(PRIVACY_POLICY_URL)}
+          onPress={() =>
+            router.push({
+              pathname: '/legal',
+              params: { url: PRIVACY_POLICY_URL, title: 'מדיניות פרטיות' },
+            } as never)
+          }
         />
         <Row label="התנתק" onPress={confirmSignOut} danger />
         <View style={{ height: 24 }} />
         <Row label="מחיקת חשבון" onPress={confirmDelete} danger />
       </ScrollView>
-
-      <WebViewModal
-        visible={webUrl !== null}
-        url={webUrl ?? ''}
-        onClose={() => setWebUrl(null)}
-        title="מסמך"
-      />
     </Screen>
   );
 }

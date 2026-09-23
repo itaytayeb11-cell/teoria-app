@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { OAuthButtons } from '@/components/OAuthButtons';
 import { Button, Screen, T } from '@/components/ui';
-import { WebViewModal } from '@/components/WebViewModal';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/config/legalUrls';
 import { palette } from '@/constants/Colors';
 import { useOAuthSignIn } from '@/hooks/useOAuthSignIn';
@@ -32,7 +31,6 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [web, setWeb] = useState<{ url: string; title: string } | null>(null);
 
   const onGoogleSubmit = async () => {
     try {
@@ -165,7 +163,13 @@ export default function SignUpScreen() {
                 </Pressable>
                 <Pressable
                   onPress={() =>
-                    setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
+                    router.push({
+                      pathname: '/legal',
+                      params: {
+                        url: TERMS_OF_SERVICE_URL,
+                        title: 'תנאי שימוש',
+                      },
+                    } as never)
                   }
                 >
                   <T size={13} color={palette.primary}>
@@ -175,10 +179,13 @@ export default function SignUpScreen() {
                 <T size={13}> ו</T>
                 <Pressable
                   onPress={() =>
-                    setWeb({
-                      url: PRIVACY_POLICY_URL,
-                      title: 'מדיניות פרטיות',
-                    })
+                    router.push({
+                      pathname: '/legal',
+                      params: {
+                        url: PRIVACY_POLICY_URL,
+                        title: 'מדיניות פרטיות',
+                      },
+                    } as never)
                   }
                 >
                   <T size={13} color={palette.primary}>
@@ -228,7 +235,13 @@ export default function SignUpScreen() {
                 </T>
                 <Pressable
                   onPress={() =>
-                    setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
+                    router.push({
+                      pathname: '/legal',
+                      params: {
+                        url: TERMS_OF_SERVICE_URL,
+                        title: 'תנאי שימוש',
+                      },
+                    } as never)
                   }
                 >
                   <T size={12} color={palette.primary}>
@@ -241,7 +254,13 @@ export default function SignUpScreen() {
                 </T>
                 <Pressable
                   onPress={() =>
-                    setWeb({ url: PRIVACY_POLICY_URL, title: 'מדיניות פרטיות' })
+                    router.push({
+                      pathname: '/legal',
+                      params: {
+                        url: PRIVACY_POLICY_URL,
+                        title: 'מדיניות פרטיות',
+                      },
+                    } as never)
                   }
                 >
                   <T size={12} color={palette.primary}>
@@ -271,13 +290,6 @@ export default function SignUpScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </LinearGradient>
-
-      <WebViewModal
-        visible={web !== null}
-        url={web?.url ?? ''}
-        title={web?.title ?? ''}
-        onClose={() => setWeb(null)}
-      />
     </Screen>
   );
 }

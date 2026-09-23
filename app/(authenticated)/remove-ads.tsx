@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Screen, T } from '@/components/ui';
-import { WebViewModal } from '@/components/WebViewModal';
 import { PRIVACY_URL, TERMS_URL } from '@/config/appConfig';
 import { palette } from '@/constants/Colors';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
@@ -34,8 +33,6 @@ export default function RemoveAdsScreen() {
 
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-  const [webUrl, setWebUrl] = useState<string | null>(null);
-  const [webTitle, setWebTitle] = useState('');
 
   const handlePurchase = async () => {
     if (!removeAdsPackage) {
@@ -74,13 +71,6 @@ export default function RemoveAdsScreen() {
 
   return (
     <Screen edges={[]} style={{ backgroundColor: '#fff' }}>
-      <WebViewModal
-        visible={webUrl !== null}
-        url={webUrl ?? ''}
-        title={webTitle}
-        onClose={() => setWebUrl(null)}
-      />
-
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View
           style={{
@@ -230,20 +220,24 @@ export default function RemoveAdsScreen() {
                 )}
               </Pressable>
               <Pressable
-                onPress={() => {
-                  setWebTitle('תנאי שימוש');
-                  setWebUrl(TERMS_URL);
-                }}
+                onPress={() =>
+                  router.push({
+                    pathname: '/legal',
+                    params: { url: TERMS_URL, title: 'תנאי שימוש' },
+                  } as never)
+                }
               >
                 <T color={palette.muted} size={13}>
                   תנאי שימוש
                 </T>
               </Pressable>
               <Pressable
-                onPress={() => {
-                  setWebTitle('מדיניות פרטיות');
-                  setWebUrl(PRIVACY_URL);
-                }}
+                onPress={() =>
+                  router.push({
+                    pathname: '/legal',
+                    params: { url: PRIVACY_URL, title: 'מדיניות פרטיות' },
+                  } as never)
+                }
               >
                 <T color={palette.muted} size={13}>
                   פרטיות
