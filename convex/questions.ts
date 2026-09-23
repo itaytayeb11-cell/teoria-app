@@ -6,6 +6,7 @@ import { filterByLicense, getUserIdOrNull } from './model';
 // כל סוגי הרישיון האפשריים בפועל (ר' הערה ב-convex/schema.ts users.licenseType)
 const LICENSE_TYPES = ['B', 'A', 'C1', 'C', 'D', '1'] as const;
 const ALL_LICENSE_KEY = 'all';
+const DICTIONARY_CACHE_KEY = 'default';
 
 // שולף את סוג הרישיון של המשתמש המחובר (או undefined)
 async function currentLicenseType(ctx: QueryCtx): Promise<string | undefined> {
@@ -59,73 +60,38 @@ export async function getBankStats(
 }
 
 // מילון תמרורים — שאלות עם תמונה, מקובצות לפי תת-נושא, בלי כפילות תמונה
+// נקרא מהקאש (signDictionaryCache), לא סריקה מלאה של מאגר השאלות
 export const signDictionary = query({
   args: {},
   handler: async (ctx) => {
-    const all = await ctx.db
-      .query('questions')
-      .withIndex('by_active', (q) => q.eq('isActive', true))
-      .collect();
-
-    const seenUrls = new Set<string>();
-    const groups = new Map<
-      string,
-      {
-        id: string;
-        url: string;
-        text: string;
-        answer: string; // התשובה הנכונה לשאלה — משמשת כ"פירוש" התמרור בפועל
-        category: string;
-        officialId?: string;
-      }[]
-    >();
-
-    for (const q of all) {
-      if (!q.imageUrl || seenUrls.has(q.imageUrl)) {
-        continue;
-      }
-      seenUrls.add(q.imageUrl);
-      const group = q.subCategory ?? q.category;
-      const list = groups.get(group) ?? [];
-      list.push({
-        id: q._id,
-        url: q.imageUrl,
-        text: q.text,
-        answer: q.answers[q.correctAnswer] ?? '',
-        category: q.category,
-        officialId: q.officialId,
-      });
-      groups.set(group, list);
-    }
-
-    return [...groups.entries()]
-      .map(([group, items]) => ({ group, items }))
-      .sort((a, b) => b.items.length - a.items.length);
+    const cached = await ctx.db
+      .query('signDictionaryCache')
+      .withIndex('by_key', (q) => q.eq('key', DICTIONARY_CACHE_KEY))
+      .unique();
+    return cached?.groups ?? [];
   },
 });
 
 // התקדמות במילון תמרורים — כמה תמונות שונות המשתמש כבר ראה בפועל בתרגול/מבחן
+// נקרא מהקאש (signDictionaryCache), לא סריקה מלאה של מאגר השאלות
 export const signProgress = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getUserIdOrNull(ctx);
 
-    const all = await ctx.db
-      .query('questions')
-      .withIndex('by_active', (q) => q.eq('isActive', true))
-      .collect();
-    const withImage = new Map<string, string>(); // questionId -> imageUrl
-    const uniqueUrls = new Set<string>();
-    for (const q of all) {
-      if (q.imageUrl) {
-        withImage.set(q._id, q.imageUrl);
-        uniqueUrls.add(q.imageUrl);
-      }
+    const cached = await ctx.db
+      .query('signDictionaryCache')
+      .withIndex('by_key', (q) => q.eq('key', DICTIONARY_CACHE_KEY))
+      .unique();
+    const total = cached?.totalUniqueImages ?? 0;
+
+    if (!userId || !cached) {
+      return { seen: 0, total };
     }
 
-    if (!userId) {
-      return { seen: 0, total: uniqueUrls.size };
-    }
+    const withImage = new Map(
+      cached.imageIndex.map((e) => [e.questionId, e.imageUrl])
+    );
 
     const logs = await ctx.db
       .query('answerLog')
@@ -140,7 +106,7 @@ export const signProgress = query({
       }
     }
 
-    return { seen: seenUrls.size, total: uniqueUrls.size };
+    return { seen: seenUrls.size, total };
   },
 });
 
@@ -257,6 +223,63 @@ export const recomputeBankStats = internalMutation({
       } else {
         await ctx.db.insert('questionBankStats', doc);
       }
+    }
+
+    // מילון התמרורים (signDictionaryCache) — מחושב מאותה רשימת `active`
+    // שכבר נשלפה למעלה, בלי סריקה נוספת
+    const seenUrls = new Set<string>();
+    const imageIndex: { questionId: (typeof active)[number]['_id']; imageUrl: string }[] = [];
+    const groupsMap = new Map<
+      string,
+      {
+        id: string;
+        url: string;
+        text: string;
+        answer: string;
+        category: string;
+        officialId?: string;
+      }[]
+    >();
+    for (const q of active) {
+      if (!q.imageUrl) {
+        continue;
+      }
+      imageIndex.push({ questionId: q._id, imageUrl: q.imageUrl });
+      if (seenUrls.has(q.imageUrl)) {
+        continue;
+      }
+      seenUrls.add(q.imageUrl);
+      const group = q.subCategory ?? q.category;
+      const list = groupsMap.get(group) ?? [];
+      list.push({
+        id: q._id,
+        url: q.imageUrl,
+        text: q.text,
+        answer: q.answers[q.correctAnswer] ?? '',
+        category: q.category,
+        officialId: q.officialId,
+      });
+      groupsMap.set(group, list);
+    }
+    const groups = [...groupsMap.entries()]
+      .map(([group, items]) => ({ group, items }))
+      .sort((a, b) => b.items.length - a.items.length);
+
+    const existingDict = await ctx.db
+      .query('signDictionaryCache')
+      .withIndex('by_key', (q) => q.eq('key', DICTIONARY_CACHE_KEY))
+      .unique();
+    const dictDoc = {
+      key: DICTIONARY_CACHE_KEY,
+      groups,
+      imageIndex,
+      totalUniqueImages: seenUrls.size,
+      updatedAt: Date.now(),
+    };
+    if (existingDict) {
+      await ctx.db.patch(existingDict._id, dictDoc);
+    } else {
+      await ctx.db.insert('signDictionaryCache', dictDoc);
     }
 
     return { licenseKeys: keys, totalActive: active.length };

@@ -77,6 +77,35 @@ export default defineSchema({
   }).index('by_licenseKey', ['licenseKey']),
 
   // ==========================================================================
+  // קאש של מילון התמרורים (questions.signDictionary/signProgress) — בלי זה,
+  // כל טעינה של מסך המילון סרקה את כל 1,800+ השאלות המלאות רק כדי לבנות
+  // קבוצות תמונה. מתעדכן יחד עם questionBankStats ב-recomputeBankStats.
+  // ==========================================================================
+  signDictionaryCache: defineTable({
+    key: v.string(), // תמיד "default" — שורה יחידה
+    groups: v.array(
+      v.object({
+        group: v.string(),
+        items: v.array(
+          v.object({
+            id: v.string(),
+            url: v.string(),
+            text: v.string(),
+            answer: v.string(),
+            category: v.string(),
+            officialId: v.optional(v.string()),
+          })
+        ),
+      })
+    ),
+    imageIndex: v.array(
+      v.object({ questionId: v.id('questions'), imageUrl: v.string() })
+    ),
+    totalUniqueImages: v.number(),
+    updatedAt: v.number(),
+  }).index('by_key', ['key']),
+
+  // ==========================================================================
   // טבלת מבחנים — כל מבחן שמשתמש התחיל/סיים
   // ==========================================================================
   quizSessions: defineTable({
