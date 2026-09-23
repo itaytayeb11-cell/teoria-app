@@ -33,14 +33,14 @@ export const APP_ENV: AppEnv = IS_DEV_MODE ? 'dev' : 'prod';
 // ⚠️  אל תתן לאוטומציה לשנות את זה
 // 👤 נדרשת פעולת משתמש: הגדר ל-TRUE רק אחרי שיש androidAppId/iosAppId
 //    אמיתיים של AdMob ב-app.json (לא ה-placeholder של גוגל לבדיקות)
-export const ADS_ENABLED = false;
+export const ADS_ENABLED = true;
 
 // 🚨 קריטי: דגל זה קובע האם מערכת ה-IAP (הסרת פרסומות) פעילה
 // ⚠️  אל תתן לאוטומציה לשנות את זה
 // 👤 נדרשת פעולת משתמש: הגדר ידנית ל-true/false לפי הצורך:
 //    - הגדר ל-TRUE לבניות ייצור (רכישות אמיתיות)
 //    - הגדר ל-FALSE לפיתוח/בדיקות
-export const PAYMENT_SYSTEM_ENABLED = false;
+export const PAYMENT_SYSTEM_ENABLED = true;
 
 // 🚨 קריטי: דגל זה קובע האם הרכישה (הסרת פרסומות) מדומה
 // ⚠️  אל תתן לאוטומציה לשנות את זה
