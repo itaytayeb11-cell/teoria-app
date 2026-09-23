@@ -111,6 +111,9 @@ export function AppDrawer(props: { visible: boolean; onClose: () => void }) {
   };
 
   const openWeb = (url: string, title: string) => {
+    // סוגרים קודם את מגירת התפריט — שני Modal של RN פתוחים בו-זמנית
+    // (המגירה + חלון הדפדפן) גורמים למסך לתקוע ב-iOS
+    onClose();
     setWebTitle(title);
     setWebUrl(url);
   };
