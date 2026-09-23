@@ -1,24 +1,20 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireUserId } from './model';
+import { getUserIdOrNull, requireUserId } from './model';
 
 // שליפת המשתמש הנוכחי המחובר
 // מחזיר null אם המשתמש לא מחובר
+// חשוב: קריאה לפי אותו מזהה auth שהמוטציות כותבות אליו (לא חיפוש לפי אימייל,
+// שיכול להצביע על רשומה אחרת ולגרום לשינויים "להיעלם" אחרי שמירה)
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getUserIdOrNull(ctx);
+    if (!userId) {
       return null;
     }
 
-    // חיפוש המשתמש ב-Database לפי כתובת האימייל מה-Identity
-    const user = await ctx.db
-      .query('users')
-      .withIndex('by_email', (q) => q.eq('email', identity.email ?? ''))
-      .unique();
-
-    return user;
+    return await ctx.db.get(userId);
   },
 });
 

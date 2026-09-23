@@ -124,34 +124,37 @@ export default function SignUpScreen() {
                 secureTextEntry
               />
 
-              <Pressable
-                onPress={() => setConsent((v) => !v)}
+              <View
                 style={{
                   flexDirection: rtl.flexDirection,
                   alignItems: 'center',
+                  flexWrap: 'wrap',
                   gap: 8,
                   marginVertical: 12,
                 }}
               >
-                <View
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 6,
-                    borderWidth: 2,
-                    borderColor: consent ? palette.primary : '#C7CBD4',
-                    backgroundColor: consent ? palette.primary : 'transparent',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {consent && (
-                    <T color="#fff" weight="bold" size={12}>
-                      ✓
-                    </T>
-                  )}
-                </View>
-                <View
+                <Pressable onPress={() => setConsent((v) => !v)}>
+                  <View
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: 6,
+                      borderWidth: 2,
+                      borderColor: consent ? palette.primary : '#C7CBD4',
+                      backgroundColor: consent ? palette.primary : 'transparent',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {consent && (
+                      <T color="#fff" weight="bold" size={12}>
+                        ✓
+                      </T>
+                    )}
+                  </View>
+                </Pressable>
+                <Pressable
+                  onPress={() => setConsent((v) => !v)}
                   style={{
                     flex: 1,
                     flexDirection: rtl.flexDirection,
@@ -159,30 +162,30 @@ export default function SignUpScreen() {
                   }}
                 >
                   <T size={13}>קראתי ואני מאשר את </T>
-                  <Pressable
-                    onPress={() =>
-                      setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
-                    }
-                  >
-                    <T size={13} color={palette.primary}>
-                      תנאי השימוש
-                    </T>
-                  </Pressable>
-                  <T size={13}> ו</T>
-                  <Pressable
-                    onPress={() =>
-                      setWeb({
-                        url: PRIVACY_POLICY_URL,
-                        title: 'מדיניות פרטיות',
-                      })
-                    }
-                  >
-                    <T size={13} color={palette.primary}>
-                      מדיניות הפרטיות
-                    </T>
-                  </Pressable>
-                </View>
-              </Pressable>
+                </Pressable>
+                <Pressable
+                  onPress={() =>
+                    setWeb({ url: TERMS_OF_SERVICE_URL, title: 'תנאי שימוש' })
+                  }
+                >
+                  <T size={13} color={palette.primary}>
+                    תנאי השימוש
+                  </T>
+                </Pressable>
+                <T size={13}> ו</T>
+                <Pressable
+                  onPress={() =>
+                    setWeb({
+                      url: PRIVACY_POLICY_URL,
+                      title: 'מדיניות פרטיות',
+                    })
+                  }
+                >
+                  <T size={13} color={palette.primary}>
+                    מדיניות הפרטיות
+                  </T>
+                </Pressable>
+              </View>
 
               <Button label="הירשם" loading={loading} onPress={onSubmit} />
 
