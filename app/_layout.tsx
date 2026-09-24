@@ -9,7 +9,7 @@ import '../global.css';
 
 import { SetupScreen } from '@/components/SetupScreen';
 import { RevenueCatProvider } from '@/contexts/RevenueCatContext';
-import { useTrackingPermission } from '@/hooks/useTrackingPermission';
+import { TrackingProvider } from '@/contexts/TrackingContext';
 import { bootstrapRTL } from '@/lib/rtlBootstrap';
 import { getConvexUrl } from '@/utils/convexConfig';
 
@@ -52,10 +52,6 @@ const secureStorage = {
 };
 
 export default function RootLayout() {
-  // חלון ה-ATT מוצג כבר בהפעלה הראשונה (מסך ההתחברות), כדי שיופיע לפני כל
-  // איסוף נתונים ויהיה גלוי גם לבודק של אפל בלי להתחבר קודם
-  useTrackingPermission(true);
-
   // Bootstrap RTL for Expo Go on first mount
   useEffect(() => {
     bootstrapRTL().catch(() => {
@@ -84,7 +80,9 @@ export default function RootLayout() {
         {/* ספק RevenueCat לניהול מנויים ורכישות */}
         <RevenueCatProvider>
           {/* Slot מעבד את הראוטים (Routes) הילדים - ה-Layouts הפנימיים מנהלים את הניווט שלהם */}
-          <Slot />
+          <TrackingProvider>
+            <Slot />
+          </TrackingProvider>
         </RevenueCatProvider>
       </ConvexAuthProvider>
     </SafeAreaProvider>

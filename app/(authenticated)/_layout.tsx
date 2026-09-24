@@ -7,9 +7,9 @@ import {
 } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 import { palette } from '@/constants/Colors';
+import { useTrackingSettled } from '@/contexts/TrackingContext';
 import { api } from '@/convex/_generated/api';
 import { usePushRegistration } from '@/hooks/usePushRegistration';
-import { useTrackingPermission } from '@/hooks/useTrackingPermission';
 
 // כל המסכים שנפתחים "מעל" סרגל הטאבים (לא הטאבים עצמם — אלה חיים ב-(tabs)).
 // כאן זה Stack אמיתי, אז ניווט קדימה/אחורה עובד עם היסטוריה רגילה (LIFO)
@@ -40,7 +40,7 @@ export default function AuthenticatedLayout() {
 
   // ATT קודם, ורק אחריו התראות Push — שני חלונות הרשאה במקביל: iOS מציג
   // רק אחד ומתעלם בשקט מהשני (זה מה שגרם ל-ATT לא להופיע בבדיקת אפל)
-  const trackingSettled = useTrackingPermission(isAuthenticated);
+  const trackingSettled = useTrackingSettled();
   usePushRegistration(isAuthenticated && trackingSettled);
 
   const loadingView = (
