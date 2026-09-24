@@ -79,8 +79,17 @@ export default function HomeScreen() {
   const stats = useQuery(api.stats.getMyStats);
   const { isPremium: adsRemoved } = useRevenueCat();
   const { showBeforeSimulation } = useInterstitialAd(adsRemoved);
-  const removeAdsPromo = useRemoveAdsPromo(!adsRemoved);
   const [showDateReminder, setShowDateReminder] = useState(false);
+  // פופ-אפ הפרסום לא נפתח כשתזכורת התאריך מוצגת (שני Modal יחד תוקעים את
+  // המסך ב-iOS), ומחכה כמה שניות אחרי פתיחת המסך
+  const [promoReady, setPromoReady] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setPromoReady(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+  const removeAdsPromo = useRemoveAdsPromo(
+    !adsRemoved && promoReady && !showDateReminder
+  );
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const testDate = home?.testDate;
@@ -93,6 +102,12 @@ export default function HomeScreen() {
     (async () => {
       const today = new Date().toISOString().slice(0, 10);
       const last = await AsyncStorage.getItem(TEST_DATE_REMINDER_KEY);
+      // הפעלה ראשונה אי פעם: לא מציגים (המשתמש כרגע סיים את מסך הפרופיל שכבר
+      // שואל על תאריך המבחן, ו-Modal שנפתח יחד עם חלון ה-ATT תקע את המסך)
+      if (!last) {
+        await AsyncStorage.setItem(TEST_DATE_REMINDER_KEY, today);
+        return;
+      }
       if (!cancelled && last !== today) {
         await AsyncStorage.setItem(TEST_DATE_REMINDER_KEY, today);
         setShowDateReminder(true);
