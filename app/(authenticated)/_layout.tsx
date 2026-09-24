@@ -38,8 +38,10 @@ export default function AuthenticatedLayout() {
     isAuthenticated ? {} : 'skip'
   );
 
-  usePushRegistration(isAuthenticated);
-  useTrackingPermission(isAuthenticated);
+  // ATT קודם, ורק אחריו התראות Push — שני חלונות הרשאה במקביל: iOS מציג
+  // רק אחד ומתעלם בשקט מהשני (זה מה שגרם ל-ATT לא להופיע בבדיקת אפל)
+  const trackingSettled = useTrackingPermission(isAuthenticated);
+  usePushRegistration(isAuthenticated && trackingSettled);
 
   const loadingView = (
     <View
